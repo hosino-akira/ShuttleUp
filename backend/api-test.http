@@ -1,0 +1,14 @@
+### GET Training Sessions
+GET http://localhost:8080/api/training-sessions/users/1
+
+### Create Training Session
+POST http://localhost:8080/api/training-sessions
+Content-Type: application/json
+
+{
+  "userId": 1,
+  "trainingDate": "2026-08-03",
+  "durationMinutes": 120,
+  "feeling": 5,
+  "note": "スマッシュとフットワーク練習"
+}
