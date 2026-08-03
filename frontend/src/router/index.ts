@@ -10,7 +10,7 @@ const router = createRouter({
       component: DashboardView,
     },
     {
-      path: '/history',
+      path: '/training-history',
       name: 'training-history',
       component: () => import('../views/TrainingHistoryView.vue'),
     },
