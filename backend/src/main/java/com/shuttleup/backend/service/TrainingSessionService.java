@@ -34,23 +34,7 @@ public class TrainingSessionService {
     @Transactional(readOnly = true)
     public List<TrainingSession> getTrainingSessions(Long userId) {
         return trainingSessionRepository
-                .findByUserIdOrderByTrainingDateDesc(userId);
-    }
-
-    /**
-     * IDを指定してトレーニング記録を取得する。
-     *
-     * @param id トレーニングID
-     * @return トレーニング記録
-     */
-    @Transactional(readOnly = true)
-    public TrainingSession getTrainingSession(Long id) {
-        return trainingSessionRepository.findById(id)
-                .orElseThrow(() ->
-                        new IllegalArgumentException(
-                                "Training session not found: " + id
-                        )
-                );
+                .findByUserIdOrderByCreatedAtDesc((userId));
     }
 
     @Transactional

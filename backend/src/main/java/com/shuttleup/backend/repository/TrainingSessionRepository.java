@@ -22,6 +22,12 @@ public interface TrainingSessionRepository
             Long userId,
             LocalDate trainingDate
     );
+
+    /**
+     * ユーザーIDに紐づくトレーニング記録を、
+     * 作成日の降順で取得する。
+     */
+    List<TrainingSession> findByUserIdOrderByCreatedAtDesc(Long userId);
 }
 
 
