@@ -18,10 +18,9 @@ interface TrainingSessionForm {
   note: string
 }
 
-const userId = 1
+const userId = 1 // 現在のユーザーID
 const formRef = ref<FormInstance>()
 const sessions = ref<TrainingSession[]>([])
-const loading = ref(false)
 const submitting = ref(false)
 
 const form = reactive<TrainingSessionForm>({
@@ -39,15 +38,11 @@ const columns: TableColumnsType<TrainingSession> = [
 ]
 
 async function loadTrainingSessions(): Promise<void> {
-  loading.value = true
-
   try {
     sessions.value = await getTrainingSessions(userId)
   } catch (error: unknown) {
     console.error(error)
     message.error('トレーニング履歴の取得に失敗しました。')
-  } finally {
-    loading.value = false
   }
 }
 
@@ -165,7 +160,6 @@ onMounted(loadTrainingSessions)
       <a-table
         :columns="columns"
         :data-source="sessions"
-        :loading="loading"
         row-key="id"
         :scroll="{ x: 640 }"
       >
