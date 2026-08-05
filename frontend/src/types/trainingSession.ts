@@ -25,3 +25,10 @@ export interface TrainingSessionCreateRequest {
   feeling: number | null
   note: string | null
 }
+
+export interface TrainingSessionUpdateRequest {
+  trainingDate: string
+  durationMinutes: number
+  feeling: number | null
+  note: string | null
+}

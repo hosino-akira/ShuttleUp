@@ -1,6 +1,7 @@
 package com.shuttleup.backend.controller;
 
 import com.shuttleup.backend.dto.training.TrainingSessionCreateRequest;
+import com.shuttleup.backend.dto.training.TrainingSessionUpdateRequest;
 import com.shuttleup.backend.entity.TrainingSession;
 import com.shuttleup.backend.service.TrainingSessionService;
 import org.springframework.http.HttpStatus;
@@ -45,5 +46,26 @@ public class TrainingSessionController {
             @RequestBody TrainingSessionCreateRequest request) {
 
         return trainingSessionService.createTrainingSession(request);
+    }
+
+    /**
+     * トレーニング記録を更新
+     */
+    @PutMapping("/{id}")
+    public TrainingSession updateTrainingSession(
+            @PathVariable Long id,
+            @RequestBody TrainingSessionUpdateRequest request) {
+        return trainingSessionService.updateTrainingSession(id, request);
+    }
+
+    /**
+     * 指定したトレーニング記録を削除する。
+     *
+     * @param id トレーニング記録ID
+     */
+    @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteTrainingSession(@PathVariable Long id) {
+        trainingSessionService.deleteTrainingSession(id);
     }
 }

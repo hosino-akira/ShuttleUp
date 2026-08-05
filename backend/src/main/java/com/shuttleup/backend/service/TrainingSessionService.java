@@ -1,6 +1,7 @@
 package com.shuttleup.backend.service;
 
 import com.shuttleup.backend.dto.training.TrainingSessionCreateRequest;
+import com.shuttleup.backend.dto.training.TrainingSessionUpdateRequest;
 import com.shuttleup.backend.entity.TrainingSession;
 import com.shuttleup.backend.entity.User;
 import com.shuttleup.backend.repository.TrainingSessionRepository;
@@ -58,5 +59,32 @@ public class TrainingSessionService {
         trainingSession.setUpdatedAt(now);
 
         return trainingSessionRepository.save(trainingSession);
+    }
+
+    @Transactional
+    public TrainingSession updateTrainingSession(
+            Long id, TrainingSessionUpdateRequest request) {
+        TrainingSession trainingSession = trainingSessionRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Training session not found"));
+
+        trainingSession.setTrainingDate(request.getTrainingDate());
+        trainingSession.setDurationMinutes(request.getDurationMinutes());
+        trainingSession.setFeeling(request.getFeeling());
+        trainingSession.setNote(request.getNote());
+        trainingSession.setUpdatedAt(LocalDateTime.now());
+
+        return trainingSessionRepository.save(trainingSession);
+    }
+
+    /**
+     * IDに該当するトレーニング記録を削除する。
+     * 存在確認を行い、誤ったIDを正常終了として扱わないようにする。
+     */
+    @Transactional
+    public void deleteTrainingSession(Long id) {
+        TrainingSession trainingSession = trainingSessionRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Training session not found"));
+
+        trainingSessionRepository.delete(trainingSession);
     }
 }
