@@ -3,6 +3,7 @@ import { computed, onMounted, reactive, ref } from 'vue'
 import { message } from 'ant-design-vue'
 import type { FormInstance } from 'ant-design-vue'
 import TrainingModal from '../components/training/TrainingModal.vue'
+import TrainingSessionDetailModal from '../components/training/TrainingSessionDetailModal.vue'
 import {
   createTrainingSession,
   deleteTrainingSession,
@@ -30,6 +31,8 @@ const editSubmitting = ref(false)
 const deleteSubmitting = ref(false)
 const editVisible = ref(false)
 const editingSession = ref<TrainingSession | null>(null)
+const detailVisible = ref(false)
+const selectedSession = ref<TrainingSession | null>(null)
 const sortState = reactive<{ field: string; order: 'asc' | 'desc' | null }>({
   field: '',
   order: null,
@@ -118,6 +121,11 @@ async function submitTrainingSession(): Promise<void> {
 function openEditModal(record: TrainingSession): void {
   editingSession.value = record
   editVisible.value = true
+}
+
+function openDetailModal(record: TrainingSession): void {
+  selectedSession.value = record
+  detailVisible.value = true
 }
 
 async function submitEdit(request: TrainingSessionUpdateRequest): Promise<void> {
@@ -223,8 +231,11 @@ onMounted(loadTrainingSessions)
           <vxe-column field="note" title="メモ" min-width="240">
             <template #default="{ row }">{{ row.note || '—' }}</template>
           </vxe-column>
-          <vxe-column title="操作" width="110" fixed="right">
-            <template #default="{ row }"><a-button type="link" @click="openEditModal(row)">編集</a-button></template>
+          <vxe-column title="操作" width="150" fixed="right">
+            <template #default="{ row }">
+              <a-button type="link" @click="openDetailModal(row)">詳細</a-button>
+              <a-button type="link" @click="openEditModal(row)">編集</a-button>
+            </template>
           </vxe-column>
         </vxe-table>
       </div>
@@ -246,6 +257,10 @@ onMounted(loadTrainingSessions)
       :session="editingSession"
       @save="submitEdit"
       @delete="submitDelete"
+    />
+    <TrainingSessionDetailModal
+      v-model:open="detailVisible"
+      :session="selectedSession"
     />
   </section>
 </template>

@@ -1,34 +1,26 @@
 import http from './http'
-import type {
-  TrainingSession,
-  TrainingSessionCreateRequest,
-  TrainingSessionUpdateRequest,
-} from '../types/trainingSession'
+import type { TrainingSessionCreateRequest, TrainingSessionResponse, TrainingSessionUpdateRequest } from '../types/trainingSession'
 
-export async function getTrainingSessions(userId: number): Promise<TrainingSession[]> {
-  const response = await http.get<TrainingSession[]>(`/training-sessions/users/${userId}`)
-
+export async function getTrainingSessions(userId: number): Promise<TrainingSessionResponse[]> {
+  const response = await http.get<TrainingSessionResponse[]>(`/training-sessions/users/${userId}`)
   return response.data
 }
 
-export async function updateTrainingSession(
-  id: number,
-  request: TrainingSessionUpdateRequest,
-): Promise<TrainingSession> {
-  const response = await http.put<TrainingSession>(`/training-sessions/${id}`, request)
-
+export async function getTrainingSession(id: number): Promise<TrainingSessionResponse> {
+  const response = await http.get<TrainingSessionResponse>(`/training-sessions/${id}`)
   return response.data
 }
 
-/** 指定したトレーニング記録を削除する。 */
+export async function createTrainingSession(request: TrainingSessionCreateRequest): Promise<TrainingSessionResponse> {
+  const response = await http.post<TrainingSessionResponse>('/training-sessions', request)
+  return response.data
+}
+
+export async function updateTrainingSession(id: number, request: TrainingSessionUpdateRequest): Promise<TrainingSessionResponse> {
+  const response = await http.put<TrainingSessionResponse>(`/training-sessions/${id}`, request)
+  return response.data
+}
+
 export async function deleteTrainingSession(id: number): Promise<void> {
   await http.delete(`/training-sessions/${id}`)
-}
-
-export async function createTrainingSession(
-  request: TrainingSessionCreateRequest,
-): Promise<TrainingSession> {
-  const response = await http.post<TrainingSession>('/training-sessions', request)
-
-  return response.data
 }

@@ -1,4 +1,4 @@
-export interface TrainingSession {
+export interface TrainingSessionResponse {
   id: number
   userId: number
   trainingDate: string
@@ -16,6 +16,8 @@ export interface TrainingSessionCreateRequest {
   feeling: number | null
   note: string | null
 }
+
+export type TrainingSession = TrainingSessionResponse
 
 export interface TrainingSessionUpdateRequest {
   trainingDate: string
