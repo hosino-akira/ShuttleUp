@@ -1,12 +1,20 @@
 package com.shuttleup.backend.controller;
 
-import com.shuttleup.backend.dto.training.TrainingSessionCreateRequest;
-import com.shuttleup.backend.dto.training.TrainingSessionUpdateRequest;
-import com.shuttleup.backend.entity.TrainingSession;
+import com.shuttleup.backend.dto.request.TrainingSessionCreateRequest;
+import com.shuttleup.backend.dto.request.TrainingSessionUpdateRequest;
+import com.shuttleup.backend.dto.response.TrainingSessionResponse;
 import com.shuttleup.backend.service.TrainingSessionService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
@@ -17,55 +25,54 @@ public class TrainingSessionController {
 
     private final TrainingSessionService trainingSessionService;
 
-    public TrainingSessionController(
-            TrainingSessionService trainingSessionService) {
+    public TrainingSessionController(TrainingSessionService trainingSessionService) {
         this.trainingSessionService = trainingSessionService;
     }
 
     /**
-     * ユーザーIDを指定してトレーニングセッション一覧を取得する。
-     *
-     * @param userId ユーザーID
-     * @return トレーニングセッション一覧
+     * 指定したユーザーのトレーニング記録一覧を取得する。
      */
     @GetMapping("/users/{userId}")
-    public ResponseEntity<List<TrainingSession>> getTrainingSessions(
+    public ResponseEntity<List<TrainingSessionResponse>> getTrainingSessions(
             @PathVariable Long userId) {
-
-        List<TrainingSession> sessions =
-                trainingSessionService.getTrainingSessions(userId);
-
-        return ResponseEntity.ok(sessions);
+        return ResponseEntity.ok(trainingSessionService.getTrainingSessions(userId));
     }
+
     /**
-     * トレーニング記録を追加
+     * IDを指定してトレーニング記録を取得する。
+     */
+    @GetMapping("/{id}")
+    public ResponseEntity<TrainingSessionResponse> getTrainingSessionById(
+            @PathVariable Long id) {
+        return ResponseEntity.ok(trainingSessionService.getTrainingSessionById(id));
+    }
+
+    /**
+     * トレーニング記録を新規作成する。
      */
     @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public TrainingSession createTrainingSession(
+    public ResponseEntity<TrainingSessionResponse> createTrainingSession(
             @RequestBody TrainingSessionCreateRequest request) {
-
-        return trainingSessionService.createTrainingSession(request);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(trainingSessionService.createTrainingSession(request));
     }
 
     /**
-     * トレーニング記録を更新
+     * トレーニング記録を更新する。
      */
     @PutMapping("/{id}")
-    public TrainingSession updateTrainingSession(
+    public ResponseEntity<TrainingSessionResponse> updateTrainingSession(
             @PathVariable Long id,
             @RequestBody TrainingSessionUpdateRequest request) {
-        return trainingSessionService.updateTrainingSession(id, request);
+        return ResponseEntity.ok(trainingSessionService.updateTrainingSession(id, request));
     }
 
     /**
-     * 指定したトレーニング記録を削除する。
-     *
-     * @param id トレーニング記録ID
+     * IDを指定してトレーニング記録を削除する。
      */
     @DeleteMapping("/{id}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteTrainingSession(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteTrainingSession(@PathVariable Long id) {
         trainingSessionService.deleteTrainingSession(id);
+        return ResponseEntity.noContent().build();
     }
 }
