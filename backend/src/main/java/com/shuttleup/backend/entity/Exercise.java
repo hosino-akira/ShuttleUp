@@ -17,7 +17,7 @@ import lombok.Setter;
 import java.time.LocalDateTime;
 
 /**
- * トレーニングの小分類を管理するエンティティ
+ * 一回のトレーニングの小分類（動作）を管理するエンティティ
  */
 @Entity
 @Table(name = "exercises")

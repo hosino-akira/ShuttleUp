@@ -17,7 +17,7 @@ import lombok.Setter;
 import java.time.LocalDateTime;
 
 /**
- * トレーニング明細を管理するエンティティ
+ * 一回のトレーニング明細を管理するエンティティ
  */
 @Entity
 @Table(name = "training_records")

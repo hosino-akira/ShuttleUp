@@ -12,3 +12,36 @@ Content-Type: application/json
   "feeling": 5,
   "note": "スマッシュとフットワーク練習"
 }
+
+### Get Training Records
+GET http://localhost:8080/api/training-sessions/5/records
+
+### Create Training Record
+POST http://localhost:8080/api/training-sessions/5/records
+Content-Type: application/json
+
+{
+  "exerciseId": 1,
+  "sets": 5,
+  "repetitions": 5,
+  "weightKg": 100.0,
+  "note": "フォーム確認"
+}
+
+### Get Training Record
+GET http://localhost:8080/api/training-records/3
+
+### Update Training Record
+PUT http://localhost:8080/api/training-records/3
+Content-Type: application/json
+
+{
+  "exerciseId": 1,
+  "sets": 5,
+  "repetitions": 5,
+  "weightKg": 105.0,
+  "note": "重量を更新"
+}
+
+### Delete Training Record
+DELETE http://localhost:8080/api/training-records/3
