@@ -1,24 +1,73 @@
 <script setup lang="ts">
+import { computed } from 'vue'
+import type { TrainingSession } from '../../types/trainingSession'
+
+const props = withDefaults(defineProps<{
+  sessions: readonly TrainingSession[]
+  loading?: boolean
+}>(), {
+  loading: false,
+})
+
 interface StatisticItem {
+  precision: number
   suffix: string
   title: string
   value: number
 }
 
-const statistics: readonly StatisticItem[] = [
-  { title: '連続トレーニング', value: 12, suffix: '日' },
-  { title: '今週', value: 3, suffix: 'セッション' },
-  { title: '今月', value: 14, suffix: 'セッション' },
-  { title: '合計時間', value: 26.5, suffix: '時間' },
-]
+const statistics = computed<readonly StatisticItem[]>(() => {
+  const totalMinutes = props.sessions.reduce(
+    (total, session) => total + session.durationMinutes,
+    0,
+  )
+  const feelings = props.sessions.flatMap((session) =>
+    session.feeling === null ? [] : [session.feeling],
+  )
+  const averageFeeling = feelings.length === 0
+    ? 0
+    : feelings.reduce((total, feeling) => total + feeling, 0) / feelings.length
+
+  return [
+    {
+      title: 'トレーニング回数',
+      value: props.sessions.length,
+      suffix: '回',
+      precision: 0,
+    },
+    {
+      title: '累計時間',
+      value: totalMinutes / 60,
+      suffix: '時間',
+      precision: 1,
+    },
+    {
+      title: '平均コンディション',
+      value: averageFeeling,
+      suffix: '/ 5',
+      precision: 1,
+    },
+  ]
+})
 </script>
 
 <template>
   <a-row :gutter="[16, 16]">
-    <a-col v-for="statistic in statistics" :key="statistic.title" :xs="24" :sm="12" :xl="6">
-      <a-card :bordered="false">
-        <a-statistic :title="statistic.title" :value="statistic.value" :suffix="statistic.suffix" />
+    <a-col v-for="statistic in statistics" :key="statistic.title" :xs="24" :sm="12" :xl="8">
+      <a-card class="statistic-card" :bordered="false" :loading="loading">
+        <a-statistic
+          :title="statistic.title"
+          :value="statistic.value"
+          :precision="statistic.precision"
+          :suffix="statistic.suffix"
+        />
       </a-card>
     </a-col>
   </a-row>
 </template>
+
+<style scoped>
+.statistic-card {
+  height: 100%;
+}
+</style>
