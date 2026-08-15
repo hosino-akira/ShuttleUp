@@ -15,6 +15,7 @@ import type {
   TrainingSessionCreateRequest,
   TrainingSessionUpdateRequest,
 } from '../types/trainingSession'
+import type { VxeTablePropTypes } from 'vxe-table'
 
 interface TrainingSessionForm {
   trainingDate: string | null
@@ -38,7 +39,9 @@ const sortState = reactive<{ field: string; order: 'asc' | 'desc' | null }>({
   order: null,
 })
 const pagination = reactive({ currentPage: 1, pageSize: 10, total: 0 })
-
+const columnConfig = reactive<VxeTablePropTypes.ColumnConfig>({
+  resizable: true
+})
 const emptyForm = (): TrainingSessionForm => ({
   trainingDate: null,
   durationMinutes: 60,
@@ -218,6 +221,9 @@ onMounted(loadTrainingSessions)
           border
           stripe
           show-overflow
+          highlight-current-row
+          :cell-config="{height: 32}"
+          :column-config="columnConfig"
           :data="pagedSessions"
           :sort-config="{ remote: true }"
           :empty-text="'データがありません'"
@@ -231,7 +237,7 @@ onMounted(loadTrainingSessions)
           <vxe-column field="note" title="メモ" min-width="240">
             <template #default="{ row }">{{ row.note || '—' }}</template>
           </vxe-column>
-          <vxe-column title="操作" width="150" fixed="right">
+          <vxe-column title="操作" min-width="15%" fixed="right">
             <template #default="{ row }">
               <a-button type="link" @click="openDetailModal(row)">詳細</a-button>
               <a-button type="link" @click="openEditModal(row)">編集</a-button>

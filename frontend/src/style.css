@@ -23,3 +23,9 @@ body,
   min-height: 100%;
   margin: 0;
 }
+
+.vxe-table .vxe-header--column {
+  background-color: #1677ff17;
+  color: #333;
+  font-weight: 600;
+}
