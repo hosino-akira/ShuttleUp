@@ -4,6 +4,7 @@ import com.shuttleup.backend.dto.request.ExerciseCreateRequest;
 import com.shuttleup.backend.dto.request.ExerciseUpdateRequest;
 import com.shuttleup.backend.dto.response.ExerciseResponse;
 import com.shuttleup.backend.service.ExerciseService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -50,7 +51,7 @@ public class ExerciseController {
      */
     @PostMapping
     public ResponseEntity<ExerciseResponse> createExercise(
-            @RequestBody ExerciseCreateRequest request) {
+            @Valid @RequestBody ExerciseCreateRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(exerciseService.createExercise(request));
     }
@@ -61,7 +62,7 @@ public class ExerciseController {
     @PutMapping("/{id}")
     public ResponseEntity<ExerciseResponse> updateExercise(
             @PathVariable Long id,
-            @RequestBody ExerciseUpdateRequest request) {
+            @Valid @RequestBody ExerciseUpdateRequest request) {
         return ResponseEntity.ok(exerciseService.updateExercise(id, request));
     }
 

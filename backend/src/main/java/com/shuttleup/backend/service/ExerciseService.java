@@ -87,12 +87,12 @@ public class ExerciseService {
 
     private Exercise findExercise(Long id) {
         return exerciseRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Exercise not found"));
+                .orElseThrow(() -> new IllegalArgumentException("指定された種目が見つかりません。"));
     }
 
     private ExerciseType findExerciseType(Long id) {
         return exerciseTypeRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Exercise type not found"));
+                .orElseThrow(() -> new IllegalArgumentException("指定された種別が見つかりません。"));
     }
 
     private ExerciseResponse toResponse(Exercise exercise) {

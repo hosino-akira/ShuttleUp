@@ -52,7 +52,7 @@ public class TrainingSessionService {
     public TrainingSessionResponse createTrainingSession(
             TrainingSessionCreateRequest request) {
         User user = userRepository.findById(request.getUserId())
-                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+                .orElseThrow(() -> new IllegalArgumentException("指定されたユーザーが見つかりません。"));
 
         LocalDateTime now = LocalDateTime.now();
         TrainingSession trainingSession = new TrainingSession();
@@ -93,7 +93,7 @@ public class TrainingSessionService {
 
     private TrainingSession findTrainingSession(Long id) {
         return trainingSessionRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Training session not found"));
+                .orElseThrow(() -> new IllegalArgumentException("指定されたトレーニングが見つかりません。"));
     }
 
     private TrainingSessionResponse toResponse(TrainingSession trainingSession) {

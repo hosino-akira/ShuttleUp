@@ -99,17 +99,17 @@ public class TrainingRecordService {
 
     private TrainingSession findTrainingSession(Long sessionId) {
         return trainingSessionRepository.findById(sessionId)
-                .orElseThrow(() -> new IllegalArgumentException("Training session not found"));
+                .orElseThrow(() -> new IllegalArgumentException("指定されたトレーニングが見つかりません。"));
     }
 
     private TrainingRecord findTrainingRecord(Long recordId) {
         return trainingRecordRepository.findById(recordId)
-                .orElseThrow(() -> new IllegalArgumentException("Training record not found"));
+                .orElseThrow(() -> new IllegalArgumentException("指定されたトレーニング種目が見つかりません。"));
     }
 
     private Exercise findExercise(Long exerciseId) {
         return exerciseRepository.findById(exerciseId)
-                .orElseThrow(() -> new IllegalArgumentException("Exercise not found"));
+                .orElseThrow(() -> new IllegalArgumentException("指定された種目が見つかりません。"));
     }
 
     private void applyValues(

@@ -4,6 +4,7 @@ import com.shuttleup.backend.dto.request.TrainingSessionCreateRequest;
 import com.shuttleup.backend.dto.request.TrainingSessionUpdateRequest;
 import com.shuttleup.backend.dto.response.TrainingSessionResponse;
 import com.shuttleup.backend.service.TrainingSessionService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -52,7 +53,7 @@ public class TrainingSessionController {
      */
     @PostMapping
     public ResponseEntity<TrainingSessionResponse> createTrainingSession(
-            @RequestBody TrainingSessionCreateRequest request) {
+            @Valid @RequestBody TrainingSessionCreateRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(trainingSessionService.createTrainingSession(request));
     }
@@ -63,7 +64,7 @@ public class TrainingSessionController {
     @PutMapping("/{id}")
     public ResponseEntity<TrainingSessionResponse> updateTrainingSession(
             @PathVariable Long id,
-            @RequestBody TrainingSessionUpdateRequest request) {
+            @Valid @RequestBody TrainingSessionUpdateRequest request) {
         return ResponseEntity.ok(trainingSessionService.updateTrainingSession(id, request));
     }
 

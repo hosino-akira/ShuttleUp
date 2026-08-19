@@ -1,20 +1,22 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
-import { useRoute } from 'vue-router'
+import { computed, ref } from "vue";
+import { useRoute } from "vue-router";
 import {
   BellOutlined,
   GlobalOutlined,
   MenuFoldOutlined,
   MenuUnfoldOutlined,
-} from '@ant-design/icons-vue'
-import { NAVIGATION_MENU } from '../constants/navigation'
+} from "@ant-design/icons-vue";
+import { NAVIGATION_MENU } from "../constants/navigation";
 
-const route = useRoute()
-const isSidebarCollapsed = ref(false)
-const activeMenuKey = computed(() => route.name?.toString() ?? '')
+const route = useRoute();
+const isSidebarCollapsed = ref(false);
+const activeMenuKey = computed(
+  () => route.name?.toString() ?? "",
+);
 
 function toggleSidebar(): void {
-  isSidebarCollapsed.value = !isSidebarCollapsed.value
+  isSidebarCollapsed.value = !isSidebarCollapsed.value;
 }
 </script>
 
@@ -26,7 +28,6 @@ function toggleSidebar(): void {
       :breakpoint="'lg'"
       :collapsed-width="0"
       :width="240"
-      collapsible
       theme="light"
     >
       <RouterLink class="brand" :to="{ name: 'dashboard' }">
@@ -34,9 +35,17 @@ function toggleSidebar(): void {
         <span class="brand-name">ShuttleUp</span>
       </RouterLink>
 
-      <a-menu :selected-keys="[activeMenuKey]" mode="inline">
-        <a-menu-item v-for="item in NAVIGATION_MENU" :key="item.key">
-          <RouterLink :to="item.to">{{ item.label }}</RouterLink>
+      <a-menu
+        :selected-keys="[activeMenuKey]"
+        mode="inline"
+      >
+        <a-menu-item
+          v-for="item in NAVIGATION_MENU"
+          :key="item.key"
+        >
+          <RouterLink :to="item.to">{{
+            item.label
+          }}</RouterLink>
         </a-menu-item>
       </a-menu>
     </a-layout-sider>
@@ -44,21 +53,37 @@ function toggleSidebar(): void {
     <a-layout>
       <a-layout-header class="application-header">
         <a-button
-          :aria-label="isSidebarCollapsed ? 'Expand navigation' : 'Collapse navigation'"
+          :aria-label="
+            isSidebarCollapsed
+              ? 'Expand navigation'
+              : 'Collapse navigation'
+          "
           type="text"
           @click="toggleSidebar"
         >
-          <MenuUnfoldOutlined v-if="isSidebarCollapsed" />
-          <MenuFoldOutlined v-else />
+          <MenuUnfoldOutlined
+            v-if="isSidebarCollapsed"
+            class="sidebar-toggle-icon"
+          />
+          <MenuFoldOutlined
+            v-else
+            class="sidebar-toggle-icon"
+          />
         </a-button>
 
         <div class="header-actions">
           <!-- Reserved controls: connect these to notification, locale, and theme services later. -->
-          <a-button aria-label="Change language" type="text">
+          <a-button
+            aria-label="Change language"
+            type="text"
+          >
             <GlobalOutlined />
           </a-button>
           <a-badge :count="0" :show-zero="false">
-            <a-button aria-label="Notifications" type="text">
+            <a-button
+              aria-label="Notifications"
+              type="text"
+            >
               <BellOutlined />
             </a-button>
           </a-badge>
@@ -113,7 +138,7 @@ function toggleSidebar(): void {
   align-items: center;
   justify-content: space-between;
   height: 64px;
-  padding: 0 24px;
+  padding: 0 12px;
   line-height: normal;
   background: var(--app-surface-color);
   border-block-end: 1px solid var(--app-border-color);
@@ -131,9 +156,13 @@ function toggleSidebar(): void {
 
 .content-container {
   min-height: calc(100vh - 64px);
-  padding: clamp(20px, 3vw, 40px);
+  padding: clamp(10px, 3vw, 15px);
+  box-sizing: border-box;
 }
 
+.sidebar-toggle-icon {
+  font-size: 24px;
+}
 @media (max-width: 575px) {
   .application-header {
     padding: 0 16px;
