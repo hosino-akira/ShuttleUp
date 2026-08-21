@@ -57,7 +57,7 @@ public class Match {
     private Integer opponentScore;
 
     /** 試合動画のURL */
-    @Column(name = "video_url")
+    @Column(name = "video_url", length = 2048)
     private String videoUrl;
 
     /** メモ */

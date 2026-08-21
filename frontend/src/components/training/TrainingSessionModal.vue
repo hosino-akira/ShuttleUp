@@ -298,6 +298,7 @@ async function handleRecordSaved(): Promise<void> {
       >
     </div>
     <TrainingRecordTable
+      height="35%"
       :records="records"
       :loading="recordsLoading"
       @edit="openRecordEdit"

@@ -167,12 +167,6 @@ async function executeAction(): Promise<void> {
     :z-index="1200"
     @update:open="emit('update:open', $event)"
   >
-    <a-alert
-      message="入力項目は現在のトレーニング種目の仕様を使用しています。"
-      type="info"
-      show-icon
-      class="form-notice"
-    />
     <a-form ref="formRef" :model="form" layout="vertical">
       <a-form-item
         label="種目"
@@ -258,7 +252,7 @@ async function executeAction(): Promise<void> {
         ><a-textarea
           v-model:value="form.note"
           :maxlength="1000"
-          :rows="3"
+          :rows="2"
           show-count
       /></a-form-item>
     </a-form>

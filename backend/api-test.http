@@ -45,3 +45,38 @@ Content-Type: application/json
 
 ### Delete Training Record
 DELETE http://localhost:8080/api/training-records/3
+
+### Get Matches
+GET http://localhost:8080/api/training-sessions/5/matches
+
+### Get Match
+GET http://localhost:8080/api/matches/1
+
+### Create Match
+POST http://localhost:8080/api/training-sessions/5/matches
+Content-Type: application/json
+
+{
+  "opponentId": 1,
+  "matchDate": "2026-08-03",
+  "myScore": 21,
+  "opponentScore": 18,
+  "videoUrl": "https://example.com/matches/1",
+  "note": "練習試合"
+}
+
+### Update Match
+PUT http://localhost:8080/api/matches/1
+Content-Type: application/json
+
+{
+  "opponentId": 1,
+  "matchDate": "2026-08-03",
+  "myScore": 21,
+  "opponentScore": 19,
+  "videoUrl": "https://example.com/matches/1",
+  "note": "スコアを修正"
+}
+
+### Delete Match
+DELETE http://localhost:8080/api/matches/1
