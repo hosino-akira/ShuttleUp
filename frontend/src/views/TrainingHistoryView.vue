@@ -147,6 +147,11 @@ async function handleSessionSaved(
   await loadTrainingSessions(session.id);
 }
 
+async function handleSessionDeleted(): Promise<void> {
+  selectedSession.value = null;
+  await loadTrainingSessions();
+}
+
 async function deleteSelectedSession(): Promise<void> {
   if (!selectedSession.value) return;
   deleteSubmitting.value = true;
@@ -182,11 +187,13 @@ onMounted(loadTrainingSessions);
           >新規登録</a-button
         >
         <a-button
+          type="primary"
           :disabled="selectedSession === null"
           @click="openEditModal"
           >編集</a-button
         >
         <a-button
+          type="primary"
           danger
           :disabled="selectedSession === null"
           @click="deleteConfirmOpen = true"
@@ -275,6 +282,7 @@ onMounted(loadTrainingSessions);
       "
       :user-id="userId"
       @saved="handleSessionSaved"
+      @deleted="handleSessionDeleted"
     />
     <ConfirmModal
       v-model:open="deleteConfirmOpen"

@@ -4,6 +4,7 @@ import { message } from "ant-design-vue";
 import type { FormInstance } from "ant-design-vue";
 import {
   createTrainingSession,
+  deleteTrainingSession,
   updateTrainingSession,
 } from "../../api/trainingSessionApi";
 import { getTrainingRecords } from "../../api/trainingRecordApi";
@@ -19,6 +20,7 @@ import TrainingRecordModal from "./TrainingRecordModal.vue";
 import TrainingRecordTable from "./TrainingRecordTable.vue";
 
 type Mode = "create" | "edit";
+type ConfirmAction = "save" | "delete";
 
 const props = defineProps<{
   open: boolean;
@@ -30,6 +32,7 @@ const props = defineProps<{
 const emit = defineEmits<{
   "update:open": [value: boolean];
   saved: [session: TrainingSession];
+  deleted: [];
 }>();
 
 const formRef = ref<FormInstance>();
@@ -39,6 +42,7 @@ const records = ref<TrainingRecordResponse[]>([]);
 const recordsLoading = ref(false);
 const submitting = ref(false);
 const confirmOpen = ref(false);
+const confirmAction = ref<ConfirmAction>("save");
 const recordModalOpen = ref(false);
 const recordMode = ref<Mode>("create");
 const editingRecord = ref<TrainingRecordResponse | null>(
@@ -117,12 +121,29 @@ async function requestSave(): Promise<void> {
   } catch {
     return;
   }
+  confirmAction.value = "save";
   confirmOpen.value = true;
 }
 
-async function saveSession(): Promise<void> {
+function requestDelete(): void {
+  if (currentMode.value !== "edit" || !currentSession.value)
+    return;
+  confirmAction.value = "delete";
+  confirmOpen.value = true;
+}
+
+async function executeAction(): Promise<void> {
   submitting.value = true;
   try {
+    if (confirmAction.value === "delete") {
+      if (!currentSession.value) return;
+      await deleteTrainingSession(currentSession.value.id);
+      message.success("トレーニングを削除しました。");
+      confirmOpen.value = false;
+      emit("update:open", false);
+      emit("deleted");
+      return;
+    }
     const request: TrainingSessionUpdateRequest = {
       trainingDate: form.trainingDate,
       durationMinutes: form.durationMinutes,
@@ -192,7 +213,7 @@ async function handleRecordSaved(): Promise<void> {
     >
     <a-form ref="formRef" :model="form" layout="vertical">
       <a-row :gutter="16">
-        <a-col :xs="24" :md="12">
+        <a-col :xs="24" :md="8">
           <a-form-item
             label="トレーニング日"
             name="trainingDate"
@@ -211,7 +232,7 @@ async function handleRecordSaved(): Promise<void> {
             />
           </a-form-item>
         </a-col>
-        <a-col :xs="24" :md="12">
+        <a-col :xs="24" :md="8">
           <a-form-item
             label="トレーニング時間（分）"
             name="durationMinutes"
@@ -235,14 +256,14 @@ async function handleRecordSaved(): Promise<void> {
             />
           </a-form-item>
         </a-col>
-        <a-col :xs="24" :md="12">
+        <a-col :xs="24" :md="8">
           <a-form-item
             label="トレーニング時の感覚"
             name="feeling"
             ><a-rate v-model:value="form.feeling"
           /></a-form-item>
         </a-col>
-        <a-col :xs="24" :md="12">
+        <a-col :xs="24" :md="24">
           <a-form-item
             label="メモ"
             name="note"
@@ -257,7 +278,7 @@ async function handleRecordSaved(): Promise<void> {
             <a-textarea
               v-model:value="form.note"
               :maxlength="1000"
-              :rows="3"
+              :rows="2"
               show-count
             />
           </a-form-item>
@@ -265,7 +286,6 @@ async function handleRecordSaved(): Promise<void> {
       </a-row>
     </a-form>
 
-    <a-divider />
     <div class="records-header">
       <a-typography-title :level="4"
         >トレーニング種目</a-typography-title
@@ -284,18 +304,27 @@ async function handleRecordSaved(): Promise<void> {
     />
 
     <template #footer>
-      <div class="footer-actions">
-        <a-button
-          :disabled="submitting"
-          @click="emit('update:open', false)"
-          >キャンセル</a-button
-        >
+      <div class="modal-footer">
         <a-button
           type="primary"
-          :loading="submitting"
-          @click="requestSave"
-          >保存</a-button
+          danger
+          :disabled="currentMode !== 'edit' || submitting"
+          @click="requestDelete"
+          >削除</a-button
         >
+        <div class="footer-actions">
+          <a-button
+            :disabled="submitting"
+            @click="emit('update:open', false)"
+            >キャンセル</a-button
+          >
+          <a-button
+            type="primary"
+            :loading="submitting"
+            @click="requestSave"
+            >保存</a-button
+          >
+        </div>
       </div>
     </template>
   </BaseLargeModal>
@@ -311,9 +340,19 @@ async function handleRecordSaved(): Promise<void> {
 
   <ConfirmModal
     v-model:open="confirmOpen"
-    message="保存してもよろしいですか？"
+    :message="
+      confirmAction === 'delete'
+        ? '削除してもよろしいですか？'
+        : '保存してもよろしいですか？'
+    "
+    :description="
+      confirmAction === 'delete'
+        ? '削除したデータは元に戻せません。'
+        : ''
+    "
+    :danger="confirmAction === 'delete'"
     :loading="submitting"
-    @confirm="saveSession"
+    @confirm="executeAction"
   />
 </template>
 
@@ -333,7 +372,12 @@ async function handleRecordSaved(): Promise<void> {
 }
 .footer-actions {
   display: flex;
-  justify-content: flex-end;
   gap: 8px;
+}
+.modal-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
 }
 </style>

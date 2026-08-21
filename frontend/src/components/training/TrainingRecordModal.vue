@@ -267,6 +267,7 @@ async function executeAction(): Promise<void> {
       <div class="modal-footer">
         <a-button
           v-if="mode === 'edit'"
+          type="primary"
           danger
           :disabled="submitting"
           @click="requestDelete"

@@ -43,7 +43,8 @@ const emit = defineEmits<{
 
 .base-large-modal .ant-modal-content {
   min-height: 650px;
-  max-height: calc(85vh - 120px);
+  max-height: 650px;
+  /* max-height: calc(85vh - 120px); */
   display: flex;
   flex-direction: column;
   padding: 0;

@@ -52,6 +52,7 @@ onMounted(loadTrainingSessions);
       <template #action>
         <a-button
           size="small"
+          type="primary"
           danger
           :loading="loading"
           @click="loadTrainingSessions"
