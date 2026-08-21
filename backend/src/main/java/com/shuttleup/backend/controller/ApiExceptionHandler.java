@@ -32,4 +32,12 @@ public class ApiExceptionHandler {
         return ResponseEntity.status(HttpStatus.CONFLICT)
                 .body(Map.of("message", "関連するデータが存在するため削除できません。"));
     }
+
+    /** 業務上許可されない操作の場合は409を返す。 */
+    @ExceptionHandler(IllegalStateException.class)
+    public ResponseEntity<Map<String, String>> handleIllegalState(
+            IllegalStateException exception) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(Map.of("message", exception.getMessage()));
+    }
 }

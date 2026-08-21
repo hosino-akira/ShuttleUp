@@ -80,3 +80,47 @@ Content-Type: application/json
 
 ### Delete Match
 DELETE http://localhost:8080/api/matches/1
+
+### Get Opponents
+GET http://localhost:8080/api/users/1/opponents
+
+### Get Opponent
+GET http://localhost:8080/api/opponents/1
+
+### Create Opponent
+POST http://localhost:8080/api/users/1/opponents
+Content-Type: application/json
+
+{
+  "name": "山田選手",
+  "memo": "右利き、攻撃型"
+}
+
+### Update Opponent
+PUT http://localhost:8080/api/opponents/1
+Content-Type: application/json
+
+{
+  "name": "山田選手",
+  "memo": "右利き、ネット前が得意"
+}
+
+### Delete Opponent
+DELETE http://localhost:8080/api/opponents/1
+
+### Create Opponent - Validation Error (blank name)
+POST http://localhost:8080/api/users/1/opponents
+Content-Type: application/json
+
+{
+  "name": "",
+  "memo": "名前は必須"
+}
+
+### Create Opponent - User Not Found
+POST http://localhost:8080/api/users/999999/opponents
+Content-Type: application/json
+
+{
+  "name": "存在しないユーザーの対戦相手"
+}
