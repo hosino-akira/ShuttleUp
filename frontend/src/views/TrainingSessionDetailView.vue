@@ -411,6 +411,7 @@ onBeforeUnmount(() =>
     v-model:open="recordModalOpen"
     :mode="recordMode"
     :session-id="sessionId"
+    :user-id="session?.userId ?? userId"
     :record="editingRecord"
     @saved="refreshRecords"
   />

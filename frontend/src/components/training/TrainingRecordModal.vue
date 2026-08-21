@@ -1,20 +1,36 @@
 <script setup lang="ts">
-import { computed, reactive, ref, watch } from "vue";
+import {
+  computed,
+  onMounted,
+  reactive,
+  ref,
+  watch,
+} from "vue";
 import { message } from "ant-design-vue";
 import type { FormInstance } from "ant-design-vue";
-import { getExercises } from "../../api/exerciseApi";
+import {
+  getExerciseCategories,
+  getExercises,
+  getExerciseTypes,
+} from "../../api/exerciseApi";
 import {
   createTrainingRecord,
   deleteTrainingRecord,
   updateTrainingRecord,
 } from "../../api/trainingRecordApi";
-import type { ExerciseResponse } from "../../types/exercise";
+import type {
+  ExerciseCategoryResponse,
+  ExerciseResponse,
+  ExerciseTypeResponse,
+} from "../../types/exercise";
 import type {
   TrainingRecordCreateRequest,
   TrainingRecordResponse,
 } from "../../types/trainingRecord";
 import BaseLargeModal from "../common/BaseLargeModal.vue";
 import ConfirmModal from "../common/ConfirmModal.vue";
+import BaseSelect from "../common/BaseSelect.vue";
+import ExerciseCreateModal from "./ExerciseCreateModal.vue";
 
 type Mode = "create" | "edit";
 type ConfirmAction = "save" | "delete";
@@ -24,6 +40,7 @@ const props = defineProps<{
   mode: Mode;
   sessionId: number;
   record: TrainingRecordResponse | null;
+  userId: number;
 }>();
 
 const emit = defineEmits<{
@@ -32,14 +49,29 @@ const emit = defineEmits<{
 }>();
 
 const formRef = ref<FormInstance>();
+const categories = ref<ExerciseCategoryResponse[]>([]);
+const exerciseTypes = ref<ExerciseTypeResponse[]>([]);
 const exercises = ref<ExerciseResponse[]>([]);
+const categoryId = ref<number>();
+const exerciseTypeId = ref<number>();
+const categoriesLoading = ref(false);
+const typesLoading = ref(false);
 const exercisesLoading = ref(false);
+const exerciseCreateOpen = ref(false);
 const submitting = ref(false);
 const confirmOpen = ref(false);
 const confirmAction = ref<ConfirmAction>("save");
+type TrainingRecordForm = Omit<
+  TrainingRecordCreateRequest,
+  "exerciseId"
+> & {
+  exerciseId?: number;
+};
+let typeRequestId = 0;
+let exerciseRequestId = 0;
 
-const emptyForm = (): TrainingRecordCreateRequest => ({
-  exerciseId: 0,
+const emptyForm = (): TrainingRecordForm => ({
+  exerciseId: undefined,
   sets: null,
   repetitions: null,
   weightKg: null,
@@ -49,36 +81,142 @@ const emptyForm = (): TrainingRecordCreateRequest => ({
   attemptCount: null,
   note: null,
 });
-const form =
-  reactive<TrainingRecordCreateRequest>(emptyForm());
+const form = reactive<TrainingRecordForm>(emptyForm());
 const title = computed(() =>
   props.mode === "create"
     ? "トレーニング種目の新規登録"
     : "トレーニング種目の編集",
 );
+const categoryOptions = computed(() =>
+  categories.value.map((item) => ({
+    value: item.id,
+    label: item.name,
+  })),
+);
+const exerciseTypeOptions = computed(() =>
+  exerciseTypes.value.map((item) => ({
+    value: item.id,
+    label: item.name,
+  })),
+);
 const exerciseOptions = computed(() =>
   exercises.value.map((exercise) => ({
     value: exercise.id,
-    label: `${exercise.name} — ${exercise.categoryName} / ${exercise.exerciseTypeName}`,
+    label: exercise.name,
   })),
 );
 
-async function loadExercises(): Promise<void> {
-  if (exercises.value.length > 0) return;
-  exercisesLoading.value = true;
+async function loadCategories(): Promise<void> {
+  categoriesLoading.value = true;
   try {
-    exercises.value = await getExercises();
-  } catch (error: unknown) {
+    categories.value = await getExerciseCategories();
+  } catch (error) {
     console.error(error);
-    message.error("種目一覧の取得に失敗しました。");
+    message.error("大分類の取得に失敗しました。");
   } finally {
-    exercisesLoading.value = false;
+    categoriesLoading.value = false;
   }
 }
 
+async function loadExerciseTypes(
+  selectedCategoryId: number,
+  selectedTypeId?: number,
+): Promise<void> {
+  const requestId = ++typeRequestId;
+  typesLoading.value = true;
+  try {
+    const loaded = await getExerciseTypes(
+      selectedCategoryId,
+    );
+    if (requestId !== typeRequestId) return;
+    exerciseTypes.value = loaded;
+    if (
+      selectedTypeId &&
+      loaded.some((item) => item.id === selectedTypeId)
+    )
+      exerciseTypeId.value = selectedTypeId;
+  } catch (error) {
+    if (requestId === typeRequestId) {
+      console.error(error);
+      message.error("中分類の取得に失敗しました。");
+    }
+  } finally {
+    if (requestId === typeRequestId)
+      typesLoading.value = false;
+  }
+}
+
+async function loadExercises(
+  selectedTypeId: number,
+  selectedExerciseId?: number,
+): Promise<void> {
+  const requestId = ++exerciseRequestId;
+  exercisesLoading.value = true;
+  try {
+    const loaded = await getExercises(
+      selectedTypeId,
+      props.userId,
+    );
+    if (requestId !== exerciseRequestId) return;
+    exercises.value = loaded;
+    if (
+      selectedExerciseId &&
+      loaded.some((item) => item.id === selectedExerciseId)
+    )
+      form.exerciseId = selectedExerciseId;
+  } catch (error: unknown) {
+    if (requestId === exerciseRequestId) {
+      console.error(error);
+      message.error("種目一覧の取得に失敗しました。");
+    }
+  } finally {
+    if (requestId === exerciseRequestId)
+      exercisesLoading.value = false;
+  }
+}
+
+async function handleCategoryChange(
+  value: number | undefined,
+): Promise<void> {
+  typeRequestId++;
+  exerciseRequestId++;
+  exerciseTypeId.value = undefined;
+  form.exerciseId = 0;
+  exerciseTypes.value = [];
+  exercises.value = [];
+  if (value) await loadExerciseTypes(value);
+}
+
+async function handleExerciseTypeChange(
+  value: number | undefined,
+): Promise<void> {
+  exerciseRequestId++;
+  form.exerciseId = 0;
+  exercises.value = [];
+  if (value) await loadExercises(value);
+}
+
+async function handleExerciseCreated(
+  exercise: ExerciseResponse,
+): Promise<void> {
+  categoryId.value = exercise.categoryId;
+  exerciseTypeId.value = undefined;
+  exerciseTypes.value = [];
+  exercises.value = [];
+  await loadExerciseTypes(
+    exercise.categoryId,
+    exercise.exerciseTypeId,
+  );
+  await loadExercises(exercise.exerciseTypeId, exercise.id);
+}
+
+onMounted(async () => {
+  await loadCategories();
+});
+
 watch(
   () => props.open,
-  (open) => {
+  async (open) => {
     if (!open) return;
     Object.assign(
       form,
@@ -96,8 +234,23 @@ watch(
           }
         : emptyForm(),
     );
+    categoryId.value = props.record?.categoryId;
+    exerciseTypeId.value = undefined;
+    exerciseTypes.value = [];
+    exercises.value = [];
     formRef.value?.clearValidate();
-    void loadExercises();
+    if (categories.value.length === 0)
+      await loadCategories();
+    if (props.record) {
+      await loadExerciseTypes(
+        props.record.categoryId,
+        props.record.exerciseTypeId,
+      );
+      await loadExercises(
+        props.record.exerciseTypeId,
+        props.record.exerciseId,
+      );
+    }
   },
 );
 
@@ -124,8 +277,14 @@ async function executeAction(): Promise<void> {
       await deleteTrainingRecord(props.record.id);
       message.success("トレーニング種目を削除しました。");
     } else {
-      const request = {
+      if (form.exerciseId == null || form.exerciseId <= 0) {
+        message.error("種目を選択してください。");
+        return;
+      }
+
+      const request: TrainingRecordCreateRequest = {
         ...form,
+        exerciseId: form.exerciseId,
         note: form.note?.trim() || null,
       };
       if (props.mode === "edit" && props.record)
@@ -164,31 +323,62 @@ async function executeAction(): Promise<void> {
   <BaseLargeModal
     :open="open"
     :title="title"
-    :z-index="1200"
     @update:open="emit('update:open', $event)"
   >
     <a-form ref="formRef" :model="form" layout="vertical">
-      <a-form-item
-        label="種目"
-        name="exerciseId"
-        :rules="[
-          {
-            required: true,
-            type: 'number',
-            min: 1,
-            message: '種目を選択してください。',
-          },
-        ]"
-      >
-        <a-select
-          v-model:value="form.exerciseId"
-          show-search
-          option-filter-prop="label"
-          :options="exerciseOptions"
-          :loading="exercisesLoading"
-          placeholder="種目名で検索"
-        />
-      </a-form-item>
+      <a-row :gutter="12">
+        <a-col :xs="24" :md="8"
+          ><a-form-item label="大分類">
+            <BaseSelect
+              v-model:value="categoryId"
+              :options="categoryOptions"
+              :loading="categoriesLoading"
+              debug-name="大分類"
+              placeholder="大分類を選択"
+              @change="handleCategoryChange"
+            /> </a-form-item
+        ></a-col>
+        <a-col :xs="24" :md="8"
+          ><a-form-item label="中分類">
+            <BaseSelect
+              v-model:value="exerciseTypeId"
+              :options="exerciseTypeOptions"
+              :loading="typesLoading"
+              :disabled="!categoryId"
+              placeholder="中分類を選択"
+              @change="handleExerciseTypeChange"
+            /> </a-form-item
+        ></a-col>
+        <a-col :xs="24" :md="8"
+          ><a-form-item
+            label="種目"
+            name="exerciseId"
+            :rules="[
+              {
+                required: true,
+                type: 'number',
+                min: 1,
+                message: '種目を選択してください。',
+              },
+            ]"
+          >
+            <div class="exercise-select-row">
+              <BaseSelect
+                v-model:value="form.exerciseId"
+                :options="exerciseOptions"
+                :loading="exercisesLoading"
+                :disabled="!exerciseTypeId"
+                placeholder="種目を選択"
+              /><a-button
+                type="primary"
+                :disabled="categoriesLoading"
+                @click="exerciseCreateOpen = true"
+                >新規</a-button
+              >
+            </div>
+          </a-form-item></a-col
+        >
+      </a-row>
       <a-divider orientation="left">筋力・回数</a-divider>
       <a-row :gutter="12">
         <a-col :xs="24" :md="8"
@@ -302,11 +492,26 @@ async function executeAction(): Promise<void> {
     :z-index="1300"
     @confirm="executeAction"
   />
+  <ExerciseCreateModal
+    v-model:open="exerciseCreateOpen"
+    :user-id="userId"
+    :initial-category-id="categoryId"
+    :initial-exercise-type-id="exerciseTypeId"
+    @created="handleExerciseCreated"
+  />
 </template>
 
 <style scoped>
 .full-width {
   width: 100%;
+}
+.exercise-select-row {
+  display: flex;
+  gap: 8px;
+}
+.exercise-select-row :deep(.ant-select) {
+  flex: 1;
+  min-width: 0;
 }
 .form-notice {
   margin-bottom: 16px;
