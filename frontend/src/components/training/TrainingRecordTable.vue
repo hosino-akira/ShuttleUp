@@ -8,6 +8,7 @@ defineProps<{
 
 const emit = defineEmits<{
   edit: [record: TrainingRecordResponse];
+  delete: [record: TrainingRecordResponse];
 }>();
 
 function recordSummary(
@@ -68,11 +69,17 @@ function recordSummary(
         recordSummary(row)
       }}</template>
     </vxe-column>
-    <vxe-column title="編集" width="90" fixed="right">
+    <vxe-column title="操作" width="150" fixed="right">
       <template #default="{ row }">
         <a-button type="link" @click="emit('edit', row)"
           >編集</a-button
         >
+        <a-popconfirm
+          title="この記録を削除しますか？"
+          @confirm="emit('delete', row)"
+        >
+          <a-button type="link" danger>削除</a-button>
+        </a-popconfirm>
       </template>
     </vxe-column>
   </vxe-table>

@@ -21,7 +21,7 @@ function toggleSidebar(): void {
 </script>
 
 <template>
-  <a-layout class="application-layout">
+  <a-layout>
     <a-layout-sider
       v-model:collapsed="isSidebarCollapsed"
       class="application-sider"
@@ -50,7 +50,7 @@ function toggleSidebar(): void {
       </a-menu>
     </a-layout-sider>
 
-    <a-layout>
+    <a-layout class="application-layout">
       <a-layout-header class="application-header">
         <a-button
           :aria-label="
@@ -152,10 +152,16 @@ function toggleSidebar(): void {
 
 .application-content {
   background: var(--app-page-color);
+  display: flex;
+  flex: 1;
+  min-height: 0;
 }
 
 .content-container {
-  min-height: calc(100vh - 64px);
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
   padding: clamp(10px, 3vw, 15px);
   box-sizing: border-box;
 }

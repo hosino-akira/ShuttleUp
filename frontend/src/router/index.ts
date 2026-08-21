@@ -15,6 +15,16 @@ const router = createRouter({
       component: () => import('../views/TrainingHistoryView.vue'),
     },
     {
+      path: '/training-history/new',
+      name: 'training-session-create',
+      component: () => import('../views/TrainingSessionDetailView.vue'),
+    },
+    {
+      path: '/training-history/:sessionId',
+      name: 'training-session-detail',
+      component: () => import('../views/TrainingSessionDetailView.vue'),
+    },
+    {
       path: '/plan',
       name: 'training-plan',
       component: () => import('../views/TrainingPlanView.vue'),

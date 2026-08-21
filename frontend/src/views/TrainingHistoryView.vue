@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, reactive, ref } from "vue";
 import { message } from "ant-design-vue";
+import { useRouter } from "vue-router";
 import type {
   VxeTableInstance,
   VxeTablePropTypes,
@@ -10,17 +11,13 @@ import {
   getTrainingSessions,
 } from "../api/trainingSessionApi";
 import ConfirmModal from "../components/common/ConfirmModal.vue";
-import TrainingSessionModal from "../components/training/TrainingSessionModal.vue";
 import type { TrainingSession } from "../types/trainingSession";
 
-type Mode = "create" | "edit";
-
 const userId = 1;
+const router = useRouter();
 const tableRef = ref<VxeTableInstance<TrainingSession>>();
 const sessions = ref<TrainingSession[]>([]);
 const selectedSession = ref<TrainingSession | null>(null);
-const sessionModalOpen = ref(false);
-const sessionModalMode = ref<Mode>("create");
 const deleteConfirmOpen = ref(false);
 const deleteSubmitting = ref(false);
 const sortState = reactive<{
@@ -131,25 +128,15 @@ async function loadTrainingSessions(
 }
 
 function openCreateModal(): void {
-  sessionModalMode.value = "create";
-  sessionModalOpen.value = true;
+  void router.push({ name: "training-session-create" });
 }
 
 function openEditModal(): void {
   if (!selectedSession.value) return;
-  sessionModalMode.value = "edit";
-  sessionModalOpen.value = true;
-}
-
-async function handleSessionSaved(
-  session: TrainingSession,
-): Promise<void> {
-  await loadTrainingSessions(session.id);
-}
-
-async function handleSessionDeleted(): Promise<void> {
-  selectedSession.value = null;
-  await loadTrainingSessions();
+  void router.push({
+    name: "training-session-detail",
+    params: { sessionId: selectedSession.value.id },
+  });
 }
 
 async function deleteSelectedSession(): Promise<void> {
@@ -214,7 +201,7 @@ onMounted(loadTrainingSessions);
           border
           stripe
           show-overflow
-          highlight-current-row
+          :row-config="{ isCurrent: true }"
           :cell-config="{ height: 32 }"
           :column-config="columnConfig"
           :data="pagedSessions"
@@ -274,16 +261,6 @@ onMounted(loadTrainingSessions);
       />
     </a-card>
 
-    <TrainingSessionModal
-      v-model:open="sessionModalOpen"
-      :mode="sessionModalMode"
-      :session="
-        sessionModalMode === 'edit' ? selectedSession : null
-      "
-      :user-id="userId"
-      @saved="handleSessionSaved"
-      @deleted="handleSessionDeleted"
-    />
     <ConfirmModal
       v-model:open="deleteConfirmOpen"
       message="削除してもよろしいですか？"
@@ -300,7 +277,8 @@ onMounted(loadTrainingSessions);
   display: flex;
   flex-direction: column;
   gap: 12px;
-  height: calc(100vh - 64px - clamp(40px, 6vw, 80px));
+  /* height: calc(100vh - 64px - clamp(40px, 6vw, 80px)); */
+  height: 100%;
   min-height: 0;
   overflow: hidden;
 }

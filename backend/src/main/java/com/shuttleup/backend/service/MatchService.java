@@ -34,11 +34,17 @@ public class MatchService {
     /** 指定されたトレーニングセッションに紐づく試合一覧を取得する。 */
     @Transactional(readOnly = true)
     public List<MatchResponse> getMatchesByTrainingSessionId(Long sessionId) {
-        findTrainingSession(sessionId);
-        return matchRepository.findByTrainingSessionIdOrderByIdAsc(sessionId)
-                .stream()
+
+        TrainingSession session = findTrainingSession(sessionId);
+
+        List<Match> matches =
+                matchRepository.findByTrainingSessionIdOrderByIdAsc(sessionId);
+
+        List<MatchResponse> responses = matches.stream()
                 .map(this::toResponse)
                 .toList();
+
+        return responses;
     }
 
     /** IDを指定して試合を取得する。 */
