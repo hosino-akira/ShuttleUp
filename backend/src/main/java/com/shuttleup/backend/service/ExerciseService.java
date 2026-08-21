@@ -6,8 +6,10 @@ import com.shuttleup.backend.dto.response.ExerciseResponse;
 import com.shuttleup.backend.entity.Exercise;
 import com.shuttleup.backend.entity.ExerciseCategory;
 import com.shuttleup.backend.entity.ExerciseType;
+import com.shuttleup.backend.entity.User;
 import com.shuttleup.backend.repository.ExerciseRepository;
 import com.shuttleup.backend.repository.ExerciseTypeRepository;
+import com.shuttleup.backend.repository.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,20 +21,25 @@ public class ExerciseService {
 
     private final ExerciseRepository exerciseRepository;
     private final ExerciseTypeRepository exerciseTypeRepository;
+    private final UserRepository userRepository;
 
     public ExerciseService(
             ExerciseRepository exerciseRepository,
-            ExerciseTypeRepository exerciseTypeRepository) {
+            ExerciseTypeRepository exerciseTypeRepository,
+            UserRepository userRepository) {
         this.exerciseRepository = exerciseRepository;
         this.exerciseTypeRepository = exerciseTypeRepository;
+        this.userRepository = userRepository;
     }
 
     /**
      * すべての種目を取得する。
      */
     @Transactional(readOnly = true)
-    public List<ExerciseResponse> getAllExercises() {
-        return exerciseRepository.findAll()
+    public List<ExerciseResponse> getAvailableExercises(
+            Long exerciseTypeId, Long userId) {
+        findUser(userId);
+        return exerciseRepository.findAvailableExercises(exerciseTypeId, userId)
                 .stream()
                 .map(this::toResponse)
                 .toList();
@@ -52,12 +59,14 @@ public class ExerciseService {
     @Transactional
     public ExerciseResponse createExercise(ExerciseCreateRequest request) {
         ExerciseType exerciseType = findExerciseType(request.getExerciseTypeId());
+        User user = findUser(request.getUserId());
 
         LocalDateTime now = LocalDateTime.now();
         Exercise exercise = new Exercise();
         exercise.setExerciseType(exerciseType);
-        exercise.setName(request.getName());
+        exercise.setName(request.getName().trim());
         exercise.setSystemPreset(false);
+        exercise.setUser(user);
         exercise.setCreatedAt(now);
         exercise.setUpdatedAt(now);
 
@@ -95,6 +104,11 @@ public class ExerciseService {
                 .orElseThrow(() -> new IllegalArgumentException("指定された種別が見つかりません。"));
     }
 
+    private User findUser(Long id) {
+        return userRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("指定されたユーザーが見つかりません。"));
+    }
+
     private ExerciseResponse toResponse(Exercise exercise) {
         ExerciseType exerciseType = exercise.getExerciseType();
         ExerciseCategory category = exerciseType.getCategory();
@@ -107,6 +121,7 @@ public class ExerciseService {
                 .categoryId(category.getId())
                 .categoryName(category.getName())
                 .systemPreset(exercise.getSystemPreset())
+                .userId(exercise.getUser() == null ? null : exercise.getUser().getId())
                 .createdAt(exercise.getCreatedAt())
                 .updatedAt(exercise.getUpdatedAt())
                 .build();

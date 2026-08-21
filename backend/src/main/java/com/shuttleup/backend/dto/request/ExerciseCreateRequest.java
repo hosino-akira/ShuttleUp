@@ -12,6 +12,9 @@ public class ExerciseCreateRequest {
     @NotNull
     private Long exerciseTypeId;
 
+    @NotNull
+    private Long userId;
+
     @NotBlank
     private String name;
 }

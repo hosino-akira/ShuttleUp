@@ -1,8 +1,18 @@
 import http from './http'
-import type { ExerciseCreateRequest, ExerciseResponse, ExerciseUpdateRequest } from '../types/exercise'
+import type { ExerciseCategoryResponse, ExerciseCreateRequest, ExerciseResponse, ExerciseTypeResponse, ExerciseUpdateRequest } from '../types/exercise'
 
-export async function getExercises(): Promise<ExerciseResponse[]> {
-  const response = await http.get<ExerciseResponse[]>('/exercises')
+export async function getExercises(exerciseTypeId?: number, userId = 1): Promise<ExerciseResponse[]> {
+  const response = await http.get<ExerciseResponse[]>('/exercises', { params: { exerciseTypeId, userId } })
+  return response.data
+}
+
+export async function getExerciseCategories(): Promise<ExerciseCategoryResponse[]> {
+  const response = await http.get<ExerciseCategoryResponse[]>('/exercise-categories')
+  return response.data
+}
+
+export async function getExerciseTypes(categoryId: number): Promise<ExerciseTypeResponse[]> {
+  const response = await http.get<ExerciseTypeResponse[]>('/exercise-types', { params: { categoryId } })
   return response.data
 }
 

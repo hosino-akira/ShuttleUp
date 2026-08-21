@@ -47,6 +47,11 @@ public class Exercise {
     @Column(name = "system_preset", nullable = false)
     private Boolean systemPreset = false;
 
+    /** この種目を作成したユーザー（システム標準種目ではnull） */
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User user;
+
     /** 作成日時 */
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;

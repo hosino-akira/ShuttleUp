@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -34,8 +35,11 @@ public class ExerciseController {
      * すべての種目を取得する。
      */
     @GetMapping
-    public ResponseEntity<List<ExerciseResponse>> getAllExercises() {
-        return ResponseEntity.ok(exerciseService.getAllExercises());
+    public ResponseEntity<List<ExerciseResponse>> getAllExercises(
+            @RequestParam(required = false) Long exerciseTypeId,
+            @RequestParam(defaultValue = "1") Long userId) {
+        return ResponseEntity.ok(
+                exerciseService.getAvailableExercises(exerciseTypeId, userId));
     }
 
     /**
