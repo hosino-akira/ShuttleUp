@@ -39,7 +39,8 @@ function recordSummary(
 </script>
 
 <template>
-  <vxe-table
+  <div class="vxe-table-wrapper">
+    <vxe-table
     border
     stripe
     show-overflow
@@ -82,5 +83,6 @@ function recordSummary(
         </a-popconfirm>
       </template>
     </vxe-column>
-  </vxe-table>
+    </vxe-table>
+  </div>
 </template>

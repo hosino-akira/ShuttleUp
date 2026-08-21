@@ -30,6 +30,22 @@ body,
   font-weight: 600;
 }
 
+.vxe-table-wrapper {
+  width: 100%;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.vxe-table-wrapper > .vxe-table {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  --vxe-ui-table-border-color: #66666648;
+  --vxe-ui-table-border-width: 1.25px;
+  --vxe-ui-table-resizable-line-color: #666;
+}
+
+
 /* button様式 */
 /* 削除：type="primary"　danger
 キャンセル：なし

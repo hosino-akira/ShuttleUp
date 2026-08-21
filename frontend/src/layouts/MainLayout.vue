@@ -101,7 +101,9 @@ function toggleSidebar(): void {
 
 <style scoped>
 .application-layout {
+  min-width: 0;
   min-height: 100vh;
+  overflow-x: hidden;
 }
 
 .application-sider {
@@ -154,14 +156,18 @@ function toggleSidebar(): void {
   background: var(--app-page-color);
   display: flex;
   flex: 1;
+  min-width: 0;
   min-height: 0;
+  overflow-x: hidden;
 }
 
 .content-container {
   display: flex;
   flex: 1;
   flex-direction: column;
+  min-width: 0;
   min-height: 0;
+  overflow-x: hidden;
   padding: clamp(10px, 3vw, 15px);
   box-sizing: border-box;
 }

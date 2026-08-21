@@ -194,7 +194,7 @@ onMounted(loadTrainingSessions);
       :bordered="false"
       title="登録済みトレーニング"
     >
-      <div class="table-scroll-area">
+      <div class="table-scroll-area vxe-table-wrapper">
         <vxe-table
           ref="tableRef"
           height="100%"
@@ -279,6 +279,7 @@ onMounted(loadTrainingSessions);
   gap: 12px;
   /* height: calc(100vh - 64px - clamp(40px, 6vw, 80px)); */
   height: 100%;
+  min-width: 0;
   min-height: 0;
   overflow: hidden;
 }
@@ -295,7 +296,9 @@ onMounted(loadTrainingSessions);
 .table-card {
   display: flex;
   flex: 1;
+  min-width: 0;
   min-height: 0;
+  overflow: hidden;
   flex-direction: column;
 }
 .table-card :deep(.ant-card-head) {
@@ -305,7 +308,9 @@ onMounted(loadTrainingSessions);
 .table-card :deep(.ant-card-body) {
   display: flex;
   flex: 1;
+  min-width: 0;
   min-height: 0;
+  overflow: hidden;
   flex-direction: column;
   padding: 12px 16px;
 }

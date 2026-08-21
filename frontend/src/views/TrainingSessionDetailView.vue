@@ -444,24 +444,34 @@ onBeforeUnmount(() =>
   display: flex;
   flex: 1;
   flex-direction: column;
+  min-width: 0;
   min-height: 0;
   gap: 12px;
 }
 .form-card,
 .record-card {
   flex: 0 0 auto;
+  min-width: 0;
+  overflow: hidden;
 }
 .match-card {
   display: flex;
   flex: 1;
 
   flex-direction: column;
+  min-width: 0;
   min-height: 0;
+  overflow: hidden;
 }
+.record-card :deep(.ant-card-body),
 .match-card :deep(.ant-card-body) {
   flex: 1;
+  min-width: 0;
   min-height: 0;
-  overflow: auto;
+  overflow-x: hidden;
+}
+.match-card :deep(.ant-card-body) {
+  overflow-y: auto;
 }
 .page-header {
   display: flex;
