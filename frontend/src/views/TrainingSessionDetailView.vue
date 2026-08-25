@@ -7,6 +7,7 @@ import {
   ref,
 } from "vue";
 import { Modal, message } from "ant-design-vue";
+import { CURRENT_USER_ID } from "../constants/user";
 import type { FormInstance } from "ant-design-vue";
 import {
   onBeforeRouteLeave,
@@ -40,7 +41,7 @@ import OpponentDrawer from "../components/training/OpponentDrawer.vue";
 type Mode = "create" | "edit";
 const route = useRoute();
 const router = useRouter();
-const userId = 1;
+const userId = CURRENT_USER_ID;
 const sessionId = ref<number | null>(
   route.name === "training-session-create"
     ? null

@@ -1,5 +1,6 @@
 package com.shuttleup.backend.controller;
 
+import com.shuttleup.backend.exception.BadRequestException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -13,6 +14,14 @@ import java.util.Map;
  */
 @RestControllerAdvice
 public class ApiExceptionHandler {
+
+    /** 入力内容が業務ルールに反する場合は400を返す。 */
+    @ExceptionHandler(BadRequestException.class)
+    public ResponseEntity<Map<String, String>> handleBadRequest(
+            BadRequestException exception) {
+        return ResponseEntity.badRequest()
+                .body(Map.of("message", exception.getMessage()));
+    }
 
     /**
      * 指定されたリソースが存在しない場合は404を返す。

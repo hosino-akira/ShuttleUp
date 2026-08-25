@@ -71,4 +71,24 @@ public class Match {
     /** 更新日時 */
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
+
+    /** 自分の得点が相手より高いかを返す。 */
+    public boolean isWin() {
+        return isWin(myScore, opponentScore);
+    }
+
+    /** 自分の得点が相手より低いかを返す。 */
+    public boolean isLoss() {
+        return isLoss(myScore, opponentScore);
+    }
+
+    /** 得点を比較して勝利かを返す。 */
+    public static boolean isWin(Integer myScore, Integer opponentScore) {
+        return myScore != null && opponentScore != null && myScore > opponentScore;
+    }
+
+    /** 得点を比較して敗北かを返す。 */
+    public static boolean isLoss(Integer myScore, Integer opponentScore) {
+        return myScore != null && opponentScore != null && myScore < opponentScore;
+    }
 }

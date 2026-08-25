@@ -124,3 +124,27 @@ Content-Type: application/json
 {
   "name": "存在しないユーザーの対戦相手"
 }
+
+### Dashboard：全期間
+GET http://localhost:8080/api/dashboard/users/1
+
+### Dashboard：期間指定
+GET http://localhost:8080/api/dashboard/users/1?from=2026-01-01&to=2026-12-31
+
+### Dashboard：種目指定
+GET http://localhost:8080/api/dashboard/users/1?exerciseId=1
+
+### Dashboard：対戦相手指定
+GET http://localhost:8080/api/dashboard/users/1?opponentId=1
+
+### Dashboard：期間・種目・対戦相手指定
+GET http://localhost:8080/api/dashboard/users/1?from=2026-01-01&to=2026-12-31&exerciseId=1&opponentId=1
+
+### Dashboard：不正な期間
+GET http://localhost:8080/api/dashboard/users/1?from=2026-12-31&to=2026-01-01
+
+### Dashboard：存在しないユーザー
+GET http://localhost:8080/api/dashboard/users/999999
+
+### Dashboard：存在しない対戦相手
+GET http://localhost:8080/api/dashboard/users/1?opponentId=999999

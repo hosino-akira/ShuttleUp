@@ -1,7 +1,8 @@
 import http from './http'
 import type { ExerciseCategoryResponse, ExerciseCreateRequest, ExerciseResponse, ExerciseTypeResponse, ExerciseUpdateRequest } from '../types/exercise'
+import { CURRENT_USER_ID } from '../constants/user'
 
-export async function getExercises(exerciseTypeId?: number, userId = 1): Promise<ExerciseResponse[]> {
+export async function getExercises(exerciseTypeId?: number, userId = CURRENT_USER_ID): Promise<ExerciseResponse[]> {
   const response = await http.get<ExerciseResponse[]>('/exercises', { params: { exerciseTypeId, userId } })
   return response.data
 }

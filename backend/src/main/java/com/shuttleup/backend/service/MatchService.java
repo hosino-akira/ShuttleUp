@@ -6,6 +6,7 @@ import com.shuttleup.backend.dto.response.MatchResponse;
 import com.shuttleup.backend.entity.Match;
 import com.shuttleup.backend.entity.Opponent;
 import com.shuttleup.backend.entity.TrainingSession;
+import com.shuttleup.backend.exception.BadRequestException;
 import com.shuttleup.backend.repository.MatchRepository;
 import com.shuttleup.backend.repository.OpponentRepository;
 import com.shuttleup.backend.repository.TrainingSessionRepository;
@@ -117,6 +118,7 @@ public class MatchService {
     }
 
     private void applyValues(Match match, MatchCreateRequest request) {
+        validateScores(request.getMyScore(), request.getOpponentScore());
         match.setMatchDate(request.getMatchDate());
         match.setMyScore(request.getMyScore());
         match.setOpponentScore(request.getOpponentScore());
@@ -125,11 +127,18 @@ public class MatchService {
     }
 
     private void applyValues(Match match, MatchUpdateRequest request) {
+        validateScores(request.getMyScore(), request.getOpponentScore());
         match.setMatchDate(request.getMatchDate());
         match.setMyScore(request.getMyScore());
         match.setOpponentScore(request.getOpponentScore());
         match.setVideoUrl(request.getVideoUrl());
         match.setNote(request.getNote());
+    }
+
+    private void validateScores(Integer myScore, Integer opponentScore) {
+        if (myScore != null && myScore.equals(opponentScore)) {
+            throw new BadRequestException("引き分けの試合結果は登録できません。");
+        }
     }
 
     private MatchResponse toResponse(Match match) {
