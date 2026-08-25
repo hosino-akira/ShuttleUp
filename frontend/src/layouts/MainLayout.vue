@@ -21,7 +21,7 @@ function toggleSidebar(): void {
 </script>
 
 <template>
-  <a-layout>
+  <a-layout class="application-shell">
     <a-layout-sider
       v-model:collapsed="isSidebarCollapsed"
       class="application-sider"
@@ -100,13 +100,25 @@ function toggleSidebar(): void {
 </template>
 
 <style scoped>
+.application-shell {
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+
 .application-layout {
   min-width: 0;
-  min-height: 100vh;
-  overflow-x: hidden;
+  min-height: 0;
+  height: 100%;
+  overflow: hidden;
 }
 
 .application-sider {
+  height: 100%;
+  overflow-x: hidden;
+  overflow-y: auto;
   border-inline-end: 1px solid var(--app-border-color);
 }
 
@@ -137,6 +149,7 @@ function toggleSidebar(): void {
 
 .application-header {
   display: flex;
+  flex: 0 0 64px;
   align-items: center;
   justify-content: space-between;
   height: 64px;
@@ -159,14 +172,15 @@ function toggleSidebar(): void {
   min-width: 0;
   min-height: 0;
   overflow-x: hidden;
+  overflow-y: auto;
 }
 
 .content-container {
   display: flex;
-  flex: 1;
   flex-direction: column;
+  width: 100%;
   min-width: 0;
-  min-height: 0;
+  min-height: 100%;
   overflow-x: hidden;
   padding: clamp(10px, 3vw, 15px);
   box-sizing: border-box;
