@@ -1,36 +1,33 @@
-import axios from 'axios'
-import { useGlobalLoading } from '../composables/useGlobalLoading'
+import axios from "axios";
+import { useGlobalLoading } from "../composables/useGlobalLoading";
 
-const { startLoading, stopLoading } = useGlobalLoading()
+const { startLoading, stopLoading } = useGlobalLoading();
 
 const http = axios.create({
-  baseURL: 'http://localhost:8080/api',
-  timeout: 5000,
-  headers: {
-    'Content-Type': 'application/json'
-  }
-})
+  baseURL: "/api",
+  timeout: 10000,
+});
 
 http.interceptors.request.use(
   (config) => {
-    startLoading()
-    return config
+    startLoading();
+    return config;
   },
   (error: unknown) => {
-    stopLoading()
-    return Promise.reject(error)
+    stopLoading();
+    return Promise.reject(error);
   },
-)
+);
 
 http.interceptors.response.use(
   (response) => {
-    stopLoading()
-    return response
+    stopLoading();
+    return response;
   },
   (error: unknown) => {
-    stopLoading()
-    return Promise.reject(error)
+    stopLoading();
+    return Promise.reject(error);
   },
-)
+);
 
-export default http
+export default http;

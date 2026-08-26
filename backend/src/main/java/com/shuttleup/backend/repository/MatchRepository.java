@@ -33,4 +33,17 @@ public interface MatchRepository extends JpaRepository<Match, Long> {
         Integer getMyScore();
         Integer getOpponentScore();
     }
+
+    /** 分析用に対戦相手を一括取得し、N+1を防止する。 */
+    @Query("""
+            select m from Match m
+            join fetch m.opponent
+            where m.trainingSession.user.id = :userId
+              and m.matchDate between :from and :to
+            order by m.matchDate asc, m.id asc
+            """)
+    List<Match> findAnalysisMatches(
+            @Param("userId") Long userId,
+            @Param("from") LocalDate from,
+            @Param("to") LocalDate to);
 }

@@ -36,4 +36,19 @@ public interface TrainingRecordRepository
         LocalDate getTrainingDate();
         Double getMaxWeightKg();
     }
+
+    /** 分析用に種目階層を一括取得し、N+1を防止する。 */
+    @Query("""
+            select tr from TrainingRecord tr
+            join fetch tr.exercise e
+            join fetch e.exerciseType et
+            join fetch et.category
+            where tr.trainingSession.user.id = :userId
+              and tr.trainingSession.trainingDate between :from and :to
+            order by tr.trainingSession.trainingDate asc, tr.id asc
+            """)
+    List<TrainingRecord> findAnalysisRecords(
+            @Param("userId") Long userId,
+            @Param("from") LocalDate from,
+            @Param("to") LocalDate to);
 }

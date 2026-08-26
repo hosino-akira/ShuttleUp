@@ -49,6 +49,10 @@ public interface TrainingSessionRepository
         LocalDate getTrainingDate();
         Integer getDurationMinutes();
     }
+
+    /** 分析対象期間のトレーニングを日付順に取得する。 */
+    List<TrainingSession> findByUserIdAndTrainingDateBetweenOrderByTrainingDateAscIdAsc(
+            Long userId, LocalDate from, LocalDate to);
 }
 
 

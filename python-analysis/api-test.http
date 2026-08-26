@@ -1,0 +1,11 @@
+### 指定期間のトレーニング分析
+GET http://localhost:8000/api/analysis/users/1/training-report?from=2026-08-01&to=2026-08-31
+
+### 同一日のトレーニング分析
+GET http://localhost:8000/api/analysis/users/1/training-report?from=2026-08-01&to=2026-08-01
+
+### 不正な期間
+GET http://localhost:8000/api/analysis/users/1/training-report?from=2026-08-31&to=2026-08-01
+
+### 存在しないユーザー
+GET http://localhost:8000/api/analysis/users/999999/training-report?from=2026-08-01&to=2026-08-31

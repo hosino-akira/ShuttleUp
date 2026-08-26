@@ -148,3 +148,6 @@ GET http://localhost:8080/api/dashboard/users/999999
 
 ### Dashboard：存在しない対戦相手
 GET http://localhost:8080/api/dashboard/users/1?opponentId=999999
+
+### Python分析用データ：期間指定
+GET http://localhost:8080/api/analysis-data/users/1?from=2026-08-01&to=2026-08-31
