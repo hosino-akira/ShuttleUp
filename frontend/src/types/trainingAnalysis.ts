@@ -51,25 +51,6 @@ export interface MatchAnalysis {
   overall: MatchSummary;
   byOpponent: OpponentSummary[];
 }
-export interface MissingData {
-  sessionsWithoutRecords: number;
-  sessionsWithoutFeeling: number;
-  sessionsWithoutNote: number;
-  recordsWithoutExercise: number;
-  recordsWithInvalidValues: number;
-}
-export interface CompletenessAnalysis {
-  sessionCount: number;
-  sessionsWithRecords: number;
-  sessionsWithoutRecords: number;
-  recordCount: number;
-  sessionsWithFeeling: number;
-  sessionsWithNote: number;
-  recordsWithNote: number;
-  coreCompleteSessionCount: number;
-  coreCompleteRate: number;
-  missingData: MissingData;
-}
 export interface TrainingBalance {
   physicalRecordCount: number;
   skillRecordCount: number;
@@ -92,7 +73,6 @@ export interface TrainingAnalysisResponse {
   frequency: TrainingFrequency;
   weightProgress: WeightProgress[];
   matches: MatchAnalysis;
-  completeness: CompletenessAnalysis;
   trainingBalance: TrainingBalance;
   warnings: string[];
 }

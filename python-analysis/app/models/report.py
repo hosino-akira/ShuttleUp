@@ -72,27 +72,6 @@ class MatchAnalysis(ReportModel):
     by_opponent: list[OpponentSummary]
 
 
-class MissingData(ReportModel):
-    sessions_without_records: int
-    sessions_without_feeling: int
-    sessions_without_note: int
-    records_without_exercise: int
-    records_with_invalid_values: int
-
-
-class Completeness(ReportModel):
-    session_count: int
-    sessions_with_records: int
-    sessions_without_records: int
-    record_count: int
-    sessions_with_feeling: int
-    sessions_with_note: int
-    records_with_note: int
-    core_complete_session_count: int
-    core_complete_rate: float
-    missing_data: MissingData
-
-
 class TrainingBalance(ReportModel):
     physical_record_count: int
     skill_record_count: int
@@ -116,6 +95,5 @@ class TrainingReport(ReportModel):
     frequency: Frequency
     weight_progress: list[WeightProgress]
     matches: MatchAnalysis
-    completeness: Completeness
     training_balance: TrainingBalance
     warnings: list[str]

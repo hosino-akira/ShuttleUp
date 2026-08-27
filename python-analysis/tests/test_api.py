@@ -29,6 +29,7 @@ def test_正常時は空データでも構造を維持する() -> None:
     assert response.status_code == 200
     assert response.json()["frequency"]["sessionCount"] == 0
     assert response.json()["weightProgress"] == []
+    assert "completeness" not in response.json()
 
 
 def test_開始日と終了日が同じでも動作する() -> None:

@@ -1,7 +1,6 @@
 from datetime import date
 from app.analysis.balance import analyze_balance
 from app.analysis.classification import TrainingKind, classify_category
-from app.analysis.completeness import analyze_completeness
 from app.analysis.frequency import analyze_frequency
 from app.analysis.matches import analyze_matches
 from app.analysis.weight import analyze_weight
@@ -71,16 +70,6 @@ def test_勝敗と対戦相手別成績を計算し引き分けを警告する()
     assert result.overall.win_rate == 50.0
     assert result.by_opponent[0].match_count == 2
     assert len(warnings) == 1
-
-
-def test_Recordなしと任意項目欠損を完全性へ反映する() -> None:
-    sessions = [session(1, date(2026, 8, 1), feeling=4, note="記録"), session(2, date(2026, 8, 2))]
-    result = analyze_completeness(sessions, [record(1, 1)])
-    assert result.sessions_without_records == 1
-    assert result.missing_data.sessions_without_feeling == 1
-    assert result.missing_data.sessions_without_note == 1
-    assert result.core_complete_rate == 50.0
-    assert result.missing_data.records_with_invalid_values == 0
 
 
 def test_カテゴリ分類と件数時間比率を計算する() -> None:

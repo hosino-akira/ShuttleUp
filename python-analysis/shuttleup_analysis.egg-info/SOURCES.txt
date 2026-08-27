@@ -6,7 +6,6 @@ app/analysis/__init__.py
 app/analysis/balance.py
 app/analysis/classification.py
 app/analysis/common.py
-app/analysis/completeness.py
 app/analysis/frequency.py
 app/analysis/matches.py
 app/analysis/weight.py

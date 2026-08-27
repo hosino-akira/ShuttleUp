@@ -1,6 +1,5 @@
 from datetime import date
 from app.analysis.balance import analyze_balance
-from app.analysis.completeness import analyze_completeness
 from app.analysis.frequency import analyze_frequency
 from app.analysis.matches import analyze_matches
 from app.analysis.weight import analyze_weight
@@ -16,5 +15,4 @@ def create_training_report(data: AnalysisData, from_date: date, to_date: date) -
         frequency=analyze_frequency(data.sessions, from_date, to_date),
         weight_progress=analyze_weight(data.records, data.sessions),
         matches=analyze_matches(data.matches, warnings),
-        completeness=analyze_completeness(data.sessions, data.records),
         training_balance=analyze_balance(data.records, warnings), warnings=warnings)
