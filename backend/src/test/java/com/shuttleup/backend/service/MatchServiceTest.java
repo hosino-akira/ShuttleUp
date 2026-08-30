@@ -18,6 +18,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.time.LocalDate;
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.when;
 
@@ -35,7 +36,7 @@ class MatchServiceTest {
         when(opponentRepository.findById(2L)).thenReturn(Optional.of(
                 Opponent.builder().id(2L).user(user).build()));
         MatchCreateRequest request = new MatchCreateRequest();
-        request.setOpponentId(2L); request.setMatchDate(LocalDate.now());
+        request.setOpponentId(2L);
         request.setMyScore(21); request.setOpponentScore(21);
         assertThatThrownBy(() -> service().createMatch(1L, request))
                 .isInstanceOf(BadRequestException.class)
@@ -51,10 +52,25 @@ class MatchServiceTest {
         when(opponentRepository.findById(2L)).thenReturn(Optional.of(
                 Opponent.builder().id(2L).user(user).build()));
         MatchUpdateRequest request = new MatchUpdateRequest();
-        request.setOpponentId(2L); request.setMatchDate(LocalDate.now());
+        request.setOpponentId(2L);
         request.setMyScore(10); request.setOpponentScore(10);
         assertThatThrownBy(() -> service().updateMatch(3L, request))
                 .isInstanceOf(BadRequestException.class);
+    }
+
+    @Test
+    void 試合日は紐付くトレーニングセッションの日付を返す() {
+        LocalDate trainingDate = LocalDate.of(2026, 8, 30);
+        User user = User.builder().id(1L).build();
+        Opponent opponent = Opponent.builder().id(2L).user(user).name("対戦相手").build();
+        Match match = Match.builder().id(3L)
+                .trainingSession(TrainingSession.builder().id(1L).user(user)
+                        .trainingDate(trainingDate).build())
+                .opponent(opponent)
+                .build();
+        when(matchRepository.findById(3L)).thenReturn(Optional.of(match));
+
+        assertThat(service().getMatch(3L).getMatchDate()).isEqualTo(trainingDate);
     }
 
     private MatchService service() {

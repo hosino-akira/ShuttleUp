@@ -77,7 +77,7 @@ public class AnalysisDataService {
     private MatchResponse toMatchResponse(Match match) {
         return MatchResponse.builder().id(match.getId()).trainingSessionId(match.getTrainingSession().getId())
                 .opponentId(match.getOpponent().getId()).opponentName(match.getOpponent().getName())
-                .matchDate(match.getMatchDate()).myScore(match.getMyScore())
+                .matchDate(match.getTrainingSession().getTrainingDate()).myScore(match.getMyScore())
                 .opponentScore(match.getOpponentScore()).videoUrl(match.getVideoUrl()).note(match.getNote())
                 .createdAt(match.getCreatedAt()).updatedAt(match.getUpdatedAt()).build();
     }

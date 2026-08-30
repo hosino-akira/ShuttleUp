@@ -38,7 +38,6 @@ const action = ref<Action>("save");
 const opponentSearch = ref("");
 const emptyForm = (): MatchCreateRequest => ({
   opponentId: 0,
-  matchDate: "",
   myScore: null,
   opponentScore: null,
   videoUrl: null,
@@ -71,7 +70,6 @@ watch(
       props.match
         ? {
             opponentId: props.match.opponentId,
-            matchDate: props.match.matchDate,
             myScore: props.match.myScore,
             opponentScore: props.match.opponentScore,
             videoUrl: props.match.videoUrl,
@@ -193,23 +191,6 @@ async function executeAction() {
             >
           </a-form-item></a-col
         >
-        <a-col :xs="24" :md="12"
-          ><a-form-item
-            label="試合日"
-            name="matchDate"
-            :rules="[
-              {
-                required: true,
-                message: '試合日を選択してください。',
-              },
-            ]"
-          >
-            <a-date-picker
-              v-model:value="form.matchDate"
-              value-format="YYYY-MM-DD"
-              class="full-width"
-            /> </a-form-item
-        ></a-col>
         <a-col :xs="12" :md="6"
           ><a-form-item label="自分のスコア"
             ><a-input-number

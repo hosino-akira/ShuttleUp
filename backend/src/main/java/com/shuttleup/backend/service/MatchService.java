@@ -119,7 +119,6 @@ public class MatchService {
 
     private void applyValues(Match match, MatchCreateRequest request) {
         validateScores(request.getMyScore(), request.getOpponentScore());
-        match.setMatchDate(request.getMatchDate());
         match.setMyScore(request.getMyScore());
         match.setOpponentScore(request.getOpponentScore());
         match.setVideoUrl(request.getVideoUrl());
@@ -128,7 +127,6 @@ public class MatchService {
 
     private void applyValues(Match match, MatchUpdateRequest request) {
         validateScores(request.getMyScore(), request.getOpponentScore());
-        match.setMatchDate(request.getMatchDate());
         match.setMyScore(request.getMyScore());
         match.setOpponentScore(request.getOpponentScore());
         match.setVideoUrl(request.getVideoUrl());
@@ -147,7 +145,7 @@ public class MatchService {
                 .trainingSessionId(match.getTrainingSession().getId())
                 .opponentId(match.getOpponent().getId())
                 .opponentName(match.getOpponent().getName())
-                .matchDate(match.getMatchDate())
+                .matchDate(match.getTrainingSession().getTrainingDate())
                 .myScore(match.getMyScore())
                 .opponentScore(match.getOpponentScore())
                 .videoUrl(match.getVideoUrl())

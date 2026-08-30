@@ -19,8 +19,8 @@ public interface MatchRepository extends JpaRepository<Match, Long> {
             select m.myScore as myScore, m.opponentScore as opponentScore
             from Match m
             where m.trainingSession.user.id = :userId
-              and (:from is null or m.matchDate >= :from)
-              and (:to is null or m.matchDate <= :to)
+              and (:from is null or m.trainingSession.trainingDate >= :from)
+              and (:to is null or m.trainingSession.trainingDate <= :to)
               and (:opponentId is null or m.opponent.id = :opponentId)
             """)
     List<MatchScoreRow> findDashboardScores(
@@ -39,8 +39,8 @@ public interface MatchRepository extends JpaRepository<Match, Long> {
             select m from Match m
             join fetch m.opponent
             where m.trainingSession.user.id = :userId
-              and m.matchDate between :from and :to
-            order by m.matchDate asc, m.id asc
+              and m.trainingSession.trainingDate between :from and :to
+            order by m.trainingSession.trainingDate asc, m.id asc
             """)
     List<Match> findAnalysisMatches(
             @Param("userId") Long userId,

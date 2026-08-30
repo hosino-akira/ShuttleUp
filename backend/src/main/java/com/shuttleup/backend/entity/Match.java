@@ -14,7 +14,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 /**
@@ -43,10 +42,6 @@ public class Match {
     @ManyToOne
     @JoinColumn(name = "opponent_id", nullable = false)
     private Opponent opponent;
-
-    /** 試合日 */
-    @Column(name = "match_date", nullable = false)
-    private LocalDate matchDate;
 
     /** 自分の得点 */
     @Column(name = "my_score")

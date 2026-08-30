@@ -58,7 +58,6 @@ Content-Type: application/json
 
 {
   "opponentId": 1,
-  "matchDate": "2026-08-03",
   "myScore": 21,
   "opponentScore": 18,
   "videoUrl": "https://example.com/matches/1",
@@ -71,7 +70,6 @@ Content-Type: application/json
 
 {
   "opponentId": 1,
-  "matchDate": "2026-08-03",
   "myScore": 21,
   "opponentScore": 19,
   "videoUrl": "https://example.com/matches/1",

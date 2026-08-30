@@ -14,7 +14,6 @@ export interface MatchResponse {
 
 export interface MatchCreateRequest {
   opponentId: number
-  matchDate: string
   myScore: number | null
   opponentScore: number | null
   videoUrl: string | null
