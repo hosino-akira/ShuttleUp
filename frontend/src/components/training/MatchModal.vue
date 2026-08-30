@@ -14,6 +14,7 @@ import type {
 import type { OpponentResponse } from "../../types/opponent";
 import BaseLargeModal from "../common/BaseLargeModal.vue";
 import ConfirmModal from "../common/ConfirmModal.vue";
+import { useUnsavedChanges } from "../../composables/useUnsavedChanges";
 
 type Mode = "create" | "edit";
 type Action = "save" | "delete";
@@ -44,6 +45,9 @@ const emptyForm = (): MatchCreateRequest => ({
   note: null,
 });
 const form = reactive<MatchCreateRequest>(emptyForm());
+const { reset: resetDirtyState, confirmLeave } = useUnsavedChanges(
+  () => ({ ...form, videoUrl: form.videoUrl ?? "", note: form.note ?? "" }),
+);
 const options = computed(() => {
   const items = props.opponents.map((item) => ({
     value: item.id,
@@ -78,6 +82,7 @@ watch(
         : emptyForm(),
     );
     formRef.value?.clearValidate();
+    resetDirtyState();
   },
 );
 watch(
@@ -96,6 +101,11 @@ function handleOpponentChange(value: number) {
   const name = opponentSearch.value.trim();
   form.opponentId = 0;
   if (name) emit("createOpponent", name);
+}
+
+async function requestClose() {
+  if (!(await confirmLeave())) return;
+  emit("update:open", false);
 }
 
 async function requestSave() {
@@ -134,6 +144,7 @@ async function executeAction() {
       );
     }
     confirmOpen.value = false;
+    resetDirtyState();
     emit("update:open", false);
     emit("saved");
   } catch (error) {
@@ -157,7 +168,7 @@ async function executeAction() {
         ? '試合記録の新規登録'
         : '試合記録の編集'
     "
-    @update:open="emit('update:open', $event)"
+    @update:open="(value) => value || requestClose()"
   >
     <a-form ref="formRef" :model="form" layout="vertical">
       <a-row :gutter="16">
@@ -232,7 +243,7 @@ async function executeAction() {
         <a-space
           ><a-button
             :disabled="submitting"
-            @click="emit('update:open', false)"
+            @click="requestClose"
             >キャンセル</a-button
           ><a-button
             type="primary"

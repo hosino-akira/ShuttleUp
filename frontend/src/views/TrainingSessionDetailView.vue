@@ -6,7 +6,7 @@ import {
   reactive,
   ref,
 } from "vue";
-import { Modal, message } from "ant-design-vue";
+import { message } from "ant-design-vue";
 import { CURRENT_USER_ID } from "../constants/user";
 import type { FormInstance } from "ant-design-vue";
 import {
@@ -37,6 +37,7 @@ import TrainingRecordModal from "../components/training/TrainingRecordModal.vue"
 import MatchTable from "../components/training/MatchTable.vue";
 import MatchModal from "../components/training/MatchModal.vue";
 import OpponentDrawer from "../components/training/OpponentDrawer.vue";
+import { useUnsavedChanges } from "../composables/useUnsavedChanges";
 
 type Mode = "create" | "edit";
 const route = useRoute();
@@ -61,8 +62,6 @@ const form = reactive<TrainingSessionUpdateRequest>({
   feeling: 3,
   note: null,
 });
-const savedSnapshot = ref("");
-const dirtyTrackingReady = ref(false);
 const recordModalOpen = ref(false);
 const recordMode = ref<Mode>("create");
 const editingRecord = ref<TrainingRecordResponse | null>(
@@ -74,15 +73,14 @@ const editingMatch = ref<MatchResponse | null>(null);
 const opponentDrawerOpen = ref(false);
 const selectedOpponentId = ref<number | undefined>();
 const opponentInitialName = ref("");
-const dirty = computed(
-  () =>
-    dirtyTrackingReady.value &&
-    savedSnapshot.value !== snapshot(),
-);
-
 function snapshot() {
-  return JSON.stringify({ ...form, note: form.note ?? "" });
+  return { ...form, note: form.note ?? "" };
 }
+const {
+  isDirty: dirty,
+  reset: resetDirtyState,
+  confirmLeave,
+} = useUnsavedChanges(snapshot);
 function applySession(value: TrainingSession) {
   Object.assign(form, {
     trainingDate: value.trainingDate,
@@ -90,12 +88,11 @@ function applySession(value: TrainingSession) {
     feeling: value.feeling,
     note: value.note ?? "",
   });
-  savedSnapshot.value = snapshot();
+  resetDirtyState();
 }
 async function initialize() {
   if (isCreate.value) {
-    savedSnapshot.value = snapshot();
-    dirtyTrackingReady.value = true;
+    resetDirtyState();
     loading.value = false;
     return;
   }
@@ -123,7 +120,6 @@ async function initialize() {
     matches.value = loadedMatches;
     opponents.value = loadedOpponents;
     applySession(loadedSession);
-    dirtyTrackingReady.value = true;
   } catch (error) {
     console.error(error);
     message.error("トレーニング詳細の取得に失敗しました。");
@@ -232,22 +228,9 @@ function createOpponentFromMatch(name: string) {
   opponentInitialName.value = name;
   opponentDrawerOpen.value = true;
 }
-function confirmLeave(): Promise<boolean> {
-  return new Promise((resolve) =>
-    Modal.confirm({
-      title: "未保存の変更があります。移動しますか？",
-      content:
-        "トレーニング基本情報への変更は破棄されます。",
-      okText: "移動する",
-      cancelText: "キャンセル",
-      onOk: () => resolve(true),
-      onCancel: () => resolve(false),
-    }),
-  );
-}
 async function goBack() {
   if (dirty.value && !(await confirmLeave())) return;
-  savedSnapshot.value = snapshot();
+  resetDirtyState();
   await router.push({ name: "training-history" });
 }
 function beforeUnload(event: BeforeUnloadEvent) {

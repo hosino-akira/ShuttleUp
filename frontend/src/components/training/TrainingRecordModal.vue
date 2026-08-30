@@ -31,6 +31,7 @@ import BaseLargeModal from "../common/BaseLargeModal.vue";
 import ConfirmModal from "../common/ConfirmModal.vue";
 import BaseSelect from "../common/BaseSelect.vue";
 import ExerciseCreateModal from "./ExerciseCreateModal.vue";
+import { useUnsavedChanges } from "../../composables/useUnsavedChanges";
 
 type Mode = "create" | "edit";
 type ConfirmAction = "save" | "delete";
@@ -82,6 +83,14 @@ const emptyForm = (): TrainingRecordForm => ({
   note: null,
 });
 const form = reactive<TrainingRecordForm>(emptyForm());
+const { reset: resetDirtyState, confirmLeave } = useUnsavedChanges(
+  () => ({
+    categoryId: categoryId.value ?? null,
+    exerciseTypeId: exerciseTypeId.value ?? null,
+    ...form,
+    note: form.note ?? "",
+  }),
+);
 const title = computed(() =>
   props.mode === "create"
     ? "トレーニング種目の新規登録"
@@ -239,6 +248,7 @@ watch(
     exerciseTypes.value = [];
     exercises.value = [];
     formRef.value?.clearValidate();
+    resetDirtyState();
     if (categories.value.length === 0)
       await loadCategories();
     if (props.record) {
@@ -253,6 +263,11 @@ watch(
     }
   },
 );
+
+async function requestClose(): Promise<void> {
+  if (!(await confirmLeave())) return;
+  emit("update:open", false);
+}
 
 async function requestSave(): Promise<void> {
   try {
@@ -304,6 +319,7 @@ async function executeAction(): Promise<void> {
       );
     }
     confirmOpen.value = false;
+    resetDirtyState();
     emit("update:open", false);
     emit("saved");
   } catch (error: unknown) {
@@ -323,7 +339,7 @@ async function executeAction(): Promise<void> {
   <BaseLargeModal
     :open="open"
     :title="title"
-    @update:open="emit('update:open', $event)"
+    @update:open="(value) => value || requestClose()"
   >
     <a-form ref="formRef" :model="form" layout="vertical">
       <a-row :gutter="12">
@@ -379,7 +395,6 @@ async function executeAction(): Promise<void> {
           </a-form-item></a-col
         >
       </a-row>
-      <a-divider orientation="left">筋力・回数</a-divider>
       <a-row :gutter="12">
         <a-col :xs="24" :md="8"
           ><a-form-item label="セット数"
@@ -404,7 +419,6 @@ async function executeAction(): Promise<void> {
               :step="0.5" /></a-form-item
         ></a-col>
       </a-row>
-      <a-divider orientation="left">時間・距離</a-divider>
       <a-row :gutter="12">
         <a-col :xs="24" :md="12"
           ><a-form-item label="実施時間（分）"
@@ -421,7 +435,6 @@ async function executeAction(): Promise<void> {
               :min="0" /></a-form-item
         ></a-col>
       </a-row>
-      <a-divider orientation="left">成功率</a-divider>
       <a-row :gutter="12">
         <a-col :xs="24" :md="12"
           ><a-form-item label="成功回数"
@@ -461,7 +474,7 @@ async function executeAction(): Promise<void> {
         <div class="footer-actions">
           <a-button
             :disabled="submitting"
-            @click="emit('update:open', false)"
+            @click="requestClose"
             >キャンセル</a-button
           >
           <a-button
