@@ -5,6 +5,13 @@ const router = createRouter({
   history: createWebHistory(),
   routes: [
     {
+      path: '/login',
+      name: 'login',
+      component: () => import('../views/LoginView.vue'),
+      // ログイン画面はサイドバーのない専用レイアウトで表示する。
+      meta: { layout: 'auth' },
+    },
+    {
       path: '/',
       name: 'dashboard',
       component: DashboardView,
