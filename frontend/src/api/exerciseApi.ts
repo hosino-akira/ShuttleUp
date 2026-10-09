@@ -6,11 +6,11 @@ import type {
   ExerciseTypeResponse,
   ExerciseUpdateRequest,
 } from "../types/exercise";
-import { CURRENT_USER_ID } from "../constants/user";
+import { requireUserId } from "../stores/auth";
 
 export async function getExercises(
   exerciseTypeId?: number,
-  userId = CURRENT_USER_ID,
+  userId = requireUserId(),
 ): Promise<ExerciseResponse[]> {
   const response = await http.get<ExerciseResponse[]>(
     "/exercises",

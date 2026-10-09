@@ -11,6 +11,7 @@ import com.shuttleup.backend.entity.TrainingSession;
 import com.shuttleup.backend.repository.ExerciseRepository;
 import com.shuttleup.backend.repository.TrainingRecordRepository;
 import com.shuttleup.backend.repository.TrainingSessionRepository;
+import com.shuttleup.backend.security.CurrentUser;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -98,18 +99,26 @@ public class TrainingRecordService {
     }
 
     private TrainingSession findTrainingSession(Long sessionId) {
-        return trainingSessionRepository.findById(sessionId)
+        TrainingSession session = trainingSessionRepository.findById(sessionId)
                 .orElseThrow(() -> new IllegalArgumentException("指定されたトレーニングが見つかりません。"));
+        CurrentUser.requireOwner(session.getUser().getId());
+        return session;
     }
 
     private TrainingRecord findTrainingRecord(Long recordId) {
-        return trainingRecordRepository.findById(recordId)
+        TrainingRecord record = trainingRecordRepository.findById(recordId)
                 .orElseThrow(() -> new IllegalArgumentException("指定されたトレーニング種目が見つかりません。"));
+        CurrentUser.requireOwner(record.getTrainingSession().getUser().getId());
+        return record;
     }
 
     private Exercise findExercise(Long exerciseId) {
-        return exerciseRepository.findById(exerciseId)
+        Exercise exercise = exerciseRepository.findById(exerciseId)
                 .orElseThrow(() -> new IllegalArgumentException("指定された種目が見つかりません。"));
+        if (!Boolean.TRUE.equals(exercise.getSystemPreset())) {
+            CurrentUser.requireOwner(exercise.getUser() == null ? null : exercise.getUser().getId());
+        }
+        return exercise;
     }
 
     private void applyValues(

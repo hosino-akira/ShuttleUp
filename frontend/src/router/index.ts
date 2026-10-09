@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import DashboardView from '../views/DashboardView.vue'
+import { useAuthStore } from '../stores/auth'
 
 const router = createRouter({
   history: createWebHistory(),
@@ -9,6 +10,12 @@ const router = createRouter({
       name: 'login',
       component: () => import('../views/LoginView.vue'),
       // ログイン画面はサイドバーのない専用レイアウトで表示する。
+      meta: { layout: 'auth' },
+    },
+    {
+      path: '/register',
+      name: 'register',
+      component: () => import('../views/RegisterView.vue'),
       meta: { layout: 'auth' },
     },
     {
@@ -47,6 +54,12 @@ const router = createRouter({
       component: () => import('../views/ProfileView.vue'),
     },
   ],
+})
+
+router.beforeEach(async to => {
+  if (to.meta.layout === 'auth') return true
+  if (await useAuthStore().restoreSession()) return true
+  return { name: 'login' }
 })
 
 export default router

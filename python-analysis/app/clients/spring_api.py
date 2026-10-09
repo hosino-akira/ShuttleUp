@@ -26,13 +26,17 @@ class SpringApiClient:
         await self._client.aclose()
 
     async def get_analysis_data(self, user_id: int, from_date: str, to_date: str,
-                                request_id: str) -> AnalysisData:
+                                request_id: str, authorization: str | None = None) -> AnalysisData:
         started = time.perf_counter()
         try:
             response = await self._client.get(
                 f"/api/analysis-data/users/{user_id}",
                 params={"from": from_date, "to": to_date},
+                # 共有クライアントではなく各リクエストに設定し、別ユーザーのトークン混入を防ぐ。
+                headers={"Authorization": authorization} if authorization else {},
             )
+            if response.status_code in (401, 403):
+                raise SpringApiError(response.status_code, "ログイン情報またはアクセス権限を確認してください。")
             if response.status_code == 404:
                 raise SpringApiError(404, "指定されたユーザーが見つかりません。")
             if response.status_code >= 500:

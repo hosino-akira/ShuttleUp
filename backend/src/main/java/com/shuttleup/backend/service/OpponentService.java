@@ -8,6 +8,7 @@ import com.shuttleup.backend.entity.User;
 import com.shuttleup.backend.repository.MatchRepository;
 import com.shuttleup.backend.repository.OpponentRepository;
 import com.shuttleup.backend.repository.UserRepository;
+import com.shuttleup.backend.security.CurrentUser;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -98,15 +99,18 @@ public class OpponentService {
     }
 
     private User findUser(Long userId) {
+        CurrentUser.requireOwner(userId);
         return userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException(
                         "指定されたユーザーが見つかりません。"));
     }
 
     private Opponent findOpponent(Long opponentId) {
-        return opponentRepository.findById(opponentId)
+        Opponent opponent = opponentRepository.findById(opponentId)
                 .orElseThrow(() -> new IllegalArgumentException(
                         "指定された対戦相手が見つかりません。"));
+        CurrentUser.requireOwner(opponent.getUser().getId());
+        return opponent;
     }
 
     private IllegalStateException duplicateNameException() {

@@ -4,6 +4,7 @@ import com.shuttleup.backend.dto.request.ExerciseCreateRequest;
 import com.shuttleup.backend.dto.request.ExerciseUpdateRequest;
 import com.shuttleup.backend.dto.response.ExerciseResponse;
 import com.shuttleup.backend.service.ExerciseService;
+import com.shuttleup.backend.security.CurrentUser;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -37,9 +38,9 @@ public class ExerciseController {
     @GetMapping
     public ResponseEntity<List<ExerciseResponse>> getAllExercises(
             @RequestParam(required = false) Long exerciseTypeId,
-            @RequestParam(defaultValue = "1") Long userId) {
+            @RequestParam(required = false) Long userId) {
         return ResponseEntity.ok(
-                exerciseService.getAvailableExercises(exerciseTypeId, userId));
+                exerciseService.getAvailableExercises(exerciseTypeId, userId == null ? CurrentUser.id() : userId));
     }
 
     /**

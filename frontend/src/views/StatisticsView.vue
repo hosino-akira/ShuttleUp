@@ -10,7 +10,7 @@ import {
 } from "@ant-design/icons-vue";
 import BaseEChart from "../components/common/BaseEChart.vue";
 import { getTrainingAnalysis } from "../api/trainingAnalysisApi";
-import { CURRENT_USER_ID } from "../constants/user";
+import { requireUserId } from "../stores/auth";
 import type { TrainingAnalysisResponse } from "../types/trainingAnalysis";
 
 interface DateLike {
@@ -190,7 +190,7 @@ async function loadAnalysis(): Promise<void> {
   errorMessage.value = "";
   try {
     const loaded = await getTrainingAnalysis(
-      CURRENT_USER_ID,
+      requireUserId(),
       { from, to },
     );
     if (currentRequest === requestId) report.value = loaded;

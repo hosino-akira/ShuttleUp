@@ -18,11 +18,14 @@ async def get_training_report(request: Request, user_id: int,
     """指定期間のトレーニング分析結果を返す。"""
     if from_date > to_date:
         raise HTTPException(status_code=422, detail="開始日は終了日以前の日付を指定してください。")
+    authorization = request.headers.get("Authorization")
+    if not authorization or not authorization.lower().startswith("bearer "):
+        raise HTTPException(status_code=401, detail="ログインしてください。")
     request_id = request.headers.get("X-Request-ID") or str(uuid.uuid4())
     started = time.perf_counter()
     client: SpringApiClient = request.app.state.spring_api_client
     try:
-        data = await client.get_analysis_data(user_id, from_date.isoformat(), to_date.isoformat(), request_id)
+        data = await client.get_analysis_data(user_id, from_date.isoformat(), to_date.isoformat(), request_id, authorization)
         report = create_training_report(data, from_date, to_date)
         logger.info("analysis_completed request_id=%s user_id=%s from=%s to=%s elapsed_ms=%.1f sessions=%s records=%s matches=%s",
                     request_id, user_id, from_date, to_date, (time.perf_counter() - started) * 1000,

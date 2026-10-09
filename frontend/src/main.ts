@@ -1,4 +1,8 @@
 import { createApp } from 'vue'
+import { createPinia } from 'pinia'
+import { message } from 'ant-design-vue'
+import { useAuthStore } from './stores/auth'
+import { setUnauthorizedHandler } from './utils/authSession'
 import Antd from 'ant-design-vue'
 import 'ant-design-vue/dist/reset.css'
 import './style.css'
@@ -11,6 +15,14 @@ import router from './router'
 
 const app = createApp(App)
 
+app.use(createPinia())
+setUnauthorizedHandler(() => {
+  useAuthStore().logout()
+  message.warning('ログインの有効期限が切れました。もう一度ログインしてください。')
+  if (router.currentRoute.value.meta.layout !== 'auth') {
+    void router.replace({ name: 'login' })
+  }
+})
 app.use(router)
 app.use(Antd)
 

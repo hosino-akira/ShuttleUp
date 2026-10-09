@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, reactive, ref } from "vue";
 import { message } from "ant-design-vue";
-import { CURRENT_USER_ID } from "../constants/user";
+import { requireUserId } from "../stores/auth";
 import { useRouter } from "vue-router";
 import type {
   VxeTableInstance,
@@ -14,7 +14,7 @@ import {
 import ConfirmModal from "../components/common/ConfirmModal.vue";
 import type { TrainingSession } from "../types/trainingSession";
 
-const userId = CURRENT_USER_ID;
+const userId = requireUserId();
 const router = useRouter();
 const tableRef = ref<VxeTableInstance<TrainingSession>>();
 const sessions = ref<TrainingSession[]>([]);

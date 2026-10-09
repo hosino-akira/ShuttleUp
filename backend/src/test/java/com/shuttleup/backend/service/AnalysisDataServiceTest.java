@@ -20,7 +20,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class AnalysisDataServiceTest {
+class AnalysisDataServiceTest extends AuthenticatedServiceTest {
     @Mock UserRepository userRepository;
     @Mock TrainingSessionRepository sessionRepository;
     @Mock TrainingRecordRepository recordRepository;
@@ -59,8 +59,8 @@ class AnalysisDataServiceTest {
 
     @Test
     void 存在しないユーザーは404用例外() {
-        when(userRepository.existsById(99L)).thenReturn(false);
-        assertThatThrownBy(() -> service.getAnalysisData(99L,
+        when(userRepository.existsById(1L)).thenReturn(false);
+        assertThatThrownBy(() -> service.getAnalysisData(1L,
                 LocalDate.of(2026, 8, 1), LocalDate.of(2026, 8, 31)))
                 .isInstanceOf(IllegalArgumentException.class);
     }

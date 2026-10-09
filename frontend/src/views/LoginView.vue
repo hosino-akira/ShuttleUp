@@ -1,15 +1,38 @@
 <script setup lang="ts">
-import { reactive } from "vue";
-import { message } from "ant-design-vue";
+import { reactive, ref } from "vue";
+import axios from "axios";
+import { useRoute, useRouter } from "vue-router";
+import { useAuthStore } from "../stores/auth";
+
+const route = useRoute();
+const router = useRouter();
+const auth = useAuthStore();
+const isSubmitting = ref(false);
+const errorMessage = ref("");
 
 const form = reactive({
-  email: "",
+  email: typeof route.query.email === "string" ? route.query.email : "",
   password: "",
 });
 
-function handleSubmit(): void {
-  // 現段階では入力確認のみ。認証 API は次のステップで接続する。
-  message.info("入力内容を確認しました。");
+async function handleSubmit(): Promise<void> {
+  if (isSubmitting.value) return;
+  isSubmitting.value = true;
+  errorMessage.value = "";
+  try {
+    await auth.login({ email: form.email.trim(), password: form.password });
+    form.password = "";
+    await router.replace({ name: "dashboard" });
+  } catch (error: unknown) {
+    if (axios.isAxiosError<{ message?: string }>(error)
+        && [400, 401, 403].includes(error.response?.status ?? 0)) {
+      errorMessage.value = error.response?.data.message ?? "メールアドレスとパスワードを確認してください。";
+    } else {
+      errorMessage.value = "ログインできませんでした。サーバーの起動と接続を確認してください。";
+    }
+  } finally {
+    isSubmitting.value = false;
+  }
 }
 </script>
 
@@ -23,11 +46,14 @@ function handleSubmit(): void {
       <h1 id="login-title">ログイン</h1>
       <p>トレーニングの記録を続けましょう。</p>
 
+      <a-alert v-if="errorMessage" :message="errorMessage" type="error" show-icon role="alert" class="login-error" />
+
       <a-form
         :model="form"
         layout="vertical"
         :required-mark="false"
         size="large"
+        :disabled="isSubmitting"
         novalidate
         @finish="handleSubmit"
       >
@@ -64,10 +90,14 @@ function handleSubmit(): void {
           />
         </a-form-item>
 
-        <a-button type="primary" html-type="submit" block>
+        <a-button type="primary" html-type="submit" :loading="isSubmitting" block>
           ログイン
         </a-button>
       </a-form>
+      <div class="register-link">
+        アカウントをお持ちでない方は
+        <RouterLink :to="{ name: 'register' }">新規登録</RouterLink>
+      </div>
     </section>
   </main>
 </template>
@@ -108,6 +138,17 @@ h1 {
 p {
   margin: 0 0 24px;
   color: #666;
+}
+
+.register-link {
+  margin-top: 24px;
+  color: #666;
+  font-size: 14px;
+  text-align: center;
+}
+
+.login-error {
+  margin-bottom: 20px;
 }
 
 @media (max-width: 575px) {

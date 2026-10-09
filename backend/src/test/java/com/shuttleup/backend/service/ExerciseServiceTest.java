@@ -23,7 +23,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class ExerciseServiceTest {
+class ExerciseServiceTest extends AuthenticatedServiceTest {
     @Mock ExerciseRepository exerciseRepository;
     @Mock ExerciseTypeRepository exerciseTypeRepository;
     @Mock UserRepository userRepository;

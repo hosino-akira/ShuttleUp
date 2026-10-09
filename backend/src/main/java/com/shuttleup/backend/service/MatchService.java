@@ -10,6 +10,7 @@ import com.shuttleup.backend.exception.BadRequestException;
 import com.shuttleup.backend.repository.MatchRepository;
 import com.shuttleup.backend.repository.OpponentRepository;
 import com.shuttleup.backend.repository.TrainingSessionRepository;
+import com.shuttleup.backend.security.CurrentUser;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -91,15 +92,19 @@ public class MatchService {
     }
 
     private TrainingSession findTrainingSession(Long sessionId) {
-        return trainingSessionRepository.findById(sessionId)
+        TrainingSession session = trainingSessionRepository.findById(sessionId)
                 .orElseThrow(() -> new IllegalArgumentException(
                         "指定されたトレーニングセッションが見つかりません。"));
+        CurrentUser.requireOwner(session.getUser().getId());
+        return session;
     }
 
     private Match findMatch(Long matchId) {
-        return matchRepository.findById(matchId)
+        Match match = matchRepository.findById(matchId)
                 .orElseThrow(() -> new IllegalArgumentException(
                         "指定された試合が見つかりません。"));
+        CurrentUser.requireOwner(match.getTrainingSession().getUser().getId());
+        return match;
     }
 
     private Opponent findOpponent(Long opponentId) {

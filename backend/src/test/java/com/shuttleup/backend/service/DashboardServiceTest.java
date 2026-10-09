@@ -24,7 +24,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class DashboardServiceTest {
+class DashboardServiceTest extends AuthenticatedServiceTest {
     @Mock UserRepository userRepository;
     @Mock TrainingSessionRepository trainingSessionRepository;
     @Mock MatchRepository matchRepository;

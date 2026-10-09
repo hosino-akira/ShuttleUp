@@ -10,6 +10,7 @@ import com.shuttleup.backend.entity.User;
 import com.shuttleup.backend.repository.ExerciseRepository;
 import com.shuttleup.backend.repository.ExerciseTypeRepository;
 import com.shuttleup.backend.repository.UserRepository;
+import com.shuttleup.backend.security.CurrentUser;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -79,6 +80,7 @@ public class ExerciseService {
     @Transactional
     public ExerciseResponse updateExercise(Long id, ExerciseUpdateRequest request) {
         Exercise exercise = findExercise(id);
+        CurrentUser.requireOwner(exercise.getUser() == null ? null : exercise.getUser().getId());
         exercise.setExerciseType(findExerciseType(request.getExerciseTypeId()));
         exercise.setName(request.getName());
         exercise.setUpdatedAt(LocalDateTime.now());
@@ -91,12 +93,18 @@ public class ExerciseService {
      */
     @Transactional
     public void deleteExercise(Long id) {
-        exerciseRepository.delete(findExercise(id));
+        Exercise exercise = findExercise(id);
+        CurrentUser.requireOwner(exercise.getUser() == null ? null : exercise.getUser().getId());
+        exerciseRepository.delete(exercise);
     }
 
     private Exercise findExercise(Long id) {
-        return exerciseRepository.findById(id)
+        Exercise exercise = exerciseRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("指定された種目が見つかりません。"));
+        if (!Boolean.TRUE.equals(exercise.getSystemPreset())) {
+            CurrentUser.requireOwner(exercise.getUser() == null ? null : exercise.getUser().getId());
+        }
+        return exercise;
     }
 
     private ExerciseType findExerciseType(Long id) {
@@ -105,6 +113,7 @@ public class ExerciseService {
     }
 
     private User findUser(Long id) {
+        CurrentUser.requireOwner(id);
         return userRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("指定されたユーザーが見つかりません。"));
     }

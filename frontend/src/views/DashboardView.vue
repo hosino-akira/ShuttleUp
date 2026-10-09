@@ -6,7 +6,7 @@ import BaseSelect from "../components/common/BaseSelect.vue";
 import { getDashboard } from "../api/dashboardApi";
 import { getExercises } from "../api/exerciseApi";
 import { getOpponents } from "../api/opponentApi";
-import { CURRENT_USER_ID } from "../constants/user";
+import { requireUserId } from "../stores/auth";
 import type {
   DashboardQuery,
   DashboardResponse,
@@ -249,7 +249,7 @@ async function loadDashboard(): Promise<void> {
   dashboard.value = undefined;
   try {
     const loaded = await getDashboard(
-      CURRENT_USER_ID,
+      requireUserId(),
       createQuery(),
     );
     if (requestId === dashboardRequestId)
@@ -270,8 +270,8 @@ async function loadChoices(): Promise<void> {
   try {
     const [loadedExercises, loadedOpponents] =
       await Promise.all([
-        getExercises(undefined, CURRENT_USER_ID),
-        getOpponents(CURRENT_USER_ID),
+        getExercises(undefined, requireUserId()),
+        getOpponents(requireUserId()),
       ]);
     exercises.value = loadedExercises;
     opponents.value = loadedOpponents;

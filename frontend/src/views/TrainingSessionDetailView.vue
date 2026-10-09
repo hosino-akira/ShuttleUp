@@ -7,7 +7,7 @@ import {
   ref,
 } from "vue";
 import { message } from "ant-design-vue";
-import { CURRENT_USER_ID } from "../constants/user";
+import { requireUserId } from "../stores/auth";
 import type { FormInstance } from "ant-design-vue";
 import {
   onBeforeRouteLeave,
@@ -42,7 +42,7 @@ import { useUnsavedChanges } from "../composables/useUnsavedChanges";
 type Mode = "create" | "edit";
 const route = useRoute();
 const router = useRouter();
-const userId = CURRENT_USER_ID;
+const userId = requireUserId();
 const sessionId = ref<number | null>(
   route.name === "training-session-create"
     ? null

@@ -9,7 +9,8 @@ from app.models.spring import AnalysisData
 
 class FakeClient:
     async def get_analysis_data(self, user_id: int, from_date: str, to_date: str,
-                                request_id: str) -> AnalysisData:
+                                request_id: str, authorization: str) -> AnalysisData:
+        assert authorization == "Bearer unit-test-token"
         return AnalysisData(user_id=user_id, sessions=[], records=[], matches=[])
 
 
@@ -20,7 +21,14 @@ def create_client(fake: object = FakeClient()) -> TestClient:
         yield
     app = FastAPI(lifespan=lifespan)
     app.include_router(router)
-    return TestClient(app)
+    return TestClient(app, headers={"Authorization": "Bearer unit-test-token"})
+
+
+def test_未ログインでは分析データを要求しない() -> None:
+    with create_client() as client:
+        response = client.get("/api/analysis/users/1/training-report?from=2026-08-01&to=2026-08-31",
+                              headers={"Authorization": ""})
+    assert response.status_code == 401
 
 
 def test_正常時は空データでも構造を維持する() -> None:

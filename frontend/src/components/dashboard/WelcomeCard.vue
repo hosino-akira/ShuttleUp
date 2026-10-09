@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { useAuthStore } from '../../stores/auth';
+const auth = useAuthStore();
 const currentDate = new Intl.DateTimeFormat("ja-JP", {
   dateStyle: "full",
 }).format(new Date());
@@ -11,7 +13,7 @@ const currentDate = new Intl.DateTimeFormat("ja-JP", {
       :level="2"
       class="welcome-card__title"
     >
-      おかえりなさい、Akiraさん
+      おかえりなさい、{{ auth.user?.name }}さん
     </a-typography-title>
     <a-typography-paragraph
       class="welcome-card__description"

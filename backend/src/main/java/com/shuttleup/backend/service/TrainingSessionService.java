@@ -7,6 +7,7 @@ import com.shuttleup.backend.entity.TrainingSession;
 import com.shuttleup.backend.entity.User;
 import com.shuttleup.backend.repository.TrainingSessionRepository;
 import com.shuttleup.backend.repository.UserRepository;
+import com.shuttleup.backend.security.CurrentUser;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,6 +32,7 @@ public class TrainingSessionService {
      */
     @Transactional(readOnly = true)
     public List<TrainingSessionResponse> getTrainingSessions(Long userId) {
+        CurrentUser.requireOwner(userId);
         return trainingSessionRepository.findByUserIdOrderByCreatedAtDesc(userId)
                 .stream()
                 .map(this::toResponse)
@@ -51,6 +53,7 @@ public class TrainingSessionService {
     @Transactional
     public TrainingSessionResponse createTrainingSession(
             TrainingSessionCreateRequest request) {
+        CurrentUser.requireOwner(request.getUserId());
         User user = userRepository.findById(request.getUserId())
                 .orElseThrow(() -> new IllegalArgumentException("指定されたユーザーが見つかりません。"));
 
@@ -92,8 +95,10 @@ public class TrainingSessionService {
     }
 
     private TrainingSession findTrainingSession(Long id) {
-        return trainingSessionRepository.findById(id)
+        TrainingSession session = trainingSessionRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("指定されたトレーニングが見つかりません。"));
+        CurrentUser.requireOwner(session.getUser().getId());
+        return session;
     }
 
     private TrainingSessionResponse toResponse(TrainingSession trainingSession) {

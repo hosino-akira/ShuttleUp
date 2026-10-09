@@ -1,5 +1,7 @@
 package com.shuttleup.backend.service;
 
+import com.shuttleup.backend.security.CurrentUser;
+
 import com.shuttleup.backend.dto.response.DashboardResponse;
 import com.shuttleup.backend.dto.response.DashboardSummaryResponse;
 import com.shuttleup.backend.dto.response.ExerciseProgressResponse;
@@ -55,6 +57,7 @@ public class DashboardService {
     public DashboardResponse getDashboard(Long userId, LocalDate from, LocalDate to,
             Long exerciseId, Long opponentId) {
         validatePeriod(from, to);
+        CurrentUser.requireOwner(userId);
         if (!userRepository.existsById(userId)) {
             throw new IllegalArgumentException("指定されたユーザーが見つかりません。");
         }

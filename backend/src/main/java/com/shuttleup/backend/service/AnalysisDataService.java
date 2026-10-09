@@ -1,5 +1,7 @@
 package com.shuttleup.backend.service;
 
+import com.shuttleup.backend.security.CurrentUser;
+
 import com.shuttleup.backend.dto.response.AnalysisDataResponse;
 import com.shuttleup.backend.dto.response.AnalysisTrainingRecordResponse;
 import com.shuttleup.backend.dto.response.MatchResponse;
@@ -41,6 +43,7 @@ public class AnalysisDataService {
         if (from.isAfter(to)) {
             throw new BadRequestException("開始日は終了日以前の日付を指定してください。");
         }
+        CurrentUser.requireOwner(userId);
         if (!userRepository.existsById(userId)) {
             throw new IllegalArgumentException("指定されたユーザーが見つかりません。");
         }

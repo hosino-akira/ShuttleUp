@@ -6,6 +6,7 @@ import {
   GlobalOutlined,
   MenuFoldOutlined,
   MenuUnfoldOutlined,
+  UserOutlined,
 } from "@ant-design/icons-vue";
 import { NAVIGATION_MENU } from "../constants/navigation";
 
@@ -55,8 +56,8 @@ function toggleSidebar(): void {
         <a-button
           :aria-label="
             isSidebarCollapsed
-              ? 'Expand navigation'
-              : 'Collapse navigation'
+              ? 'ナビゲーションを開く'
+              : 'ナビゲーションを閉じる'
           "
           type="text"
           @click="toggleSidebar"
@@ -72,21 +73,31 @@ function toggleSidebar(): void {
         </a-button>
 
         <div class="header-actions">
-          <!-- Reserved controls: connect these to notification, locale, and theme services later. -->
+          <!-- 通知と言語切り替えは後のステップで接続する。 -->
           <a-button
-            aria-label="Change language"
+            aria-label="言語を切り替える"
             type="text"
           >
             <GlobalOutlined />
           </a-button>
           <a-badge :count="0" :show-zero="false">
             <a-button
-              aria-label="Notifications"
+              aria-label="通知"
               type="text"
             >
               <BellOutlined />
             </a-button>
           </a-badge>
+          <a-tooltip title="プロフィール">
+            <RouterLink
+              class="profile-link"
+              :to="{ name: 'profile' }"
+              aria-label="プロフィールを開く"
+              :aria-current="route.name === 'profile' ? 'page' : undefined"
+            >
+              <UserOutlined aria-hidden="true" />
+            </RouterLink>
+          </a-tooltip>
         </div>
       </a-layout-header>
 
@@ -163,6 +174,28 @@ function toggleSidebar(): void {
   display: flex;
   align-items: center;
   gap: 4px;
+}
+
+.profile-link {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  margin-left: 8px;
+  border-radius: 50%;
+  background: #e6f4ff;
+  color: var(--app-primary-color);
+  font-size: 18px;
+}
+
+.profile-link:hover,
+.profile-link[aria-current="page"] {
+  background: #bae0ff;
+}
+
+.profile-link:focus-visible {
+  outline: 2px solid var(--app-primary-color);
+  outline-offset: 3px;
 }
 
 .application-content {
