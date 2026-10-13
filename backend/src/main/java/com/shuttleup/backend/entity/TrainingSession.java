@@ -55,6 +55,10 @@ public class TrainingSession {
     @Column(name = "note", length = 1000)
     private String note;
 
+    /** 森林に植える植物。既存の記録は cedar として表示する。 */
+    @Column(name = "plant_type", length = 24)
+    private String plantType;
+
     /** 作成日時 */
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;

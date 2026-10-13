@@ -37,7 +37,7 @@ const emit = defineEmits<{
 .base-small-modal .ant-modal-header { margin: 0; padding: 12px 48px 8px 16px; }
 .base-small-modal .ant-modal-close { top: 8px; right: 8px; }
 .base-small-modal__body { max-height: 65vh; padding: 8px 16px; overflow-y: auto; }
-.base-small-modal__footer { padding: 8px 16px; border-top: 1px solid #f0f0f0; }
+.base-small-modal__footer { padding: 8px 16px; border-top: 1px solid var(--app-border-color); }
 @media (max-width: 575px) {
   .base-small-modal__body { padding: 8px 12px; }
   .base-small-modal__footer { padding: 8px 12px; }

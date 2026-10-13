@@ -64,6 +64,7 @@ public class TrainingSessionService {
         trainingSession.setDurationMinutes(request.getDurationMinutes());
         trainingSession.setFeeling(request.getFeeling());
         trainingSession.setNote(request.getNote());
+        trainingSession.setPlantType(request.getPlantType() == null ? "cedar" : request.getPlantType());
         trainingSession.setCreatedAt(now);
         trainingSession.setUpdatedAt(now);
 
@@ -81,6 +82,10 @@ public class TrainingSessionService {
         trainingSession.setDurationMinutes(request.getDurationMinutes());
         trainingSession.setFeeling(request.getFeeling());
         trainingSession.setNote(request.getNote());
+        // Older clients may omit the field when editing training details.
+        if (request.getPlantType() != null) {
+            trainingSession.setPlantType(request.getPlantType());
+        }
         trainingSession.setUpdatedAt(LocalDateTime.now());
 
         return toResponse(trainingSessionRepository.save(trainingSession));
@@ -109,6 +114,7 @@ public class TrainingSessionService {
                 .durationMinutes(trainingSession.getDurationMinutes())
                 .feeling(trainingSession.getFeeling())
                 .note(trainingSession.getNote())
+                .plantType(trainingSession.getPlantType() == null ? "cedar" : trainingSession.getPlantType())
                 .createdAt(trainingSession.getCreatedAt())
                 .updatedAt(trainingSession.getUpdatedAt())
                 .build();

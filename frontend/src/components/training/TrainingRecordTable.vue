@@ -85,14 +85,14 @@ function recordSummary(
     </vxe-column>
     <vxe-column :title="t('操作')" width="150" fixed="right">
       <template #default="{ row }">
-        <a-button type="link" @click="emit('edit', row)"
+        <a-button size="small" @click="emit('edit', row)"
           >{{ t('編集') }}</a-button
         >
         <a-popconfirm
           :title="t('この記録を削除しますか？')"
           @confirm="emit('delete', row)"
         >
-          <a-button type="link" danger>{{ t('削除') }}</a-button>
+          <a-button size="small" danger>{{ t('削除') }}</a-button>
         </a-popconfirm>
       </template>
     </vxe-column>

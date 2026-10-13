@@ -28,12 +28,12 @@ const currentDate = computed(() => new Intl.DateTimeFormat(intlLocale.value, {
 <style scoped>
 .welcome-card {
   overflow: hidden;
-  background: linear-gradient(120deg, #e6f4ff, #f6ffed);
+  background: linear-gradient(120deg, var(--app-soft-color), var(--app-page-color));
 }
 
 .welcome-card__date {
   margin-bottom: 8px;
-  color: #595959;
+  color: var(--app-muted-color);
 }
 
 .welcome-card__title {
@@ -42,6 +42,6 @@ const currentDate = computed(() => new Intl.DateTimeFormat(intlLocale.value, {
 
 .welcome-card__description {
   margin-bottom: 0;
-  color: #595959;
+  color: var(--app-muted-color);
 }
 </style>

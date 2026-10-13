@@ -199,7 +199,6 @@ async function executeAction() {
               @change="handleOpponentChange"
             />
             <a-button
-              type="link"
               class="manage-button"
               @click="emit('manageOpponents')"
               >{{ t('対戦相手を管理') }}</a-button

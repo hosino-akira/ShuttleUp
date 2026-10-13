@@ -64,6 +64,6 @@ const emit = defineEmits<{
 
 .confirm-description {
   margin-bottom: 0;
-  color: rgba(0, 0, 0, 0.45);
+  color: var(--app-muted-color);
 }
 </style>

@@ -10,6 +10,7 @@ import {
 } from "@ant-design/icons-vue";
 import { NAVIGATION_MENU } from "../constants/navigation";
 import LanguageSwitcher from '../components/common/LanguageSwitcher.vue';
+import ThemeSwitcher from '../components/common/ThemeSwitcher.vue';
 
 const route = useRoute();
 const isSidebarCollapsed = ref(false);
@@ -55,12 +56,12 @@ function toggleSidebar(): void {
     <a-layout class="application-layout">
       <a-layout-header class="application-header">
         <a-button
+          class="app-button-icon"
           :aria-label="
             isSidebarCollapsed
               ? t('ナビゲーションを開く')
               : t('ナビゲーションを閉じる')
           "
-          type="text"
           @click="toggleSidebar"
         >
           <MenuUnfoldOutlined
@@ -74,25 +75,28 @@ function toggleSidebar(): void {
         </a-button>
 
         <div class="header-actions">
+          <ThemeSwitcher />
           <LanguageSwitcher />
-          <a-badge :count="0" :show-zero="false">
-            <a-button
-              :aria-label="t('通知')"
-              type="text"
-            >
-              <BellOutlined />
-            </a-button>
-          </a-badge>
-          <a-tooltip :title="t('プロフィール')">
-            <RouterLink
-              class="profile-link"
-              :to="{ name: 'profile' }"
-              :aria-label="t('プロフィールを開く')"
-              :aria-current="route.name === 'profile' ? 'page' : undefined"
-            >
-              <UserOutlined aria-hidden="true" />
-            </RouterLink>
-          </a-tooltip>
+          <div class="header-utility">
+            <a-badge :count="0" :show-zero="false">
+              <a-button
+                class="app-button-icon"
+                :aria-label="t('通知')"
+              >
+                <BellOutlined />
+              </a-button>
+            </a-badge>
+            <a-tooltip :title="t('プロフィール')">
+              <RouterLink
+                class="profile-link app-button app-button-icon"
+                :to="{ name: 'profile' }"
+                :aria-label="t('プロフィールを開く')"
+                :aria-current="route.name === 'profile' ? 'page' : undefined"
+              >
+                <UserOutlined aria-hidden="true" />
+              </RouterLink>
+            </a-tooltip>
+          </div>
         </div>
       </a-layout-header>
 
@@ -168,24 +172,17 @@ function toggleSidebar(): void {
 .header-actions {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 8px;
 }
+.header-utility { display: flex; align-items: center; gap: 8px; }
 
 .profile-link {
-  display: grid;
-  place-items: center;
-  width: 28px;
-  height: 28px;
-  margin-left: 4px;
-  border-radius: 50%;
-  background: #e6f4ff;
-  color: var(--app-primary-color);
   font-size: 16px;
 }
 
 .profile-link:hover,
 .profile-link[aria-current="page"] {
-  background: #bae0ff;
+  background: var(--app-selected-color);
 }
 
 .profile-link:focus-visible {
@@ -226,6 +223,14 @@ function toggleSidebar(): void {
 @media (max-width: 575px) {
   .application-header {
     padding: 0 8px;
+    flex: 0 0 auto;
+    min-height: 48px;
+    height: auto;
+    gap: 8px;
+    align-items: flex-start;
+    padding-block: 8px;
   }
+  .header-actions { flex-wrap: wrap; justify-content: flex-end; gap: 6px; }
+  .header-utility { gap: 6px; }
 }
 </style>

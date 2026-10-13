@@ -1,19 +1,20 @@
 <script setup lang="ts">
 import { GlobalOutlined } from '@ant-design/icons-vue'
 import { languages, locale, setLanguage, t } from '../../i18n'
+import NativeSelect from './NativeSelect.vue'
 </script>
 
 <template>
   <div class="language-switcher">
     <GlobalOutlined aria-hidden="true" />
-    <select :value="locale" :aria-label="t('言語を切り替える')" @change="setLanguage(($event.target as HTMLSelectElement).value)">
+    <NativeSelect :model-value="locale" :label="t('言語を切り替える')" @update:model-value="setLanguage">
       <option v-for="language in languages" :key="language.value" :value="language.value">{{ language.label }}</option>
-    </select>
+    </NativeSelect>
   </div>
 </template>
 
 <style scoped>
 .language-switcher { display: inline-flex; align-items: center; gap: 6px; color: var(--app-primary-color); }
-select { max-width: 120px; padding: 4px 6px; border: 1px solid var(--app-border-color); border-radius: 6px; color: var(--app-heading-color); background: var(--app-surface-color); font: inherit; font-size: 13px; cursor: pointer; }
-select:focus-visible { outline: 2px solid var(--app-primary-color); outline-offset: 2px; }
+.language-switcher :deep(.native-select) { max-width: 124px; }
+@media (max-width: 575px) { .language-switcher > .anticon { display: none; } }
 </style>

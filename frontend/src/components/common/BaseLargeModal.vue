@@ -77,7 +77,7 @@ const emit = defineEmits<{
 .base-large-modal__footer {
   flex: 0 0 auto;
   padding: 8px 16px;
-  border-top: 1px solid #f0f0f0;
+  border-top: 1px solid var(--app-border-color);
 }
 
 @media (max-width: 575px) {

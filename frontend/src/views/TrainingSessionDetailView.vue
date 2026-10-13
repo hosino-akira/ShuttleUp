@@ -41,6 +41,8 @@ import OpponentDrawer from "../components/training/OpponentDrawer.vue";
 import { useUnsavedChanges } from "../composables/useUnsavedChanges";
 import { getAccessToken, isAccessTokenValid } from "../utils/authSession";
 import { useLocalizedForm } from '../composables/useLocalizedForm';
+import PlantPicker from '../components/forest/PlantPicker.vue';
+import { getPlantType, isPlantType, localDateKey, plantNames, type PlantType } from '../utils/forest';
 
 type Mode = "create" | "edit";
 const route = useRoute();
@@ -67,11 +69,12 @@ function getTodayDate(): string {
   const day = String(today.getDate()).padStart(2, "0");
   return `${year}-${month}-${day}`;
 }
-const form = reactive<TrainingSessionUpdateRequest>({
+const form = reactive<TrainingSessionUpdateRequest & { plantType: PlantType }>({
   trainingDate: isCreate.value ? getTodayDate() : "",
   durationMinutes: 60,
   feeling: 3,
   note: null,
+  plantType: isPlantType(route.query.plant) ? route.query.plant : 'cedar',
 });
 const recordModalOpen = ref(false);
 const recordMode = ref<Mode>("create");
@@ -98,6 +101,7 @@ function applySession(value: TrainingSession) {
     durationMinutes: value.durationMinutes,
     feeling: value.feeling,
     note: value.note ?? "",
+    plantType: getPlantType(value),
   });
   resetDirtyState();
 }
@@ -140,12 +144,14 @@ async function initialize() {
   }
 }
 async function saveSession() {
+  if (saving.value || loading.value) return;
+  saving.value = true;
   try {
     await formRef.value?.validate();
   } catch {
+    saving.value = false;
     return;
   }
-  saving.value = true;
   try {
     const request = {
       ...form,
@@ -168,7 +174,9 @@ async function saveSession() {
         params: { sessionId: saved.id },
       });
     }
-    message.success(t('トレーニングを保存しました。'));
+    message.success(creating && saved.trainingDate <= localDateKey()
+      ? t('トレーニングを保存し、{plant}を森に植えました。', { plant: t(plantNames[getPlantType(saved)]) })
+      : t('トレーニングを保存しました。'));
   } catch (error) {
     console.error(error);
     message.error(t('トレーニングの保存に失敗しました。'));
@@ -264,7 +272,7 @@ onBeforeUnmount(() =>
   <a-spin :spinning="loading">
     <section class="detail-page">
       <header class="page-header">
-        <h1>
+        <h1 class="app-page-title">
           {{
             isCreate
               ? t('トレーニング新規登録')
@@ -278,13 +286,14 @@ onBeforeUnmount(() =>
         :bordered="false"
         ><template #extra>
           <a-space wrap>
-            <a-button type="primary" @click="goBack"
+            <RouterLink class="app-button" :to="{ name: 'training-plan', query: sessionId ? { planted: sessionId } : {} }">{{ t('森を見る') }}</RouterLink>
+            <a-button @click="goBack"
               >{{ t('一覧へ戻る') }}</a-button
             ><a-button
               type="primary"
               :loading="saving"
               @click="saveSession"
-              >{{ t('保存') }}</a-button
+              >{{ isCreate && form.trainingDate <= localDateKey() ? t('保存して植える') : t('保存') }}</a-button
             ></a-space
           ></template
         >
@@ -334,6 +343,12 @@ onBeforeUnmount(() =>
                     form.feeling
                   " /></a-form-item
             ></a-col>
+            <a-col :span="24">
+              <a-form-item :label="t('植える植物を選ぶ')" name="plantType">
+                <div class="training-plant-picker"><PlantPicker v-model="form.plantType" :disabled="saving" /></div>
+                <p class="plant-help">{{ t('1回のトレーニングにつき1株。編集しても植物は増えません。未来の日付の記録は、その日から森に表示されます。') }}</p>
+              </a-form-item>
+            </a-col>
             <a-col :span="24"
               ><a-form-item
                 :label="t('メモ')"
@@ -485,12 +500,15 @@ onBeforeUnmount(() =>
 }
 .page-header h1 {
   margin: 0;
-  font-size: 22px;
 }
 .full-width {
   width: 100%;
 }
+.training-plant-picker { max-width: 650px; }
+.training-plant-picker :deep(.plant-picker) { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+.plant-help { margin: 8px 0 0; font-size: 12px; color: var(--app-muted-color); }
 @media (max-width: 576px) {
+  .training-plant-picker :deep(.plant-picker) { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   :deep(.ant-card-head) {
     padding-block: 4px;
   }
@@ -506,9 +524,6 @@ onBeforeUnmount(() =>
     align-items: flex-start;
     flex-direction: column;
     gap: 4px;
-  }
-  .page-header h1 {
-    font-size: 20px;
   }
 }
 </style>

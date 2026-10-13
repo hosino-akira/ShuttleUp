@@ -19,7 +19,7 @@ export const NAVIGATION_MENU: readonly NavigationMenuItem[] = [
   },
   {
     key: 'training-plan',
-    label: 'トレーニングプラン',
+    label: 'トレーニングの森',
     to: { name: 'training-plan' },
   },
   {

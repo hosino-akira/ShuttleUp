@@ -6,6 +6,7 @@ import { message } from 'ant-design-vue'
 import axios from 'axios'
 import { registerUser } from '../api/authApi'
 import LanguageSwitcher from '../components/common/LanguageSwitcher.vue'
+import ThemeSwitcher from '../components/common/ThemeSwitcher.vue'
 import type { FormInstance } from 'ant-design-vue'
 import { useLocalizedForm } from '../composables/useLocalizedForm'
 
@@ -70,9 +71,9 @@ async function handleSubmit(): Promise<void> {
     <section class="register-card" aria-labelledby="register-title">
       <div class="auth-card-header">
         <span class="brand-name">ShuttleUp</span>
-        <LanguageSwitcher />
+        <div class="auth-preferences"><ThemeSwitcher /><LanguageSwitcher /></div>
       </div>
-      <h1 id="register-title">{{ t('アカウント登録') }}</h1>
+      <h1 id="register-title" class="app-page-title">{{ t('アカウント登録') }}</h1>
       <p>{{ t('アカウントを作成して、トレーニングを記録しましょう。') }}</p>
 
       <a-alert
@@ -167,14 +168,16 @@ async function handleSubmit(): Promise<void> {
 
       <div class="login-link">
         {{ t('すでにアカウントをお持ちですか？') }}
-        <RouterLink :to="{ name: 'login', query: { redirect: route.query.redirect } }">{{ t('ログイン') }}</RouterLink>
+        <RouterLink class="app-button" :to="{ name: 'login', query: { redirect: route.query.redirect } }">{{ t('ログイン') }}</RouterLink>
       </div>
     </section>
   </main>
 </template>
 
 <style scoped>
-.auth-card-header { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+.auth-card-header { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 12px; }
+.auth-preferences { display: flex; flex-wrap: wrap; gap: 8px; }
+.login-link .app-button { margin-inline-start: 6px; }
 .register-page {
   display: grid;
   height: 100%;
@@ -204,13 +207,12 @@ async function handleSubmit(): Promise<void> {
 
 h1 {
   margin: 0 0 4px;
-  font-size: 22px;
   color: var(--app-heading-color);
 }
 
 p {
   margin: 0 0 16px;
-  color: #666;
+  color: var(--app-muted-color);
 }
 
 .error-message {
@@ -219,7 +221,7 @@ p {
 
 .login-link {
   margin-top: 16px;
-  color: #666;
+  color: var(--app-muted-color);
   font-size: 14px;
   text-align: center;
 }

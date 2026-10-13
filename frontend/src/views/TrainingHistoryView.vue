@@ -174,7 +174,7 @@ onMounted(loadTrainingSessions);
     aria-labelledby="training-history-title"
   >
     <div class="operation-bar">
-      <h2 id="training-history-title">
+      <h2 id="training-history-title" class="app-page-title">
         {{ t('トレーニング履歴の操作') }}
       </h2>
       <div class="operation-actions">
@@ -305,8 +305,6 @@ onMounted(loadTrainingSessions);
 .operation-bar h2 {
   margin: 0;
   color: var(--app-heading-color);
-  font-size: 14px;
-  font-weight: 600;
 }
 .operation-actions {
   display: flex;

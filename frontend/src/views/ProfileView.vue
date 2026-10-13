@@ -91,7 +91,7 @@ async function logout(): Promise<void> {
 <template>
   <section class="profile-page" aria-labelledby="profile-title">
     <a-card :bordered="false" class="profile-card">
-      <a-typography-title id="profile-title" :level="2"
+      <a-typography-title id="profile-title" class="app-page-title" :level="2"
         >{{ t('プロフィール') }}</a-typography-title
       >
       <a-typography-paragraph type="secondary">
@@ -173,14 +173,14 @@ async function logout(): Promise<void> {
 .profile-form-grid :deep(.ant-form) { margin-top: 12px; }
 .profile-form-grid > .ant-form { margin-top: 0; }
 .profile-summary { display: flex; align-items: center; gap: 12px; margin-top: 12px; }
-.profile-avatar { flex-shrink: 0; color: var(--app-primary-color); background: #e6f4ff; }
+.profile-avatar { flex-shrink: 0; color: var(--app-primary-color); background: var(--app-soft-color); }
 .profile-summary h3 { margin: 0 0 2px; font-size: 18px; overflow-wrap: anywhere; }
-.profile-email { color: #666; overflow-wrap: anywhere; }
+.profile-email { color: var(--app-muted-color); overflow-wrap: anywhere; }
 .account-status { margin-top: 4px; }
 .profile-error { margin-bottom: 12px; }
-.profile-hint { margin: -4px 0 12px; color: #666; font-size: 13px; }
-.password-hint { margin: 0 0 12px; color: #666; font-size: 13px; }
-.logout-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; color: #666; }
+.profile-hint { margin: -4px 0 12px; color: var(--app-muted-color); font-size: 13px; }
+.password-hint { margin: 0 0 12px; color: var(--app-muted-color); font-size: 13px; }
+.logout-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; color: var(--app-muted-color); }
 @media (max-width: 767px) {
   .profile-form-grid { grid-template-columns: 1fr; gap: 16px; }
 }

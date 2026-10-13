@@ -1,3 +1,5 @@
+import type { PlantType } from '../utils/forest'
+
 export interface TrainingSessionResponse {
   id: number
   userId: number
@@ -5,6 +7,7 @@ export interface TrainingSessionResponse {
   durationMinutes: number
   feeling: number | null
   note: string | null
+  plantType?: PlantType | null
   createdAt: string
   updatedAt: string
 }
@@ -15,6 +18,7 @@ export interface TrainingSessionCreateRequest {
   durationMinutes: number
   feeling: number | null
   note: string | null
+  plantType?: PlantType
 }
 
 export type TrainingSession = TrainingSessionResponse
@@ -24,4 +28,5 @@ export interface TrainingSessionUpdateRequest {
   durationMinutes: number
   feeling: number | null
   note: string | null
+  plantType?: PlantType
 }

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { formatLocalDate, t } from '../i18n';
+import { chartColors, palette } from '../theme';
 import { computed, onMounted, ref } from "vue";
 import axios from "axios";
 import type { EChartsOption } from "echarts";
@@ -47,7 +48,7 @@ const weeklyOption = computed<EChartsOption>(() => {
   const rows = report.value?.frequency.weeklyTrend ?? [];
   return {
     animationDuration: 250,
-    color: ["#1677ff"],
+    color: [palette.value.primary],
     tooltip: {
       trigger: "axis",
       valueFormatter: (value) => t('{0}日', { 0: value }),
@@ -72,7 +73,7 @@ const weeklyOption = computed<EChartsOption>(() => {
 });
 const weightOption = computed<EChartsOption>(() => ({
   animationDuration: 250,
-  color: ["#722ed1"],
+  color: [palette.value.accentAlt],
   tooltip: {
     trigger: "axis",
     formatter: (params) => {
@@ -109,7 +110,7 @@ const balanceOption = computed<EChartsOption>(() => {
   const balance = report.value?.trainingBalance;
   return {
     animationDuration: 250,
-    color: ["#1677ff", "#52c41a", "#bfbfbf"],
+    color: chartColors.value,
     tooltip: { trigger: "item", formatter: "{b}：{c}%" },
     legend: { bottom: 0 },
     series: [
@@ -212,7 +213,7 @@ onMounted(() => void loadAnalysis());
     aria-labelledby="statistics-title"
   >
     <a-card class="page-intro" :bordered="false">
-      <a-typography-title id="statistics-title" :level="2"
+      <a-typography-title id="statistics-title" class="app-page-title" :level="2"
         >{{ t('統計') }}</a-typography-title
       >
       <a-typography-paragraph
@@ -510,12 +511,12 @@ onMounted(() => void loadAnalysis());
 }
 .metric > :first-child {
   grid-row: 1 / 3;
-  color: #1677ff;
+  color: var(--app-primary-color);
   font-size: 24px;
 }
 .metric span,
 .secondary {
-  color: rgba(0, 0, 0, 0.65);
+  color: var(--app-muted-color);
 }
 .metric strong {
   font-size: 20px;
@@ -535,11 +536,11 @@ onMounted(() => void loadAnalysis());
   grid-template-columns: minmax(100px, 1fr) auto auto;
   gap: 8px;
   padding: 6px 4px;
-  border-top: 1px solid #f0f0f0;
+  border-top: 1px solid var(--app-border-color);
 }
 .opponent-item {
   padding: 6px 4px;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid var(--app-border-color);
 }
 .opponent-heading {
   display: flex;

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { intlLocale, t } from '../i18n';
+import { chartColors, palette } from '../theme';
 import { computed, onMounted, ref, watch } from "vue";
 import { useRouter } from "vue-router";
 import type { EChartsOption } from "echarts";
@@ -91,7 +92,7 @@ const monthlyOption = computed<EChartsOption>(() => {
   );
   return {
     animationDuration: 250,
-    color: ["#1677ff", "#52c41a"],
+    color: [chartColors.value[0]!, chartColors.value[1]!],
     tooltip: { trigger: "axis" },
     legend: {
       data: [t('トレーニング回数'), t('トレーニング時間')],
@@ -165,7 +166,7 @@ const monthlyOption = computed<EChartsOption>(() => {
 });
 const matchOption = computed<EChartsOption>(() => ({
   animationDuration: 250,
-  color: ["#1677ff", "#d46b6b"],
+  color: [palette.value.primary, '#b84f4b'],
   tooltip: {
     trigger: "item",
     formatter: t('{b}：{c}回（{d}%）'),
@@ -195,7 +196,7 @@ const exerciseOption = computed<EChartsOption>(() => {
   const rows = dashboard.value?.exerciseProgress ?? [];
   return {
     animationDuration: 250,
-    color: ["#722ed1"],
+    color: [palette.value.accentAlt],
     tooltip: {
       trigger: "axis",
       valueFormatter: (value) => `${value} kg`,
@@ -317,7 +318,7 @@ onMounted(() => {
       :bordered="false"
     >
       <div class="dashboard-intro-content">
-        <a-typography-title id="dashboard-title" :level="2"
+        <a-typography-title id="dashboard-title" class="app-page-title" :level="2"
           >{{ t('ダッシュボード') }}</a-typography-title
         >
         <a-typography-paragraph
@@ -630,7 +631,7 @@ onMounted(() => {
   flex-wrap: wrap;
   justify-content: center;
   gap: 4px 12px;
-  color: rgba(0, 0, 0, 0.65);
+  color: var(--app-muted-color);
 }
 .opponent-summary {
   font-size: 14px;

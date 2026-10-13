@@ -16,6 +16,7 @@ public class TrainingSessionResponse {
     private Integer durationMinutes;
     private Integer feeling;
     private String note;
+    private String plantType;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

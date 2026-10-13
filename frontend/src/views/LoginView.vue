@@ -6,6 +6,7 @@ import { useRoute, useRouter } from "vue-router";
 import { useAuthStore } from "../stores/auth";
 import { resolveAuthRedirect } from "../router";
 import LanguageSwitcher from '../components/common/LanguageSwitcher.vue';
+import ThemeSwitcher from '../components/common/ThemeSwitcher.vue';
 import type { FormInstance } from 'ant-design-vue';
 import { useLocalizedForm } from '../composables/useLocalizedForm';
 
@@ -54,9 +55,9 @@ async function handleSubmit(): Promise<void> {
     >
       <div class="auth-card-header">
         <span class="brand-name">ShuttleUp</span>
-        <LanguageSwitcher />
+        <div class="auth-preferences"><ThemeSwitcher /><LanguageSwitcher /></div>
       </div>
-      <h1 id="login-title">{{ t('ログイン') }}</h1>
+      <h1 id="login-title" class="app-page-title">{{ t('ログイン') }}</h1>
       <p>{{ t('トレーニングの記録を続けましょう。') }}</p>
 
       <a-alert v-if="errorMessage || verificationMessage" :message="t(errorMessage || verificationMessage)" type="error" show-icon role="alert" class="login-error" />
@@ -110,7 +111,7 @@ async function handleSubmit(): Promise<void> {
       </a-form>
       <div class="register-link">
         {{ t('アカウントをお持ちでない方は') }}
-        <RouterLink :to="{ name: 'register', query: { redirect: route.query.redirect } }">{{ t('アカウント登録') }}</RouterLink>
+        <RouterLink class="app-button" :to="{ name: 'register', query: { redirect: route.query.redirect } }">{{ t('アカウント登録') }}</RouterLink>
       </div>
     </section>
   </main>
@@ -144,22 +145,23 @@ async function handleSubmit(): Promise<void> {
   font-weight: 700;
 }
 
-.auth-card-header { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+.auth-card-header { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 12px; }
+.auth-preferences { display: flex; flex-wrap: wrap; gap: 8px; }
+.register-link .app-button { margin-inline-start: 6px; }
 
 h1 {
   margin: 0 0 4px;
-  font-size: 22px;
   color: var(--app-heading-color);
 }
 
 p {
   margin: 0 0 16px;
-  color: #666;
+  color: var(--app-muted-color);
 }
 
 .register-link {
   margin-top: 16px;
-  color: #666;
+  color: var(--app-muted-color);
   font-size: 14px;
   text-align: center;
 }

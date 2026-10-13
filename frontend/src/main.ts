@@ -14,8 +14,10 @@ import VxeUITable from 'vxe-table'
 import 'vxe-table/es/style.css'
 import App from './App.vue'
 import router from './router'
+import { initializeTheme } from './theme'
 
 initializeLanguage()
+initializeTheme()
 
 const app = createApp(App)
 

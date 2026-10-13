@@ -37,8 +37,8 @@ async function remove(item: OpponentResponse) {
       <a-table-column key="name" :title="t('名前')" data-index="name" />
       <a-table-column key="memo" :title="t('メモ')" data-index="memo" />
       <a-table-column key="actions" :title="t('操作')" width="150"><template #default="{ record }">
-        <a-button type="link" @click="edit(record)">{{ t('編集') }}</a-button>
-        <a-popconfirm :title="t('この対戦相手を削除しますか？')" @confirm="remove(record)"><a-button type="link" danger>{{ t('削除') }}</a-button></a-popconfirm>
+        <a-button size="small" @click="edit(record)">{{ t('編集') }}</a-button>
+        <a-popconfirm :title="t('この対戦相手を削除しますか？')" @confirm="remove(record)"><a-button size="small" danger>{{ t('削除') }}</a-button></a-popconfirm>
       </template></a-table-column>
     </a-table>
     <a-divider>{{ editingId ? t('対戦相手を編集') : t('新規登録') }}</a-divider>

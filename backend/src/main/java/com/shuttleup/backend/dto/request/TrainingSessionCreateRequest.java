@@ -4,6 +4,7 @@ import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.Pattern;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -27,4 +28,7 @@ public class TrainingSessionCreateRequest {
     @Max(5)
     private Integer feeling;
     private String note;
+
+    @Pattern(regexp = "cedar|oak|sakura|maple|sunflower|lavender")
+    private String plantType;
 }
