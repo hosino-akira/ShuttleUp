@@ -171,7 +171,7 @@ async function executeAction() {
     @update:open="(value) => value || requestClose()"
   >
     <a-form ref="formRef" :model="form" layout="vertical">
-      <a-row :gutter="16">
+      <a-row :gutter="12">
         <a-col :xs="24" :md="12"
           ><a-form-item
             label="対戦相手"

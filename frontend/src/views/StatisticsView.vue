@@ -211,7 +211,7 @@ onMounted(() => void loadAnalysis());
     class="statistics"
     aria-labelledby="statistics-title"
   >
-    <a-card :bordered="false">
+    <a-card class="page-intro" :bordered="false">
       <a-typography-title id="statistics-title" :level="2"
         >統計</a-typography-title
       >
@@ -278,8 +278,8 @@ onMounted(() => void loadAnalysis());
           <a-card
             title="トレーニング継続性"
             :bordered="false"
-            ><a-row :gutter="[16, 16]">
-              <a-col :xs="24" :sm="12" :xl="6"
+            ><a-row :gutter="[8, 8]">
+              <a-col :xs="12" :sm="12" :xl="6"
                 ><div class="metric">
                   <CalendarOutlined /><span
                     >週平均トレーニング日数</span
@@ -292,7 +292,7 @@ onMounted(() => void loadAnalysis());
                   >
                 </div></a-col
               >
-              <a-col :xs="24" :sm="12" :xl="6"
+              <a-col :xs="12" :sm="12" :xl="6"
                 ><div class="metric">
                   <FireOutlined /><span>最長連続日数</span
                   ><strong
@@ -303,7 +303,7 @@ onMounted(() => void loadAnalysis());
                   >
                 </div></a-col
               >
-              <a-col :xs="24" :sm="12" :xl="6"
+              <a-col :xs="12" :sm="12" :xl="6"
                 ><div class="metric">
                   <RiseOutlined /><span>現在の連続日数</span
                   ><strong
@@ -314,7 +314,7 @@ onMounted(() => void loadAnalysis());
                   >
                 </div></a-col
               >
-              <a-col :xs="24" :sm="12" :xl="6"
+              <a-col :xs="12" :sm="12" :xl="6"
                 ><div class="metric">
                   <FieldTimeOutlined /><span
                     >最終トレーニングからの日数</span
@@ -337,7 +337,7 @@ onMounted(() => void loadAnalysis());
                 report.frequency.weeklyTrend.length === 0
               "
               empty-description="週別傾向を表示するデータがありません。"
-              height="320px"
+              height="260px"
           /></a-card>
 
           <div class="two-column">
@@ -346,7 +346,7 @@ onMounted(() => void loadAnalysis());
                 :option="weightOption"
                 :empty="sortedWeights.length === 0"
                 empty-description="重量の分析に必要なデータがありません。"
-                :height="`${Math.max(280, Math.min(sortedWeights.length, 10) * 42 + 80)}px`"
+                :height="`${Math.max(240, Math.min(sortedWeights.length, 10) * 32 + 80)}px`"
               />
               <div
                 v-if="sortedWeights.length"
@@ -389,7 +389,7 @@ onMounted(() => void loadAnalysis());
                   0
                 "
                 empty-description="練習比率を表示するデータがありません。"
-                height="330px"
+                height="260px"
               />
               <a-typography-paragraph
                 class="note"
@@ -478,7 +478,7 @@ onMounted(() => void loadAnalysis());
 .analysis-content {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: var(--app-section-gap);
   min-width: 0;
 }
 .description,
@@ -488,8 +488,8 @@ onMounted(() => void loadAnalysis());
 }
 .period-controls {
   display: flex;
-  align-items: end;
-  gap: 16px;
+  align-items: center;
+  gap: 8px;
 }
 .period-field {
   flex: 1;
@@ -499,46 +499,46 @@ onMounted(() => void loadAnalysis());
   width: 100%;
 }
 .loading-space {
-  min-height: 420px;
+  min-height: 280px;
 }
 .metric {
   display: grid;
   grid-template-columns: auto 1fr;
   align-items: center;
-  gap: 5px 10px;
-  padding: 8px;
+  gap: 2px 8px;
+  padding: 4px;
 }
 .metric > :first-child {
   grid-row: 1 / 3;
   color: #1677ff;
-  font-size: 28px;
+  font-size: 24px;
 }
 .metric span,
 .secondary {
   color: rgba(0, 0, 0, 0.65);
 }
 .metric strong {
-  font-size: 22px;
+  font-size: 20px;
 }
 .two-column {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 16px;
+  gap: var(--app-section-gap);
   align-items: stretch;
 }
 .scroll-list {
-  max-height: 300px;
+  max-height: 240px;
   overflow-y: auto;
 }
 .best-item {
   display: grid;
   grid-template-columns: minmax(100px, 1fr) auto auto;
-  gap: 12px;
-  padding: 10px 4px;
+  gap: 8px;
+  padding: 6px 4px;
   border-top: 1px solid #f0f0f0;
 }
 .opponent-item {
-  padding: 10px 4px;
+  padding: 6px 4px;
   border-bottom: 1px solid #f0f0f0;
 }
 .opponent-heading {
@@ -558,7 +558,7 @@ onMounted(() => void loadAnalysis());
 @media (max-width: 575px) {
   .statistics,
   .analysis-content {
-    gap: 12px;
+    gap: var(--app-section-gap);
   }
   .period-controls {
     flex-direction: column;
@@ -575,7 +575,7 @@ onMounted(() => void loadAnalysis());
     gap: 4px;
   }
   :deep(.ant-card-body) {
-    padding: 16px;
+    padding: 12px;
   }
 }
 </style>

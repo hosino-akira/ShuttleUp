@@ -1,6 +1,6 @@
 import axios from "axios";
 import { useGlobalLoading } from "../composables/useGlobalLoading";
-import { getAccessToken, notifyUnauthorized } from "../utils/authSession";
+import { getAccessToken, getBearerToken, isAccessTokenValid, notifyUnauthorized } from "../utils/authSession";
 
 const { startLoading, stopLoading } = useGlobalLoading();
 
@@ -13,7 +13,11 @@ http.interceptors.request.use(
   (config) => {
     startLoading();
     const token = getAccessToken();
-    if (token && !["/auth/login", "/auth/register"].includes(config.url ?? "")) {
+    if (!["/auth/login", "/auth/register"].includes(config.url ?? "")) {
+      if (!isAccessTokenValid(token)) {
+        if (!(config.method === "get" && config.url === "/auth/me")) notifyUnauthorized(token);
+        return Promise.reject(new axios.CanceledError("ログイン情報が無効です。", config));
+      }
       config.headers.Authorization = `Bearer ${token}`;
     }
     return config;
@@ -32,8 +36,10 @@ http.interceptors.response.use(
   (error: unknown) => {
     stopLoading();
     if (axios.isAxiosError(error) && error.response?.status === 401
-        && !["/auth/login", "/auth/register"].includes(error.config?.url ?? "")) {
-      notifyUnauthorized();
+        && !["/auth/login", "/auth/register"].includes(error.config?.url ?? "")
+        // セッション検証の失敗は Guard が処理し、遷移先を保持する。
+        && !(error.config?.method === "get" && error.config.url === "/auth/me")) {
+      notifyUnauthorized(getBearerToken(error.config?.headers?.Authorization));
     }
     return Promise.reject(error);
   },

@@ -46,6 +46,7 @@ const trainingRecords: readonly RecentTraining[] = [
       :columns="columns"
       :data-source="trainingRecords"
       :pagination="false"
+      size="small"
       :scroll="{ x: 560 }"
     />
   </a-card>

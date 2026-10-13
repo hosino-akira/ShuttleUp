@@ -4,6 +4,7 @@ import { message } from "ant-design-vue";
 import { requireUserId } from "../stores/auth";
 import { useRouter } from "vue-router";
 import type {
+  VxeTableEvents,
   VxeTableInstance,
   VxeTablePropTypes,
 } from "vxe-table";
@@ -27,7 +28,7 @@ const sortState = reactive<{
 }>({ field: "", order: null });
 const pagination = reactive({
   currentPage: 1,
-  pageSize: 10,
+  pageSize: 50,
   total: 0,
 });
 const columnConfig =
@@ -140,6 +141,12 @@ function openEditModal(): void {
   });
 }
 
+const editSessionOnDoubleClick: VxeTableEvents.CellDblclick<TrainingSession> =
+  ({ row }) => {
+    selectedSession.value = row;
+    openEditModal();
+  };
+
 async function deleteSelectedSession(): Promise<void> {
   if (!selectedSession.value) return;
   deleteSubmitting.value = true;
@@ -165,12 +172,11 @@ onMounted(loadTrainingSessions);
     class="training-history"
     aria-labelledby="training-history-title"
   >
-    <a-card
-      class="operation-card"
-      :bordered="false"
-      title="トレーニング履歴の操作"
-    >
-      <a-space wrap>
+    <div class="operation-bar">
+      <h2 id="training-history-title">
+        トレーニング履歴の操作
+      </h2>
+      <div class="operation-actions">
         <a-button type="primary" @click="openCreateModal"
           >新規登録</a-button
         >
@@ -187,8 +193,8 @@ onMounted(loadTrainingSessions);
           @click="deleteConfirmOpen = true"
           >削除</a-button
         >
-      </a-space>
-    </a-card>
+      </div>
+    </div>
 
     <a-card
       class="table-card"
@@ -209,6 +215,7 @@ onMounted(loadTrainingSessions);
           :sort-config="{ remote: true }"
           :empty-text="'データがありません'"
           @current-change="selectSession"
+          @cell-dblclick="editSessionOnDoubleClick"
           @sort-change="handleSortChange"
         >
           <vxe-column
@@ -249,7 +256,7 @@ onMounted(loadTrainingSessions);
         :current-page="pagination.currentPage"
         :page-size="pagination.pageSize"
         :total="pagination.total"
-        :page-sizes="[5, 10, 20, 50]"
+        :page-sizes="[50, 100, 200]"
         :layouts="[
           'Total',
           'Sizes',
@@ -277,22 +284,34 @@ onMounted(loadTrainingSessions);
 .training-history {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  /* height: calc(100vh - 64px - clamp(40px, 6vw, 80px)); */
-  height: 100%;
+  flex: 1;
+  gap: var(--app-section-gap);
   min-width: 0;
   min-height: 0;
   overflow: hidden;
 }
-.operation-card {
+.operation-bar {
+  display: flex;
   flex: 0 0 auto;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 12px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: var(--app-surface-color);
 }
-.operation-card :deep(.ant-card-head) {
-  min-height: 42px;
-  padding: 0 16px;
+.operation-bar h2 {
+  margin: 0;
+  color: var(--app-heading-color);
+  font-size: 14px;
+  font-weight: 600;
 }
-.operation-card :deep(.ant-card-body) {
-  padding: 12px 16px;
+.operation-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
 }
 .table-card {
   display: flex;
@@ -304,7 +323,7 @@ onMounted(loadTrainingSessions);
 }
 .table-card :deep(.ant-card-head) {
   flex: 0 0 auto;
-  min-height: 44px;
+  min-height: 38px;
 }
 .table-card :deep(.ant-card-body) {
   display: flex;

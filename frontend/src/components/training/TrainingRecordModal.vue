@@ -244,7 +244,7 @@ watch(
         : emptyForm(),
     );
     categoryId.value = props.record?.categoryId;
-    exerciseTypeId.value = undefined;
+    exerciseTypeId.value = props.record?.exerciseTypeId;
     exerciseTypes.value = [];
     exercises.value = [];
     formRef.value?.clearValidate();
@@ -520,6 +520,7 @@ async function executeAction(): Promise<void> {
 }
 .exercise-select-row {
   display: flex;
+  align-items: center;
   gap: 8px;
 }
 .exercise-select-row :deep(.ant-select) {

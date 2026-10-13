@@ -16,7 +16,7 @@ const goals: readonly GoalItem[] = [
 
 <template>
   <a-card title="今週の目標" :bordered="false">
-    <a-space direction="vertical" :size="16">
+    <a-space direction="vertical" :size="8">
       <a-checkbox
         v-for="goal in goals"
         :key="goal.label"

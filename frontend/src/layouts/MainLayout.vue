@@ -28,7 +28,7 @@ function toggleSidebar(): void {
       class="application-sider"
       :breakpoint="'lg'"
       :collapsed-width="0"
-      :width="240"
+      :width="200"
       theme="light"
     >
       <RouterLink class="brand" :to="{ name: 'dashboard' }">
@@ -136,12 +136,12 @@ function toggleSidebar(): void {
 .brand {
   display: flex;
   align-items: center;
-  gap: 12px;
-  height: 64px;
-  padding: 0 24px;
+  gap: 8px;
+  height: 48px;
+  padding: 0 16px;
   overflow: hidden;
   color: var(--app-heading-color);
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 600;
   text-decoration: none;
   white-space: nowrap;
@@ -160,11 +160,11 @@ function toggleSidebar(): void {
 
 .application-header {
   display: flex;
-  flex: 0 0 64px;
+  flex: 0 0 48px;
   align-items: center;
   justify-content: space-between;
-  height: 64px;
-  padding: 0 12px;
+  height: 48px;
+  padding: 0 8px;
   line-height: normal;
   background: var(--app-surface-color);
   border-block-end: 1px solid var(--app-border-color);
@@ -179,13 +179,13 @@ function toggleSidebar(): void {
 .profile-link {
   display: grid;
   place-items: center;
-  width: 36px;
-  height: 36px;
-  margin-left: 8px;
+  width: 28px;
+  height: 28px;
+  margin-left: 4px;
   border-radius: 50%;
   background: #e6f4ff;
   color: var(--app-primary-color);
-  font-size: 18px;
+  font-size: 16px;
 }
 
 .profile-link:hover,
@@ -215,16 +215,22 @@ function toggleSidebar(): void {
   min-width: 0;
   min-height: 100%;
   overflow-x: hidden;
-  padding: clamp(10px, 3vw, 15px);
+  padding: 8px;
   box-sizing: border-box;
 }
 
 .sidebar-toggle-icon {
-  font-size: 24px;
+  font-size: 18px;
+}
+
+.application-sider :deep(.ant-menu-item) {
+  height: 36px;
+  margin-block: 2px;
+  line-height: 36px;
 }
 @media (max-width: 575px) {
   .application-header {
-    padding: 0 16px;
+    padding: 0 8px;
   }
 }
 </style>

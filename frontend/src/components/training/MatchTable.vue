@@ -1,15 +1,22 @@
 <script setup lang="ts">
+import type { VxeTableEvents } from 'vxe-table'
 import type { MatchResponse } from '../../types/match'
 
 defineProps<{ matches: MatchResponse[]; loading: boolean }>()
 const emit = defineEmits<{ edit: [match: MatchResponse]; delete: [match: MatchResponse] }>()
+
+const editMatchOnDoubleClick: VxeTableEvents.CellDblclick<MatchResponse> = ({ row, $event }) => {
+  if ($event.target instanceof Element && $event.target.closest('button, a')) return
+  emit('edit', row)
+}
 </script>
 
 <template>
   <div class="vxe-table-wrapper">
     <vxe-table border stripe show-overflow :loading="loading" :data="matches"
     empty-text="試合記録はまだありません" :cell-config="{ height: 36 }"
-    :column-config="{ resizable: true }">
+    :column-config="{ resizable: true }" :row-config="{ isCurrent: true }"
+    @cell-dblclick="editMatchOnDoubleClick">
     <vxe-column field="matchDate" title="試合日" min-width="130" />
     <vxe-column field="opponentName" title="対戦相手" min-width="180" />
     <vxe-column title="スコア" min-width="130">

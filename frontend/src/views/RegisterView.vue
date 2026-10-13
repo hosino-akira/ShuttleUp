@@ -1,11 +1,12 @@
 <script setup lang="ts">
 import { reactive, ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { message } from 'ant-design-vue'
 import axios from 'axios'
 import { registerUser } from '../api/authApi'
 
 const router = useRouter()
+const route = useRoute()
 const form = reactive({ name: '', email: '', password: '', confirmPassword: '' })
 const isSubmitting = ref(false)
 const errorMessage = ref('')
@@ -37,7 +38,7 @@ async function handleSubmit(): Promise<void> {
     form.password = ''
     form.confirmPassword = ''
     message.success('アカウントを作成しました。ログインしてください。')
-    await router.replace({ name: 'login', query: { email: user.email } })
+    await router.replace({ name: 'login', query: { email: user.email, redirect: route.query.redirect } })
   } catch (error: unknown) {
     if (axios.isAxiosError<{ message?: string }>(error)) {
       const status = error.response?.status
@@ -79,7 +80,6 @@ async function handleSubmit(): Promise<void> {
         :disabled="isSubmitting"
         layout="vertical"
         :required-mark="false"
-        size="large"
         novalidate
         @finish="handleSubmit"
       >
@@ -156,7 +156,7 @@ async function handleSubmit(): Promise<void> {
 
       <div class="login-link">
         すでにアカウントをお持ちですか？
-        <RouterLink :to="{ name: 'login' }">ログイン</RouterLink>
+        <RouterLink :to="{ name: 'login', query: { redirect: route.query.redirect } }">ログイン</RouterLink>
       </div>
     </section>
   </main>
@@ -166,7 +166,7 @@ async function handleSubmit(): Promise<void> {
 .register-page {
   display: grid;
   height: 100%;
-  padding: 24px;
+  padding: 16px;
   overflow-y: auto;
   background: var(--app-page-color);
 }
@@ -175,37 +175,38 @@ async function handleSubmit(): Promise<void> {
   width: 100%;
   max-width: 460px;
   margin: auto;
-  padding: 32px;
+  padding: 20px;
   border: 1px solid var(--app-border-color);
-  border-radius: 16px;
+  border-radius: 10px;
   background: var(--app-surface-color);
   box-shadow: 0 8px 32px rgb(0 0 0 / 4%);
 }
 
 .brand-name {
   display: inline-block;
-  margin-bottom: 24px;
+  margin-bottom: 12px;
   color: var(--app-primary-color);
   font-size: 20px;
   font-weight: 700;
 }
 
 h1 {
-  margin: 0 0 8px;
+  margin: 0 0 4px;
+  font-size: 22px;
   color: var(--app-heading-color);
 }
 
 p {
-  margin: 0 0 24px;
+  margin: 0 0 16px;
   color: #666;
 }
 
 .error-message {
-  margin-bottom: 24px;
+  margin-bottom: 12px;
 }
 
 .login-link {
-  margin-top: 24px;
+  margin-top: 16px;
   color: #666;
   font-size: 14px;
   text-align: center;
@@ -217,7 +218,7 @@ p {
   }
 
   .register-card {
-    padding: 24px;
+    padding: 16px;
   }
 }
 </style>

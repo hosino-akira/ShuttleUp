@@ -1,14 +1,18 @@
 <script setup lang="ts">
-import { reactive, ref } from "vue";
+import { computed, reactive, ref } from "vue";
 import axios from "axios";
 import { useRoute, useRouter } from "vue-router";
 import { useAuthStore } from "../stores/auth";
+import { resolveAuthRedirect } from "../router";
 
 const route = useRoute();
 const router = useRouter();
 const auth = useAuthStore();
 const isSubmitting = ref(false);
 const errorMessage = ref("");
+const verificationMessage = computed(() => route.query.reason === "verification_failed"
+  ? "ログイン状態を確認できませんでした。サーバーの接続を確認して、再度ログインしてください。"
+  : "");
 
 const form = reactive({
   email: typeof route.query.email === "string" ? route.query.email : "",
@@ -22,7 +26,7 @@ async function handleSubmit(): Promise<void> {
   try {
     await auth.login({ email: form.email.trim(), password: form.password });
     form.password = "";
-    await router.replace({ name: "dashboard" });
+    await router.replace(resolveAuthRedirect(route.query.redirect));
   } catch (error: unknown) {
     if (axios.isAxiosError<{ message?: string }>(error)
         && [400, 401, 403].includes(error.response?.status ?? 0)) {
@@ -46,13 +50,12 @@ async function handleSubmit(): Promise<void> {
       <h1 id="login-title">ログイン</h1>
       <p>トレーニングの記録を続けましょう。</p>
 
-      <a-alert v-if="errorMessage" :message="errorMessage" type="error" show-icon role="alert" class="login-error" />
+      <a-alert v-if="errorMessage || verificationMessage" :message="errorMessage || verificationMessage" type="error" show-icon role="alert" class="login-error" />
 
       <a-form
         :model="form"
         layout="vertical"
         :required-mark="false"
-        size="large"
         :disabled="isSubmitting"
         novalidate
         @finish="handleSubmit"
@@ -96,7 +99,7 @@ async function handleSubmit(): Promise<void> {
       </a-form>
       <div class="register-link">
         アカウントをお持ちでない方は
-        <RouterLink :to="{ name: 'register' }">新規登録</RouterLink>
+        <RouterLink :to="{ name: 'register', query: { redirect: route.query.redirect } }">新規登録</RouterLink>
       </div>
     </section>
   </main>
@@ -106,7 +109,7 @@ async function handleSubmit(): Promise<void> {
 .login-page {
   display: grid;
   height: 100%;
-  padding: 24px;
+  padding: 16px;
   overflow-y: auto;
   background: var(--app-page-color);
 }
@@ -115,40 +118,41 @@ async function handleSubmit(): Promise<void> {
   width: 100%;
   max-width: 420px;
   margin: auto;
-  padding: 32px;
+  padding: 20px;
   border: 1px solid var(--app-border-color);
-  border-radius: 16px;
+  border-radius: 10px;
   background: var(--app-surface-color);
   box-shadow: 0 8px 32px rgb(0 0 0 / 4%);
 }
 
 .brand-name {
   display: inline-block;
-  margin-bottom: 24px;
+  margin-bottom: 12px;
   color: var(--app-primary-color);
   font-size: 20px;
   font-weight: 700;
 }
 
 h1 {
-  margin: 0 0 8px;
+  margin: 0 0 4px;
+  font-size: 22px;
   color: var(--app-heading-color);
 }
 
 p {
-  margin: 0 0 24px;
+  margin: 0 0 16px;
   color: #666;
 }
 
 .register-link {
-  margin-top: 24px;
+  margin-top: 16px;
   color: #666;
   font-size: 14px;
   text-align: center;
 }
 
 .login-error {
-  margin-bottom: 20px;
+  margin-bottom: 12px;
 }
 
 @media (max-width: 575px) {
@@ -157,7 +161,7 @@ p {
   }
 
   .login-card {
-    padding: 24px;
+    padding: 16px;
   }
 }
 </style>

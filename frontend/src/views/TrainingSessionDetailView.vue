@@ -38,6 +38,7 @@ import MatchTable from "../components/training/MatchTable.vue";
 import MatchModal from "../components/training/MatchModal.vue";
 import OpponentDrawer from "../components/training/OpponentDrawer.vue";
 import { useUnsavedChanges } from "../composables/useUnsavedChanges";
+import { getAccessToken, isAccessTokenValid } from "../utils/authSession";
 
 type Mode = "create" | "edit";
 const route = useRoute();
@@ -56,8 +57,15 @@ const records = ref<TrainingRecordResponse[]>([]);
 const matches = ref<MatchResponse[]>([]);
 const opponents = ref<OpponentResponse[]>([]);
 const formRef = ref<FormInstance>();
+function getTodayDate(): string {
+  const today = new Date();
+  const year = today.getFullYear();
+  const month = String(today.getMonth() + 1).padStart(2, "0");
+  const day = String(today.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
 const form = reactive<TrainingSessionUpdateRequest>({
-  trainingDate: "",
+  trainingDate: isCreate.value ? getTodayDate() : "",
   durationMinutes: 60,
   feeling: 3,
   note: null,
@@ -238,7 +246,7 @@ function beforeUnload(event: BeforeUnloadEvent) {
   event.preventDefault();
 }
 onBeforeRouteLeave(
-  async () => !dirty.value || (await confirmLeave()),
+  async () => !isAccessTokenValid(getAccessToken()) || !dirty.value || (await confirmLeave()),
 );
 onMounted(() => {
   window.addEventListener("beforeunload", beforeUnload);
@@ -282,7 +290,7 @@ onBeforeUnmount(() =>
           :model="form"
           layout="vertical"
         >
-          <a-row :gutter="16">
+          <a-row :gutter="12">
             <a-col :xs="24" :md="8"
               ><a-form-item
                 label="トレーニング日"
@@ -342,6 +350,14 @@ onBeforeUnmount(() =>
           </a-row>
         </a-form>
       </a-card>
+
+      <a-alert
+        v-if="isCreate"
+        class="save-required-notice"
+        type="info"
+        show-icon
+        message="先に基本情報を「保存」すると、トレーニング記録・試合記録を追加できます。"
+      />
 
       <a-card class="record-card" :bordered="false"
         ><template #title
@@ -431,7 +447,7 @@ onBeforeUnmount(() =>
   flex-direction: column;
   min-width: 0;
   min-height: 0;
-  gap: 12px;
+  gap: var(--app-section-gap);
 }
 .form-card,
 .record-card {
@@ -461,16 +477,27 @@ onBeforeUnmount(() =>
 .page-header {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 8px;
 }
 .page-header h1 {
   margin: 0;
-  font-size: 24px;
+  font-size: 22px;
 }
 .full-width {
   width: 100%;
 }
 @media (max-width: 576px) {
+  :deep(.ant-card-head) {
+    padding-block: 4px;
+  }
+  :deep(.ant-card-head-wrapper) {
+    flex-wrap: wrap;
+    gap: 4px 8px;
+  }
+  :deep(.ant-card-head-title) {
+    flex: 1 0 auto;
+    white-space: normal;
+  }
   .page-header {
     align-items: flex-start;
     flex-direction: column;

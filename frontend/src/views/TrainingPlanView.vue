@@ -2,7 +2,7 @@
 
 <template>
   <section aria-labelledby="training-plan-title">
-    <a-card :bordered="false">
+    <a-card class="page-intro" :bordered="false">
       <a-typography-title
         id="training-plan-title"
         :level="2"

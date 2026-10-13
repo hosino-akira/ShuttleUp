@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from "vue";
+import { useRouter } from "vue-router";
 import type { EChartsOption } from "echarts";
 import BaseEChart from "../components/common/BaseEChart.vue";
 import BaseSelect from "../components/common/BaseSelect.vue";
@@ -21,6 +22,7 @@ import {
   type DashboardPeriod,
 } from "../utils/dashboard";
 
+const router = useRouter();
 const dashboard = ref<DashboardResponse>();
 const dashboardLoading = ref(false);
 const dashboardError = ref(false);
@@ -309,14 +311,27 @@ onMounted(() => {
     class="dashboard"
     aria-labelledby="dashboard-title"
   >
-    <a-card :bordered="false">
-      <a-typography-title id="dashboard-title" :level="2"
-        >ダッシュボード</a-typography-title
-      >
-      <a-typography-paragraph
-        class="dashboard-description"
-        type="secondary"
-        >トレーニングと試合の実績を確認できます。</a-typography-paragraph
+    <a-card
+      class="page-intro dashboard-intro"
+      :bordered="false"
+    >
+      <div class="dashboard-intro-content">
+        <a-typography-title id="dashboard-title" :level="2"
+          >ダッシュボード</a-typography-title
+        >
+        <a-typography-paragraph
+          class="dashboard-description"
+          type="secondary"
+          >トレーニングと試合の実績を確認できます。</a-typography-paragraph
+        >
+      </div>
+      <a-button
+        class="dashboard-create-button"
+        type="primary"
+        @click="
+          router.push({ name: 'training-session-create' })
+        "
+        >トレーニング新規</a-button
       >
     </a-card>
 
@@ -406,15 +421,15 @@ onMounted(() => {
         class="dashboard-content"
         :class="{ 'is-loading': dashboardLoading }"
       >
-        <a-row :gutter="[16, 16]">
-          <a-col :xs="24" :sm="12" :xl="6"
+        <a-row :gutter="[8, 8]">
+          <a-col :xs="12" :sm="12" :xl="6"
             ><a-card :bordered="false" class="summary-card"
               ><a-statistic
                 title="トレーニング回数"
                 :value="summary.trainingSessionCount"
                 suffix="回" /></a-card
           ></a-col>
-          <a-col :xs="24" :sm="12" :xl="6"
+          <a-col :xs="12" :sm="12" :xl="6"
             ><a-card :bordered="false" class="summary-card"
               ><a-statistic
                 title="トレーニング時間"
@@ -424,14 +439,14 @@ onMounted(() => {
                   )
                 " /></a-card
           ></a-col>
-          <a-col :xs="24" :sm="12" :xl="6"
+          <a-col :xs="12" :sm="12" :xl="6"
             ><a-card :bordered="false" class="summary-card"
               ><a-statistic
                 title="試合数"
                 :value="summary.matchCount"
                 suffix="試合" /></a-card
           ></a-col>
-          <a-col :xs="24" :sm="12" :xl="6"
+          <a-col :xs="12" :sm="12" :xl="6"
             ><a-card :bordered="false" class="summary-card"
               ><a-statistic
                 title="勝率"
@@ -450,7 +465,7 @@ onMounted(() => {
             :loading="dashboardLoading"
             :empty="!dashboard?.monthlyTraining.length"
             empty-description="トレーニングデータがありません。"
-            height="360px"
+            height="280px"
           />
         </a-card>
 
@@ -461,7 +476,7 @@ onMounted(() => {
               :loading="dashboardLoading"
               :empty="summary.matchCount === 0"
               empty-description="試合データがありません。"
-              height="300px"
+              height="240px"
             />
             <div
               v-if="summary.matchCount > 0"
@@ -498,7 +513,7 @@ onMounted(() => {
                   ? '選択した種目の重量データがありません。'
                   : '種目を選択すると重量推移を確認できます。'
               "
-              height="340px"
+              height="264px"
             />
           </a-card>
         </div>
@@ -520,7 +535,7 @@ onMounted(() => {
           />
           <a-row
             v-else
-            :gutter="[16, 16]"
+            :gutter="[8, 8]"
             class="opponent-summary"
           >
             <a-col :xs="12" :md="6"
@@ -557,23 +572,44 @@ onMounted(() => {
 .dashboard-content {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: var(--app-section-gap);
   min-width: 0;
 }
 .dashboard-description,
 .filter-item {
   margin-bottom: 0;
 }
+.dashboard-intro :deep(.ant-card-body) {
+  flex-wrap: nowrap;
+  align-items: center;
+}
+.dashboard-intro-content {
+  display: flex;
+  flex: 1;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 16px;
+  min-width: 0;
+}
+.dashboard-intro-content :deep(.ant-typography) {
+  margin: 0;
+}
+.dashboard-create-button {
+  flex-shrink: 0;
+}
 .dashboard-content.is-loading {
-  min-height: 360px;
+  min-height: 280px;
 }
 .choice-alert {
-  margin-bottom: 16px;
+  margin-bottom: 8px;
 }
 .filter-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(180px, 1fr));
-  gap: 16px;
+  grid-template-columns: repeat(
+    auto-fit,
+    minmax(220px, 1fr)
+  );
+  gap: 8px 12px;
   align-items: end;
 }
 .filter-item :deep(.ant-picker),
@@ -586,17 +622,17 @@ onMounted(() => {
 .chart-grid {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1.5fr);
-  gap: 16px;
+  gap: var(--app-section-gap);
 }
 .match-summary {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  gap: 8px 18px;
+  gap: 4px 12px;
   color: rgba(0, 0, 0, 0.65);
 }
 .opponent-summary {
-  font-size: 16px;
+  font-size: 14px;
 }
 @media (max-width: 991px) {
   .filter-grid {
@@ -607,18 +643,29 @@ onMounted(() => {
   }
 }
 @media (max-width: 575px) {
+  .filter-item :deep(.ant-form-item-row) {
+    flex-direction: column;
+  }
+  .filter-item :deep(.ant-form-item-label) {
+    padding: 0 0 4px;
+    text-align: start;
+  }
+  .filter-item :deep(.ant-form-item-control) {
+    flex: auto;
+    width: 100%;
+  }
   .filter-grid {
     grid-template-columns: 1fr;
   }
   .chart-grid {
-    gap: 12px;
+    gap: var(--app-section-gap);
   }
   .dashboard,
   .dashboard-content {
-    gap: 12px;
+    gap: var(--app-section-gap);
   }
   :deep(.ant-card-body) {
-    padding: 16px;
+    padding: 12px;
   }
 }
 </style>

@@ -61,7 +61,7 @@ const statistics = computed<readonly StatisticItem[]>(
 </script>
 
 <template>
-  <a-row :gutter="[16, 16]">
+  <a-row :gutter="[8, 8]">
     <a-col
       v-for="statistic in statistics"
       :key="statistic.title"

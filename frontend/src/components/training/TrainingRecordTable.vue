@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { VxeTableEvents } from "vxe-table";
 import type { TrainingRecordResponse } from "../../types/trainingRecord";
 
 defineProps<{
@@ -10,6 +11,15 @@ const emit = defineEmits<{
   edit: [record: TrainingRecordResponse];
   delete: [record: TrainingRecordResponse];
 }>();
+
+const editRecordOnDoubleClick: VxeTableEvents.CellDblclick<TrainingRecordResponse> =
+  ({ row, $event }) => {
+    if (
+      $event.target instanceof Element &&
+      $event.target.closest("button, a")
+    ) return;
+    emit("edit", row);
+  };
 
 function recordSummary(
   record: TrainingRecordResponse,
@@ -46,9 +56,11 @@ function recordSummary(
     show-overflow
     :loading="loading"
     :data="records"
+    :row-config="{ isCurrent: true }"
     :empty-text="'トレーニング種目はまだありません'"
     :cell-config="{ height: 36 }"
     :column-config="{ resizable: true }"
+    @cell-dblclick="editRecordOnDoubleClick"
   >
     <vxe-column
       field="categoryName"

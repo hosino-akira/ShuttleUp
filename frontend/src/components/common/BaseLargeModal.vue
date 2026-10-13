@@ -42,8 +42,7 @@ const emit = defineEmits<{
 }
 
 .base-large-modal .ant-modal-content {
-  /* min-height: 650px; */
-  max-height: calc(85vh - 120px);
+  max-height: calc(100dvh - 140px);
   display: flex;
   flex-direction: column;
   padding: 0;
@@ -53,12 +52,13 @@ const emit = defineEmits<{
 .base-large-modal .ant-modal-header {
   flex: 0 0 auto;
   margin: 0;
-  padding: 20px 24px 12px;
+  padding: 12px 16px 8px;
+  padding-right: 48px;
 }
 
 .base-large-modal .ant-modal-close {
-  top: 12px;
-  right: 16px;
+  top: 8px;
+  right: 8px;
 }
 
 .base-large-modal .ant-modal-body {
@@ -70,23 +70,23 @@ const emit = defineEmits<{
 .base-large-modal__body {
   flex: 1;
   min-height: 0;
-  padding: 12px 24px;
+  padding: 8px 16px;
   overflow-y: auto;
 }
 
 .base-large-modal__footer {
   flex: 0 0 auto;
-  padding: 12px 24px 20px;
+  padding: 8px 16px;
   border-top: 1px solid #f0f0f0;
 }
 
 @media (max-width: 575px) {
   .base-large-modal__body {
-    padding: 12px 16px;
+    padding: 8px 12px;
   }
 
   .base-large-modal__footer {
-    padding: 12px 16px 16px;
+    padding: 8px 12px;
   }
 }
 </style>
