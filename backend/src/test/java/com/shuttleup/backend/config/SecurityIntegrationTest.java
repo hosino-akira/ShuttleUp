@@ -93,10 +93,13 @@ class SecurityIntegrationTest {
         String body = mvc.perform(post("/api/auth/login").contentType(MediaType.APPLICATION_JSON)
                         .content("{\"email\":\"user@example.com\",\"password\":\"111111\"}"))
                 .andExpect(status().isOk()).andExpect(jsonPath("$.tokenType").value("Bearer"))
+                .andExpect(jsonPath("$.expiresIn").value(86_400))
                 .andExpect(jsonPath("$.user.passwordHash").doesNotExist())
                 .andReturn().getResponse().getContentAsString();
         String token = new tools.jackson.databind.ObjectMapper().readTree(body).get("accessToken").asText();
-        assertThat(decoder.decode(token).getSubject()).isEqualTo("1");
+        Jwt decoded = decoder.decode(token);
+        assertThat(decoded.getSubject()).isEqualTo("1");
+        assertThat(decoded.getExpiresAt()).isEqualTo(decoded.getIssuedAt().plusSeconds(86_400));
         mvc.perform(get("/api/auth/me").header("Authorization", "Bearer " + token))
                 .andExpect(status().isOk()).andExpect(jsonPath("$.email").value("user@example.com"));
     }

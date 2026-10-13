@@ -14,7 +14,7 @@ import java.time.Instant;
 @RequiredArgsConstructor
 public class JwtTokenService {
     private final JwtEncoder encoder;
-    public static final long EXPIRES_IN_SECONDS = 3600;
+    public static final long EXPIRES_IN_SECONDS = 86_400;
 
     /** 秘密情報を含めず、ユーザーID・有効期限・認証バージョンを署名する。 */
     public LoginResponse issue(UserResponse user, long tokenVersion) {
