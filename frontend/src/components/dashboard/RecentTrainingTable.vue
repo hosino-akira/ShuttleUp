@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import { t } from '../../i18n';
+import { computed } from 'vue';
+
 import type { TableColumnsType } from "ant-design-vue";
 
 interface RecentTraining {
@@ -8,40 +11,40 @@ interface RecentTraining {
   training: string;
 }
 
-const columns: TableColumnsType<RecentTraining> = [
-  { title: "日付", dataIndex: "date", key: "date" },
+const columns = computed<TableColumnsType<RecentTraining>>(() => [
+  { title: t('日付'), dataIndex: "date", key: "date" },
   {
-    title: "トレーニング",
+    title: t('トレーニング'),
     dataIndex: "training",
     key: "training",
   },
-  { title: "時間", dataIndex: "duration", key: "duration" },
-];
+  { title: t('トレーニング時間'), dataIndex: "duration", key: "duration" },
+]);
 
-const trainingRecords: readonly RecentTraining[] = [
+const trainingRecords = computed<readonly RecentTraining[]>(() => [
   {
     key: "1",
     date: "2026/07/27",
-    training: "フットワーク基礎",
-    duration: "45分",
+    training: t('フットワーク基礎'),
+    duration: t('45分'),
   },
   {
     key: "2",
     date: "2026/07/25",
-    training: "スマッシュ練習",
-    duration: "60分",
+    training: t('スマッシュ練習'),
+    duration: t('60分'),
   },
   {
     key: "3",
     date: "2026/07/23",
-    training: "クリア・ドロップ",
-    duration: "40分",
+    training: t('クリア・ドロップ'),
+    duration: t('40分'),
   },
-];
+]);
 </script>
 
 <template>
-  <a-card title="最近のトレーニング" :bordered="false">
+  <a-card :title="t('最近のトレーニング')" :bordered="false">
     <a-table
       :columns="columns"
       :data-source="trainingRecords"

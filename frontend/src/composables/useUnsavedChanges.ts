@@ -1,3 +1,4 @@
+import { t } from '../i18n';
 import { computed, ref } from "vue";
 import { Modal } from "ant-design-vue";
 
@@ -19,11 +20,11 @@ export function useUnsavedChanges(snapshot: () => unknown) {
 
     return new Promise((resolve) =>
       Modal.confirm({
-        title: "未保存の変更があります。移動しますか？",
+        title: t('未保存の変更があります。移動しますか？'),
         content:
-          "トレーニング基本情報への変更は破棄されます。",
-        okText: "移動する",
-        cancelText: "キャンセル",
+          t('トレーニング基本情報への変更は破棄されます。'),
+        okText: t('移動する'),
+        cancelText: t('キャンセル'),
         onOk: () => resolve(true),
         onCancel: () => resolve(false),
       }),

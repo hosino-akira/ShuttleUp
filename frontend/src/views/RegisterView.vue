@@ -1,25 +1,31 @@
 <script setup lang="ts">
+import { t } from '../i18n';
 import { reactive, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { message } from 'ant-design-vue'
 import axios from 'axios'
 import { registerUser } from '../api/authApi'
+import LanguageSwitcher from '../components/common/LanguageSwitcher.vue'
+import type { FormInstance } from 'ant-design-vue'
+import { useLocalizedForm } from '../composables/useLocalizedForm'
 
 const router = useRouter()
 const route = useRoute()
+const formRef = ref<FormInstance>()
+const { onValidate: onFormValidate } = useLocalizedForm(formRef)
 const form = reactive({ name: '', email: '', password: '', confirmPassword: '' })
 const isSubmitting = ref(false)
 const errorMessage = ref('')
 
 async function validatePassword(_rule: unknown, value: string): Promise<void> {
   if (value && new TextEncoder().encode(value).length > 72) {
-    throw new Error('パスワードはUTF-8で72バイト以内で入力してください。')
+    throw new Error(t('パスワードはUTF-8で72バイト以内で入力してください。'))
   }
 }
 
 async function validateConfirmation(_rule: unknown, value: string): Promise<void> {
   if (value && value !== form.password) {
-    throw new Error('パスワードが一致していません。')
+    throw new Error(t('パスワードが一致していません。'))
   }
 }
 
@@ -37,7 +43,7 @@ async function handleSubmit(): Promise<void> {
     })
     form.password = ''
     form.confirmPassword = ''
-    message.success('アカウントを作成しました。ログインしてください。')
+    message.success(t('アカウントを作成しました。ログインしてください。'))
     await router.replace({ name: 'login', query: { email: user.email, redirect: route.query.redirect } })
   } catch (error: unknown) {
     if (axios.isAxiosError<{ message?: string }>(error)) {
@@ -62,50 +68,55 @@ async function handleSubmit(): Promise<void> {
 <template>
   <main class="register-page">
     <section class="register-card" aria-labelledby="register-title">
-      <span class="brand-name">ShuttleUp</span>
-      <h1 id="register-title">アカウント登録</h1>
-      <p>アカウントを作成して、トレーニングを記録しましょう。</p>
+      <div class="auth-card-header">
+        <span class="brand-name">ShuttleUp</span>
+        <LanguageSwitcher />
+      </div>
+      <h1 id="register-title">{{ t('アカウント登録') }}</h1>
+      <p>{{ t('アカウントを作成して、トレーニングを記録しましょう。') }}</p>
 
       <a-alert
         v-if="errorMessage"
         class="error-message"
-        :message="errorMessage"
+        :message="t(errorMessage)"
         type="error"
         show-icon
         role="alert"
       />
 
       <a-form
+        ref="formRef"
         :model="form"
         :disabled="isSubmitting"
         layout="vertical"
         :required-mark="false"
         novalidate
         @finish="handleSubmit"
+        @validate="onFormValidate"
       >
         <a-form-item
-          label="ユーザー名"
+          :label="t('ユーザー名')"
           name="name"
           :rules="[
-            { required: true, whitespace: true, message: 'ユーザー名を入力してください。' },
-            { max: 100, message: 'ユーザー名は100文字以内で入力してください。' },
+            { required: true, whitespace: true, message: t('ユーザー名を入力してください。') },
+            { max: 100, message: t('ユーザー名は100文字以内で入力してください。') },
           ]"
         >
           <a-input
             v-model:value="form.name"
             autocomplete="nickname"
-            placeholder="ユーザー名を入力"
+            :placeholder="t('ユーザー名を入力')"
             :maxlength="100"
           />
         </a-form-item>
 
         <a-form-item
-          label="メールアドレス"
+          :label="t('メールアドレス')"
           name="email"
           :rules="[
-            { required: true, message: 'メールアドレスを入力してください。' },
-            { type: 'email', message: '正しいメールアドレスを入力してください。' },
-            { max: 255, message: 'メールアドレスは255文字以内で入力してください。' },
+            { required: true, message: t('メールアドレスを入力してください。') },
+            { type: 'email', message: t('正しいメールアドレスを入力してください。') },
+            { max: 255, message: t('メールアドレスは255文字以内で入力してください。') },
           ]"
         >
           <a-input
@@ -118,51 +129,52 @@ async function handleSubmit(): Promise<void> {
         </a-form-item>
 
         <a-form-item
-          label="パスワード"
+          :label="t('パスワード')"
           name="password"
-          extra="6文字以上で入力してください。"
+          :extra="t('6文字以上で入力してください。')"
           :rules="[
-            { required: true, whitespace: true, message: 'パスワードを入力してください。' },
-            { min: 6, message: 'パスワードは6文字以上で入力してください。' },
+            { required: true, whitespace: true, message: t('パスワードを入力してください。') },
+            { min: 6, message: t('パスワードは6文字以上で入力してください。') },
             { validator: validatePassword },
           ]"
         >
           <a-input-password
             v-model:value="form.password"
             autocomplete="new-password"
-            placeholder="パスワードを入力"
+            :placeholder="t('パスワードを入力')"
           />
         </a-form-item>
 
         <a-form-item
-          label="パスワード（確認）"
+          :label="t('パスワード（確認）')"
           name="confirmPassword"
           :rules="[
-            { required: true, message: '確認用パスワードを入力してください。' },
+            { required: true, message: t('確認用パスワードを入力してください。') },
             { validator: validateConfirmation },
           ]"
         >
           <a-input-password
             v-model:value="form.confirmPassword"
             autocomplete="new-password"
-            placeholder="パスワードをもう一度入力"
+            :placeholder="t('パスワードをもう一度入力')"
           />
         </a-form-item>
 
         <a-button type="primary" html-type="submit" block :loading="isSubmitting">
-          登録する
+          {{ t('登録する') }}
         </a-button>
       </a-form>
 
       <div class="login-link">
-        すでにアカウントをお持ちですか？
-        <RouterLink :to="{ name: 'login', query: { redirect: route.query.redirect } }">ログイン</RouterLink>
+        {{ t('すでにアカウントをお持ちですか？') }}
+        <RouterLink :to="{ name: 'login', query: { redirect: route.query.redirect } }">{{ t('ログイン') }}</RouterLink>
       </div>
     </section>
   </main>
 </template>
 
 <style scoped>
+.auth-card-header { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
 .register-page {
   display: grid;
   height: 100%;

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { t } from '../i18n';
 import {
   computed,
   onBeforeUnmount,
@@ -39,6 +40,7 @@ import MatchModal from "../components/training/MatchModal.vue";
 import OpponentDrawer from "../components/training/OpponentDrawer.vue";
 import { useUnsavedChanges } from "../composables/useUnsavedChanges";
 import { getAccessToken, isAccessTokenValid } from "../utils/authSession";
+import { useLocalizedForm } from '../composables/useLocalizedForm';
 
 type Mode = "create" | "edit";
 const route = useRoute();
@@ -57,6 +59,7 @@ const records = ref<TrainingRecordResponse[]>([]);
 const matches = ref<MatchResponse[]>([]);
 const opponents = ref<OpponentResponse[]>([]);
 const formRef = ref<FormInstance>();
+const { onValidate: onFormValidate } = useLocalizedForm(formRef);
 function getTodayDate(): string {
   const today = new Date();
   const year = today.getFullYear();
@@ -108,7 +111,7 @@ async function initialize() {
     !Number.isInteger(sessionId.value) ||
     sessionId.value! <= 0
   ) {
-    message.error("トレーニングIDが正しくありません。");
+    message.error(t('トレーニングIDが正しくありません。'));
     await router.replace({ name: "training-history" });
     return;
   }
@@ -130,7 +133,7 @@ async function initialize() {
     applySession(loadedSession);
   } catch (error) {
     console.error(error);
-    message.error("トレーニング詳細の取得に失敗しました。");
+    message.error(t('トレーニング詳細の取得に失敗しました。'));
     await router.replace({ name: "training-history" });
   } finally {
     loading.value = false;
@@ -165,10 +168,10 @@ async function saveSession() {
         params: { sessionId: saved.id },
       });
     }
-    message.success("トレーニングを保存しました。");
+    message.success(t('トレーニングを保存しました。'));
   } catch (error) {
     console.error(error);
-    message.error("トレーニングの保存に失敗しました。");
+    message.error(t('トレーニングの保存に失敗しました。'));
   } finally {
     saving.value = false;
   }
@@ -192,11 +195,11 @@ async function removeRecord(
 ) {
   try {
     await deleteTrainingRecord(record.id);
-    message.success("トレーニング記録を削除しました。");
+    message.success(t('トレーニング記録を削除しました。'));
     await refreshRecords();
   } catch (error) {
     console.error(error);
-    message.error("トレーニング記録の削除に失敗しました。");
+    message.error(t('トレーニング記録の削除に失敗しました。'));
   }
 }
 function openMatchCreate() {
@@ -217,11 +220,11 @@ async function refreshMatches() {
 async function removeMatch(match: MatchResponse) {
   try {
     await deleteMatch(match.id);
-    message.success("試合記録を削除しました。");
+    message.success(t('試合記録を削除しました。'));
     await refreshMatches();
   } catch (error) {
     console.error(error);
-    message.error("試合記録の削除に失敗しました。");
+    message.error(t('試合記録の削除に失敗しました。'));
   }
 }
 async function refreshOpponents(selectedId?: number) {
@@ -264,41 +267,42 @@ onBeforeUnmount(() =>
         <h1>
           {{
             isCreate
-              ? "トレーニング新規登録"
-              : "トレーニング詳細・編集"
+              ? t('トレーニング新規登録')
+              : t('トレーニング詳細・編集')
           }}
         </h1>
       </header>
       <a-card
         class="form-card"
-        title="基本情報"
+        :title="t('基本情報')"
         :bordered="false"
         ><template #extra>
           <a-space wrap>
             <a-button type="primary" @click="goBack"
-              >一覧へ戻る</a-button
+              >{{ t('一覧へ戻る') }}</a-button
             ><a-button
               type="primary"
               :loading="saving"
               @click="saveSession"
-              >保存</a-button
+              >{{ t('保存') }}</a-button
             ></a-space
           ></template
         >
         <a-form
           ref="formRef"
+          @validate="onFormValidate"
           :model="form"
           layout="vertical"
         >
           <a-row :gutter="12">
             <a-col :xs="24" :md="8"
               ><a-form-item
-                label="トレーニング日"
+                :label="t('トレーニング日')"
                 name="trainingDate"
                 :rules="[
                   {
                     required: true,
-                    message: '日付を選択してください。',
+                    message: t('日付を選択してください。'),
                   },
                 ]"
                 ><a-date-picker
@@ -308,14 +312,14 @@ onBeforeUnmount(() =>
             ></a-col>
             <a-col :xs="24" :md="8"
               ><a-form-item
-                label="トレーニング時間（分）"
+                :label="t('トレーニング時間（分）')"
                 name="durationMinutes"
                 :rules="[
                   {
                     required: true,
                     type: 'number',
                     min: 1,
-                    message: '1分以上で入力してください。',
+                    message: t('1分以上で入力してください。'),
                   },
                 ]"
                 ><a-input-number
@@ -324,7 +328,7 @@ onBeforeUnmount(() =>
                   class="full-width" /></a-form-item
             ></a-col>
             <a-col :xs="24" :md="8"
-              ><a-form-item label="コンディション"
+              ><a-form-item :label="t('コンディション')"
                 ><a-rate
                   v-model:value="
                     form.feeling
@@ -332,13 +336,13 @@ onBeforeUnmount(() =>
             ></a-col>
             <a-col :span="24"
               ><a-form-item
-                label="メモ"
+                :label="t('メモ')"
                 name="note"
                 :rules="[
                   {
                     max: 1000,
                     message:
-                      'メモは1000文字以内で入力してください。',
+                      t('メモは1000文字以内で入力してください。'),
                   },
                 ]"
                 ><a-textarea
@@ -356,19 +360,19 @@ onBeforeUnmount(() =>
         class="save-required-notice"
         type="info"
         show-icon
-        message="先に基本情報を「保存」すると、トレーニング記録・試合記録を追加できます。"
+        :message="t('先に基本情報を「保存」すると、トレーニング記録・試合記録を追加できます。')"
       />
 
       <a-card class="record-card" :bordered="false"
         ><template #title
-          >トレーニング記録
-          <a-tag>{{ records.length }}件</a-tag></template
+          >{{ t('トレーニング記録') }}
+          <a-tag>{{ records.length }}{{ t('件') }}</a-tag></template
         ><template #extra
           ><a-button
             type="primary"
             :disabled="sessionId === null"
             @click="openRecordCreate"
-            >＋ 新規登録</a-button
+            >{{ t('＋ 新規登録') }}</a-button
           ></template
         >
         <TrainingRecordTable
@@ -380,19 +384,19 @@ onBeforeUnmount(() =>
       </a-card>
       <a-card class="match-card" :bordered="false"
         ><template #title
-          >試合記録
-          <a-tag>{{ matches.length }}件</a-tag></template
+          >{{ t('試合記録') }}
+          <a-tag>{{ matches.length }}{{ t('件') }}</a-tag></template
         ><template #extra
           ><a-space
             ><a-button
               type="primary"
               @click="opponentDrawerOpen = true"
-              >対戦相手を管理</a-button
+              >{{ t('対戦相手を管理') }}</a-button
             ><a-button
               type="primary"
               :disabled="sessionId === null"
               @click="openMatchCreate"
-              >＋ 新規登録</a-button
+              >{{ t('＋ 新規登録') }}</a-button
             ></a-space
           ></template
         >

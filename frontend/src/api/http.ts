@@ -1,3 +1,4 @@
+import { t } from '../i18n';
 import axios from "axios";
 import { useGlobalLoading } from "../composables/useGlobalLoading";
 import { getAccessToken, getBearerToken, isAccessTokenValid, notifyUnauthorized } from "../utils/authSession";
@@ -16,7 +17,7 @@ http.interceptors.request.use(
     if (!["/auth/login", "/auth/register"].includes(config.url ?? "")) {
       if (!isAccessTokenValid(token)) {
         if (!(config.method === "get" && config.url === "/auth/me")) notifyUnauthorized(token);
-        return Promise.reject(new axios.CanceledError("ログイン情報が無効です。", config));
+        return Promise.reject(new axios.CanceledError(t('ログイン情報が無効です。'), config));
       }
       config.headers.Authorization = `Bearer ${token}`;
     }

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { t } from '../../i18n';
 import { useGlobalLoading } from "../../composables/useGlobalLoading";
 
 const { isLoading } = useGlobalLoading();
@@ -10,9 +11,9 @@ const { isLoading } = useGlobalLoading();
     class="global-loading"
     role="status"
     aria-live="polite"
-    aria-label="読み込み中"
+    :aria-label="t('読み込み中')"
   >
-    <a-spin size="large" tip="読み込み中..." />
+    <a-spin size="large" :tip="t('読み込み中...')" />
   </div>
 </template>
 

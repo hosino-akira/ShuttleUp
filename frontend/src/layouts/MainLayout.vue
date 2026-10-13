@@ -1,14 +1,15 @@
 <script setup lang="ts">
+import { t } from '../i18n';
 import { computed, ref } from "vue";
 import { useRoute } from "vue-router";
 import {
   BellOutlined,
-  GlobalOutlined,
   MenuFoldOutlined,
   MenuUnfoldOutlined,
   UserOutlined,
 } from "@ant-design/icons-vue";
 import { NAVIGATION_MENU } from "../constants/navigation";
+import LanguageSwitcher from '../components/common/LanguageSwitcher.vue';
 
 const route = useRoute();
 const isSidebarCollapsed = ref(false);
@@ -45,7 +46,7 @@ function toggleSidebar(): void {
           :key="item.key"
         >
           <RouterLink :to="item.to">{{
-            item.label
+            t(item.label)
           }}</RouterLink>
         </a-menu-item>
       </a-menu>
@@ -56,8 +57,8 @@ function toggleSidebar(): void {
         <a-button
           :aria-label="
             isSidebarCollapsed
-              ? 'ナビゲーションを開く'
-              : 'ナビゲーションを閉じる'
+              ? t('ナビゲーションを開く')
+              : t('ナビゲーションを閉じる')
           "
           type="text"
           @click="toggleSidebar"
@@ -73,26 +74,20 @@ function toggleSidebar(): void {
         </a-button>
 
         <div class="header-actions">
-          <!-- 通知と言語切り替えは後のステップで接続する。 -->
-          <a-button
-            aria-label="言語を切り替える"
-            type="text"
-          >
-            <GlobalOutlined />
-          </a-button>
+          <LanguageSwitcher />
           <a-badge :count="0" :show-zero="false">
             <a-button
-              aria-label="通知"
+              :aria-label="t('通知')"
               type="text"
             >
               <BellOutlined />
             </a-button>
           </a-badge>
-          <a-tooltip title="プロフィール">
+          <a-tooltip :title="t('プロフィール')">
             <RouterLink
               class="profile-link"
               :to="{ name: 'profile' }"
-              aria-label="プロフィールを開く"
+              :aria-label="t('プロフィールを開く')"
               :aria-current="route.name === 'profile' ? 'page' : undefined"
             >
               <UserOutlined aria-hidden="true" />

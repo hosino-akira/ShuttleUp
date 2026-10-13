@@ -1,3 +1,4 @@
+import { t } from '../i18n';
 import { ref } from 'vue'
 import { defineStore } from 'pinia'
 import axios from 'axios'
@@ -16,7 +17,7 @@ export const useAuthStore = defineStore('auth', () => {
     const result = await loginUser(request)
     if (revision !== sessionRevision || result.tokenType !== 'Bearer'
         || !isAccessTokenValid(result.accessToken) || result.user.status !== 'ACTIVE') {
-      throw new Error('ログイン情報を確認できませんでした。')
+      throw new Error(t('ログイン情報を確認できませんでした。'))
     }
     saveAccessToken(result.accessToken)
     user.value = result.user
@@ -79,6 +80,6 @@ export const useAuthStore = defineStore('auth', () => {
 
 export function requireUserId(): number {
   const user = useAuthStore().user
-  if (!user) throw new Error('ログインしてください。')
+  if (!user) throw new Error(t('ログインしてください。'))
   return user.id
 }

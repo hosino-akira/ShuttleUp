@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { t } from '../../i18n';
 import {
   computed,
   onMounted,
@@ -32,6 +33,7 @@ import ConfirmModal from "../common/ConfirmModal.vue";
 import BaseSelect from "../common/BaseSelect.vue";
 import ExerciseCreateModal from "./ExerciseCreateModal.vue";
 import { useUnsavedChanges } from "../../composables/useUnsavedChanges";
+import { useLocalizedForm } from '../../composables/useLocalizedForm';
 
 type Mode = "create" | "edit";
 type ConfirmAction = "save" | "delete";
@@ -50,6 +52,7 @@ const emit = defineEmits<{
 }>();
 
 const formRef = ref<FormInstance>();
+const { onValidate: onFormValidate, reset: resetLocalizedValidation } = useLocalizedForm(formRef);
 const categories = ref<ExerciseCategoryResponse[]>([]);
 const exerciseTypes = ref<ExerciseTypeResponse[]>([]);
 const exercises = ref<ExerciseResponse[]>([]);
@@ -93,8 +96,8 @@ const { reset: resetDirtyState, confirmLeave } = useUnsavedChanges(
 );
 const title = computed(() =>
   props.mode === "create"
-    ? "トレーニング種目の新規登録"
-    : "トレーニング種目の編集",
+    ? t('トレーニング種目の新規登録')
+    : t('トレーニング種目の編集'),
 );
 const categoryOptions = computed(() =>
   categories.value.map((item) => ({
@@ -121,7 +124,7 @@ async function loadCategories(): Promise<void> {
     categories.value = await getExerciseCategories();
   } catch (error) {
     console.error(error);
-    message.error("大分類の取得に失敗しました。");
+    message.error(t('大分類の取得に失敗しました。'));
   } finally {
     categoriesLoading.value = false;
   }
@@ -147,7 +150,7 @@ async function loadExerciseTypes(
   } catch (error) {
     if (requestId === typeRequestId) {
       console.error(error);
-      message.error("中分類の取得に失敗しました。");
+      message.error(t('中分類の取得に失敗しました。'));
     }
   } finally {
     if (requestId === typeRequestId)
@@ -176,7 +179,7 @@ async function loadExercises(
   } catch (error: unknown) {
     if (requestId === exerciseRequestId) {
       console.error(error);
-      message.error("種目一覧の取得に失敗しました。");
+      message.error(t('種目一覧の取得に失敗しました。'));
     }
   } finally {
     if (requestId === exerciseRequestId)
@@ -248,6 +251,7 @@ watch(
     exerciseTypes.value = [];
     exercises.value = [];
     formRef.value?.clearValidate();
+    resetLocalizedValidation();
     resetDirtyState();
     if (categories.value.length === 0)
       await loadCategories();
@@ -290,10 +294,10 @@ async function executeAction(): Promise<void> {
     if (confirmAction.value === "delete") {
       if (!props.record) return;
       await deleteTrainingRecord(props.record.id);
-      message.success("トレーニング種目を削除しました。");
+      message.success(t('トレーニング種目を削除しました。'));
     } else {
       if (form.exerciseId == null || form.exerciseId <= 0) {
-        message.error("種目を選択してください。");
+        message.error(t('種目を選択してください。'));
         return;
       }
 
@@ -314,8 +318,8 @@ async function executeAction(): Promise<void> {
         );
       message.success(
         props.mode === "edit"
-          ? "トレーニング種目を更新しました。"
-          : "トレーニング種目を登録しました。",
+          ? t('トレーニング種目を更新しました。')
+          : t('トレーニング種目を登録しました。'),
       );
     }
     confirmOpen.value = false;
@@ -326,8 +330,8 @@ async function executeAction(): Promise<void> {
     console.error(error);
     message.error(
       confirmAction.value === "delete"
-        ? "トレーニング種目の削除に失敗しました。"
-        : "トレーニング種目の保存に失敗しました。",
+        ? t('トレーニング種目の削除に失敗しました。')
+        : t('トレーニング種目の保存に失敗しました。'),
     );
   } finally {
     submitting.value = false;
@@ -341,40 +345,40 @@ async function executeAction(): Promise<void> {
     :title="title"
     @update:open="(value) => value || requestClose()"
   >
-    <a-form ref="formRef" :model="form" layout="vertical">
+    <a-form ref="formRef" :model="form" layout="vertical" @validate="onFormValidate">
       <a-row :gutter="12">
         <a-col :xs="24" :md="8"
-          ><a-form-item label="大分類">
+          ><a-form-item :label="t('大分類')">
             <BaseSelect
               v-model:value="categoryId"
               :options="categoryOptions"
               :loading="categoriesLoading"
-              debug-name="大分類"
-              placeholder="大分類を選択"
+              :debug-name="t('大分類')"
+              :placeholder="t('大分類を選択')"
               @change="handleCategoryChange"
             /> </a-form-item
         ></a-col>
         <a-col :xs="24" :md="8"
-          ><a-form-item label="中分類">
+          ><a-form-item :label="t('中分類')">
             <BaseSelect
               v-model:value="exerciseTypeId"
               :options="exerciseTypeOptions"
               :loading="typesLoading"
               :disabled="!categoryId"
-              placeholder="中分類を選択"
+              :placeholder="t('中分類を選択')"
               @change="handleExerciseTypeChange"
             /> </a-form-item
         ></a-col>
         <a-col :xs="24" :md="8"
           ><a-form-item
-            label="種目"
+            :label="t('種目')"
             name="exerciseId"
             :rules="[
               {
                 required: true,
                 type: 'number',
                 min: 1,
-                message: '種目を選択してください。',
+                message: t('種目を選択してください。'),
               },
             ]"
           >
@@ -384,12 +388,12 @@ async function executeAction(): Promise<void> {
                 :options="exerciseOptions"
                 :loading="exercisesLoading"
                 :disabled="!exerciseTypeId"
-                placeholder="種目を選択"
+                :placeholder="t('種目を選択')"
               /><a-button
                 type="primary"
                 :disabled="categoriesLoading"
                 @click="exerciseCreateOpen = true"
-                >新規</a-button
+                >{{ t('新規') }}</a-button
               >
             </div>
           </a-form-item></a-col
@@ -397,21 +401,21 @@ async function executeAction(): Promise<void> {
       </a-row>
       <a-row :gutter="12">
         <a-col :xs="24" :md="8"
-          ><a-form-item label="セット数"
+          ><a-form-item :label="t('セット数')"
             ><a-input-number
               v-model:value="form.sets"
               class="full-width"
               :min="0" /></a-form-item
         ></a-col>
         <a-col :xs="24" :md="8"
-          ><a-form-item label="回数"
+          ><a-form-item :label="t('回数')"
             ><a-input-number
               v-model:value="form.repetitions"
               class="full-width"
               :min="0" /></a-form-item
         ></a-col>
         <a-col :xs="24" :md="8"
-          ><a-form-item label="重量（kg）"
+          ><a-form-item :label="t('重量（kg）')"
             ><a-input-number
               v-model:value="form.weightKg"
               class="full-width"
@@ -421,14 +425,14 @@ async function executeAction(): Promise<void> {
       </a-row>
       <a-row :gutter="12">
         <a-col :xs="24" :md="12"
-          ><a-form-item label="実施時間（分）"
+          ><a-form-item :label="t('実施時間（分）')"
             ><a-input-number
               v-model:value="form.durationMinutes"
               class="full-width"
               :min="0" /></a-form-item
         ></a-col>
         <a-col :xs="24" :md="12"
-          ><a-form-item label="距離（m）"
+          ><a-form-item :label="t('距離（m）')"
             ><a-input-number
               v-model:value="form.distanceMeters"
               class="full-width"
@@ -437,21 +441,21 @@ async function executeAction(): Promise<void> {
       </a-row>
       <a-row :gutter="12">
         <a-col :xs="24" :md="12"
-          ><a-form-item label="成功回数"
+          ><a-form-item :label="t('成功回数')"
             ><a-input-number
               v-model:value="form.successCount"
               class="full-width"
               :min="0" /></a-form-item
         ></a-col>
         <a-col :xs="24" :md="12"
-          ><a-form-item label="試行回数"
+          ><a-form-item :label="t('試行回数')"
             ><a-input-number
               v-model:value="form.attemptCount"
               class="full-width"
               :min="0" /></a-form-item
         ></a-col>
       </a-row>
-      <a-form-item label="メモ"
+      <a-form-item :label="t('メモ')"
         ><a-textarea
           v-model:value="form.note"
           :maxlength="1000"
@@ -468,20 +472,20 @@ async function executeAction(): Promise<void> {
           danger
           :disabled="submitting"
           @click="requestDelete"
-          >削除</a-button
+          >{{ t('削除') }}</a-button
         >
         <span v-else />
         <div class="footer-actions">
           <a-button
             :disabled="submitting"
             @click="requestClose"
-            >キャンセル</a-button
+            >{{ t('キャンセル') }}</a-button
           >
           <a-button
             type="primary"
             :loading="submitting && confirmOpen"
             @click="requestSave"
-            >保存</a-button
+            >{{ t('保存') }}</a-button
           >
         </div>
       </div>
@@ -492,12 +496,12 @@ async function executeAction(): Promise<void> {
     v-model:open="confirmOpen"
     :message="
       confirmAction === 'delete'
-        ? '削除してもよろしいですか？'
-        : '保存してもよろしいですか？'
+        ? t('削除してもよろしいですか？')
+        : t('保存してもよろしいですか？')
     "
     :description="
       confirmAction === 'delete'
-        ? '削除したデータは元に戻せません。'
+        ? t('削除したデータは元に戻せません。')
         : ''
     "
     :danger="confirmAction === 'delete'"

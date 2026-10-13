@@ -2,6 +2,7 @@
 import { useRoute } from "vue-router";
 import GlobalLoading from "./components/common/GlobalLoading.vue";
 import MainLayout from "./layouts/MainLayout.vue";
+import { antLocale } from './i18n/ui';
 
 const route = useRoute();
 
@@ -26,7 +27,7 @@ const compactTheme = {
 </script>
 
 <template>
-  <a-config-provider :theme="compactTheme">
+  <a-config-provider :theme="compactTheme" :locale="antLocale">
     <RouterView v-if="route.meta.layout === 'auth'" />
     <MainLayout v-else />
     <GlobalLoading />

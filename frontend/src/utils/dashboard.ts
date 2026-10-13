@@ -1,3 +1,4 @@
+import { formatLocalDate, t } from '../i18n';
 import type { DashboardQuery } from '../types/dashboard'
 
 export type DashboardPeriod = 'all' | 'month' | 'threeMonths' | 'sixMonths' | 'year' | 'custom'
@@ -31,20 +32,18 @@ export function createPeriodQuery(
   return { from: formatDate(from), to: formatDate(to) }
 }
 
-/** 分数を日本語の読みやすい時間表記へ変換する。 */
+/** Format a duration in the selected interface language. */
 export function formatDuration(minutes: number): string {
-  if (minutes < 60) return `${minutes}分`
+  if (minutes < 60) return t('{0}分', { 0: minutes })
   const hours = Math.floor(minutes / 60)
   const remainder = minutes % 60
-  return remainder === 0 ? `${hours}時間` : `${hours}時間${remainder}分`
+  return remainder === 0 ? t('{0}時間', { 0: hours }) : t('{0}時間{1}分', { 0: hours, 1: remainder })
 }
 
 export function formatMonth(month: string): string {
-  const [year, monthNumber] = month.split('-')
-  return `${year}年${Number(monthNumber)}月`
+  return formatLocalDate(month, { year: 'numeric', month: 'short' })
 }
 
 export function formatJapaneseDate(date: string): string {
-  const [year, month, day] = date.split('-')
-  return `${year}年${Number(month)}月${Number(day)}日`
+  return formatLocalDate(date)
 }

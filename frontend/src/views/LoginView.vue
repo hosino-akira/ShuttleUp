@@ -1,17 +1,23 @@
 <script setup lang="ts">
+import { t } from '../i18n';
 import { computed, reactive, ref } from "vue";
 import axios from "axios";
 import { useRoute, useRouter } from "vue-router";
 import { useAuthStore } from "../stores/auth";
 import { resolveAuthRedirect } from "../router";
+import LanguageSwitcher from '../components/common/LanguageSwitcher.vue';
+import type { FormInstance } from 'ant-design-vue';
+import { useLocalizedForm } from '../composables/useLocalizedForm';
 
 const route = useRoute();
 const router = useRouter();
 const auth = useAuthStore();
+const formRef = ref<FormInstance>();
+const { onValidate: onFormValidate } = useLocalizedForm(formRef);
 const isSubmitting = ref(false);
 const errorMessage = ref("");
 const verificationMessage = computed(() => route.query.reason === "verification_failed"
-  ? "ログイン状態を確認できませんでした。サーバーの接続を確認して、再度ログインしてください。"
+  ? t('ログイン状態を確認できませんでした。サーバーの接続を確認して、再度ログインしてください。')
   : "");
 
 const form = reactive({
@@ -30,9 +36,9 @@ async function handleSubmit(): Promise<void> {
   } catch (error: unknown) {
     if (axios.isAxiosError<{ message?: string }>(error)
         && [400, 401, 403].includes(error.response?.status ?? 0)) {
-      errorMessage.value = error.response?.data.message ?? "メールアドレスとパスワードを確認してください。";
+      errorMessage.value = error.response?.data.message ?? 'メールアドレスとパスワードを確認してください。';
     } else {
-      errorMessage.value = "ログインできませんでした。サーバーの起動と接続を確認してください。";
+      errorMessage.value = 'ログインできませんでした。サーバーの起動と接続を確認してください。';
     }
   } finally {
     isSubmitting.value = false;
@@ -46,28 +52,33 @@ async function handleSubmit(): Promise<void> {
       class="login-card"
       aria-labelledby="login-title"
     >
-      <span class="brand-name">ShuttleUp</span>
-      <h1 id="login-title">ログイン</h1>
-      <p>トレーニングの記録を続けましょう。</p>
+      <div class="auth-card-header">
+        <span class="brand-name">ShuttleUp</span>
+        <LanguageSwitcher />
+      </div>
+      <h1 id="login-title">{{ t('ログイン') }}</h1>
+      <p>{{ t('トレーニングの記録を続けましょう。') }}</p>
 
-      <a-alert v-if="errorMessage || verificationMessage" :message="errorMessage || verificationMessage" type="error" show-icon role="alert" class="login-error" />
+      <a-alert v-if="errorMessage || verificationMessage" :message="t(errorMessage || verificationMessage)" type="error" show-icon role="alert" class="login-error" />
 
       <a-form
+        ref="formRef"
         :model="form"
         layout="vertical"
         :required-mark="false"
         :disabled="isSubmitting"
         novalidate
         @finish="handleSubmit"
+        @validate="onFormValidate"
       >
         <a-form-item
-          label="メールアドレス"
+          :label="t('メールアドレス')"
           name="email"
           :rules="[
-            { required: true, message: 'メールアドレスを入力してください。' },
+            { required: true, message: t('メールアドレスを入力してください。') },
             {
               type: 'email',
-              message: '正しいメールアドレスを入力してください。',
+              message: t('正しいメールアドレスを入力してください。'),
             },
           ]"
         >
@@ -80,26 +91,26 @@ async function handleSubmit(): Promise<void> {
         </a-form-item>
 
         <a-form-item
-          label="パスワード"
+          :label="t('パスワード')"
           name="password"
           :rules="[
-            { required: true, message: 'パスワードを入力してください。' },
+            { required: true, message: t('パスワードを入力してください。') },
           ]"
         >
           <a-input-password
             v-model:value="form.password"
             autocomplete="current-password"
-            placeholder="パスワードを入力"
+            :placeholder="t('パスワードを入力')"
           />
         </a-form-item>
 
         <a-button type="primary" html-type="submit" :loading="isSubmitting" block>
-          ログイン
+          {{ t('ログイン') }}
         </a-button>
       </a-form>
       <div class="register-link">
-        アカウントをお持ちでない方は
-        <RouterLink :to="{ name: 'register', query: { redirect: route.query.redirect } }">新規登録</RouterLink>
+        {{ t('アカウントをお持ちでない方は') }}
+        <RouterLink :to="{ name: 'register', query: { redirect: route.query.redirect } }">{{ t('アカウント登録') }}</RouterLink>
       </div>
     </section>
   </main>
@@ -132,6 +143,8 @@ async function handleSubmit(): Promise<void> {
   font-size: 20px;
   font-weight: 700;
 }
+
+.auth-card-header { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
 
 h1 {
   margin: 0 0 4px;

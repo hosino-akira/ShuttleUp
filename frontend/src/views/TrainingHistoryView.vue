@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { t } from '../i18n';
 import { computed, onMounted, reactive, ref } from "vue";
 import { message } from "ant-design-vue";
 import { requireUserId } from "../stores/auth";
@@ -125,7 +126,7 @@ async function loadTrainingSessions(
     else tableRef.value?.clearCurrentRow();
   } catch (error: unknown) {
     console.error(error);
-    message.error("トレーニング履歴の取得に失敗しました。");
+    message.error(t('トレーニング履歴の取得に失敗しました。'));
   }
 }
 
@@ -152,13 +153,13 @@ async function deleteSelectedSession(): Promise<void> {
   deleteSubmitting.value = true;
   try {
     await deleteTrainingSession(selectedSession.value.id);
-    message.success("トレーニングを削除しました。");
+    message.success(t('トレーニングを削除しました。'));
     selectedSession.value = null;
     deleteConfirmOpen.value = false;
     await loadTrainingSessions();
   } catch (error: unknown) {
     console.error(error);
-    message.error("トレーニングの削除に失敗しました。");
+    message.error(t('トレーニングの削除に失敗しました。'));
   } finally {
     deleteSubmitting.value = false;
   }
@@ -174,24 +175,24 @@ onMounted(loadTrainingSessions);
   >
     <div class="operation-bar">
       <h2 id="training-history-title">
-        トレーニング履歴の操作
+        {{ t('トレーニング履歴の操作') }}
       </h2>
       <div class="operation-actions">
         <a-button type="primary" @click="openCreateModal"
-          >新規登録</a-button
+          >{{ t('新規登録') }}</a-button
         >
         <a-button
           type="primary"
           :disabled="selectedSession === null"
           @click="openEditModal"
-          >編集</a-button
+          >{{ t('編集') }}</a-button
         >
         <a-button
           type="primary"
           danger
           :disabled="selectedSession === null"
           @click="deleteConfirmOpen = true"
-          >削除</a-button
+          >{{ t('削除') }}</a-button
         >
       </div>
     </div>
@@ -199,7 +200,7 @@ onMounted(loadTrainingSessions);
     <a-card
       class="table-card"
       :bordered="false"
-      title="登録済みトレーニング"
+      :title="t('登録済みトレーニング')"
     >
       <div class="table-scroll-area vxe-table-wrapper">
         <vxe-table
@@ -213,26 +214,26 @@ onMounted(loadTrainingSessions);
           :column-config="columnConfig"
           :data="pagedSessions"
           :sort-config="{ remote: true }"
-          :empty-text="'データがありません'"
+          :empty-text="t('データがありません')"
           @current-change="selectSession"
           @cell-dblclick="editSessionOnDoubleClick"
           @sort-change="handleSortChange"
         >
           <vxe-column
             field="trainingDate"
-            title="トレーニング日"
+            :title="t('トレーニング日')"
             width="180"
             sortable
           />
           <vxe-column
             field="durationMinutes"
-            title="時間（分）"
+            :title="t('時間（分）')"
             width="160"
             sortable
           />
           <vxe-column
             field="feeling"
-            title="感覚"
+            :title="t('感覚')"
             width="210"
             sortable
           >
@@ -242,7 +243,7 @@ onMounted(loadTrainingSessions);
           </vxe-column>
           <vxe-column
             field="note"
-            title="メモ"
+            :title="t('メモ')"
             min-width="240"
           >
             <template #default="{ row }">{{
@@ -271,8 +272,8 @@ onMounted(loadTrainingSessions);
 
     <ConfirmModal
       v-model:open="deleteConfirmOpen"
-      message="削除してもよろしいですか？"
-      description="削除したデータは元に戻せません。"
+      :message="t('削除してもよろしいですか？')"
+      :description="t('削除したデータは元に戻せません。')"
       danger
       :loading="deleteSubmitting"
       @confirm="deleteSelectedSession"

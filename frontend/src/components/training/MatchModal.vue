@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { t } from '../../i18n';
 import { computed, reactive, ref, watch } from "vue";
 import { message } from "ant-design-vue";
 import type { FormInstance } from "ant-design-vue";
@@ -15,6 +16,7 @@ import type { OpponentResponse } from "../../types/opponent";
 import BaseLargeModal from "../common/BaseLargeModal.vue";
 import ConfirmModal from "../common/ConfirmModal.vue";
 import { useUnsavedChanges } from "../../composables/useUnsavedChanges";
+import { useLocalizedForm } from '../../composables/useLocalizedForm';
 
 type Mode = "create" | "edit";
 type Action = "save" | "delete";
@@ -33,6 +35,7 @@ const emit = defineEmits<{
   createOpponent: [name: string];
 }>();
 const formRef = ref<FormInstance>();
+const { onValidate: onFormValidate, reset: resetLocalizedValidation } = useLocalizedForm(formRef);
 const submitting = ref(false);
 const confirmOpen = ref(false);
 const action = ref<Action>("save");
@@ -60,7 +63,7 @@ const options = computed(() => {
   )
     items.push({
       value: -1,
-      label: `＋「${name}」を新規登録`,
+      label: t('＋「{0}」を新規登録', { 0: name }),
     });
   return items;
 });
@@ -82,6 +85,7 @@ watch(
         : emptyForm(),
     );
     formRef.value?.clearValidate();
+    resetLocalizedValidation();
     resetDirtyState();
   },
 );
@@ -127,7 +131,7 @@ async function executeAction() {
     if (action.value === "delete") {
       if (!props.match) return;
       await deleteMatch(props.match.id);
-      message.success("試合記録を削除しました。");
+      message.success(t('試合記録を削除しました。'));
     } else {
       const request = {
         ...form,
@@ -139,8 +143,8 @@ async function executeAction() {
       else await createMatch(props.sessionId, request);
       message.success(
         props.mode === "edit"
-          ? "試合記録を更新しました。"
-          : "試合記録を登録しました。",
+          ? t('試合記録を更新しました。')
+          : t('試合記録を登録しました。'),
       );
     }
     confirmOpen.value = false;
@@ -151,8 +155,8 @@ async function executeAction() {
     console.error(error);
     message.error(
       action.value === "delete"
-        ? "試合記録の削除に失敗しました。"
-        : "試合記録の保存に失敗しました。",
+        ? t('試合記録の削除に失敗しました。')
+        : t('試合記録の保存に失敗しました。'),
     );
   } finally {
     submitting.value = false;
@@ -165,23 +169,23 @@ async function executeAction() {
     :open="open"
     :title="
       mode === 'create'
-        ? '試合記録の新規登録'
-        : '試合記録の編集'
+        ? t('試合記録の新規登録')
+        : t('試合記録の編集')
     "
     @update:open="(value) => value || requestClose()"
   >
-    <a-form ref="formRef" :model="form" layout="vertical">
+    <a-form ref="formRef" :model="form" layout="vertical" @validate="onFormValidate">
       <a-row :gutter="12">
         <a-col :xs="24" :md="12"
           ><a-form-item
-            label="対戦相手"
+            :label="t('対戦相手')"
             name="opponentId"
             :rules="[
               {
                 required: true,
                 type: 'number',
                 min: 1,
-                message: '対戦相手を選択してください。',
+                message: t('対戦相手を選択してください。'),
               },
             ]"
           >
@@ -190,7 +194,7 @@ async function executeAction() {
               show-search
               option-filter-prop="label"
               :options="options"
-              placeholder="名前で検索"
+              :placeholder="t('名前で検索')"
               @search="opponentSearch = $event"
               @change="handleOpponentChange"
             />
@@ -198,32 +202,32 @@ async function executeAction() {
               type="link"
               class="manage-button"
               @click="emit('manageOpponents')"
-              >対戦相手を管理</a-button
+              >{{ t('対戦相手を管理') }}</a-button
             >
           </a-form-item></a-col
         >
         <a-col :xs="12" :md="6"
-          ><a-form-item label="自分のスコア"
+          ><a-form-item :label="t('自分のスコア')"
             ><a-input-number
               v-model:value="form.myScore"
               :min="0"
               class="full-width" /></a-form-item
         ></a-col>
         <a-col :xs="12" :md="6"
-          ><a-form-item label="相手のスコア"
+          ><a-form-item :label="t('相手のスコア')"
             ><a-input-number
               v-model:value="form.opponentScore"
               :min="0"
               class="full-width" /></a-form-item
         ></a-col>
         <a-col :xs="24" :md="12"
-          ><a-form-item label="動画URL"
+          ><a-form-item :label="t('動画URL')"
             ><a-input
               v-model:value="form.videoUrl"
               :maxlength="2048" /></a-form-item
         ></a-col>
       </a-row>
-      <a-form-item label="メモ"
+      <a-form-item :label="t('メモ')"
         ><a-textarea
           v-model:value="form.note"
           :maxlength="1000"
@@ -238,18 +242,18 @@ async function executeAction() {
           danger
           :disabled="submitting"
           @click="requestDelete"
-          >削除</a-button
+          >{{ t('削除') }}</a-button
         ><span v-else />
         <a-space
           ><a-button
             :disabled="submitting"
             @click="requestClose"
-            >キャンセル</a-button
+            >{{ t('キャンセル') }}</a-button
           ><a-button
             type="primary"
             :loading="submitting"
             @click="requestSave"
-            >保存</a-button
+            >{{ t('保存') }}</a-button
           ></a-space
         >
       </div></template
@@ -259,12 +263,12 @@ async function executeAction() {
     v-model:open="confirmOpen"
     :message="
       action === 'delete'
-        ? '削除してもよろしいですか？'
-        : '保存してもよろしいですか？'
+        ? t('削除してもよろしいですか？')
+        : t('保存してもよろしいですか？')
     "
     :description="
       action === 'delete'
-        ? '削除したデータは元に戻せません。'
+        ? t('削除したデータは元に戻せません。')
         : ''
     "
     :danger="action === 'delete'"

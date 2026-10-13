@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { t } from '../../i18n';
 withDefaults(
   defineProps<{
     open: boolean;
@@ -27,7 +28,7 @@ const emit = defineEmits<{
 <template>
   <a-modal
     :open="open"
-    :title="title"
+    :title="title === '確認' ? t('確認') : title"
     :width="400"
     :z-index="zIndex"
     :closable="!loading"
@@ -42,7 +43,7 @@ const emit = defineEmits<{
       <a-button
         :disabled="loading"
         @click="emit('update:open', false)"
-        >キャンセル</a-button
+        >{{ t('キャンセル') }}</a-button
       >
       <a-button
         type="primary"
@@ -50,7 +51,7 @@ const emit = defineEmits<{
         :loading="loading"
         @click="emit('confirm')"
       >
-        確認
+        {{ t('確認') }}
       </a-button>
     </template>
   </a-modal>

@@ -1,9 +1,11 @@
 <script setup lang="ts">
+import { intlLocale, t } from '../../i18n';
+import { computed } from 'vue';
 import { useAuthStore } from '../../stores/auth';
 const auth = useAuthStore();
-const currentDate = new Intl.DateTimeFormat("ja-JP", {
+const currentDate = computed(() => new Intl.DateTimeFormat(intlLocale.value, {
   dateStyle: "full",
-}).format(new Date());
+}).format(new Date()));
 </script>
 
 <template>
@@ -13,12 +15,12 @@ const currentDate = new Intl.DateTimeFormat("ja-JP", {
       :level="2"
       class="welcome-card__title"
     >
-      おかえりなさい、{{ auth.user?.name }}さん
+      {{ t('おかえりなさい、{name}さん', { name: auth.user?.name ?? '' }) }}
     </a-typography-title>
     <a-typography-paragraph
       class="welcome-card__description"
     >
-      今日も一歩ずつ、理想のプレーに近づきましょう。
+      {{ t('今日も一歩ずつ、理想のプレーに近づきましょう。') }}
     </a-typography-paragraph>
   </a-card>
 </template>

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { intlLocale, t } from '../i18n';
 import { computed, onMounted, ref, watch } from "vue";
 import { useRouter } from "vue-router";
 import type { EChartsOption } from "echarts";
@@ -36,21 +37,21 @@ const exercises = ref<ExerciseResponse[]>([]);
 const opponents = ref<OpponentResponse[]>([]);
 let dashboardRequestId = 0;
 
-const periodOptions = [
-  { value: "all", label: "全期間" },
-  { value: "month", label: "今月" },
-  { value: "threeMonths", label: "過去3か月" },
-  { value: "sixMonths", label: "過去6か月" },
-  { value: "year", label: "過去1年" },
-  { value: "custom", label: "カスタム期間" },
-];
+const periodOptions = computed(() => [
+  { value: "all", label: t('全期間') },
+  { value: "month", label: t('今月') },
+  { value: "threeMonths", label: t('過去3か月') },
+  { value: "sixMonths", label: t('過去6か月') },
+  { value: "year", label: t('過去1年') },
+  { value: "custom", label: t('カスタム期間') },
+]);
 const exerciseOptions = computed(() =>
   [...exercises.value]
     .sort(
       (a, b) =>
         Number(isWeightExercise(b)) -
           Number(isWeightExercise(a)) ||
-        a.name.localeCompare(b.name, "ja"),
+        a.name.localeCompare(b.name, intlLocale.value),
     )
     .map((exercise) => ({
       value: exercise.id,
@@ -93,7 +94,7 @@ const monthlyOption = computed<EChartsOption>(() => {
     color: ["#1677ff", "#52c41a"],
     tooltip: { trigger: "axis" },
     legend: {
-      data: ["トレーニング回数", "トレーニング時間"],
+      data: [t('トレーニング回数'), t('トレーニング時間')],
       top: 0,
     },
     grid: {
@@ -113,13 +114,13 @@ const monthlyOption = computed<EChartsOption>(() => {
     yAxis: [
       {
         type: "value",
-        name: "回数",
+        name: t('セッション数'),
         splitNumber: 5,
         minInterval: 1,
       },
       {
         type: "value",
-        name: "時間（分）",
+        name: t('時間（分）'),
         splitNumber: 5,
         splitLine: {
           show: false,
@@ -140,15 +141,15 @@ const monthlyOption = computed<EChartsOption>(() => {
       : [],
     series: [
       {
-        name: "トレーニング回数",
+        name: t('トレーニング回数'),
         type: "bar",
         data: rows.map((row) => row.sessionCount),
         tooltip: {
-          valueFormatter: (value) => `${value}回`,
+          valueFormatter: (value) => t('{0}回', { 0: value }),
         },
       },
       {
-        name: "トレーニング時間",
+        name: t('トレーニング時間'),
         type: "line",
         yAxisIndex: 1,
         smooth: true,
@@ -167,24 +168,24 @@ const matchOption = computed<EChartsOption>(() => ({
   color: ["#1677ff", "#d46b6b"],
   tooltip: {
     trigger: "item",
-    formatter: "{b}：{c}回（{d}%）",
+    formatter: t('{b}：{c}回（{d}%）'),
   },
   legend: { bottom: 0 },
   series: [
     {
-      name: "試合結果",
+      name: t('試合結果'),
       type: "pie",
       radius: ["48%", "70%"],
       center: ["50%", "45%"],
-      label: { formatter: "{b}\n{c}回" },
+      label: { formatter: t('{b}\n{c}回') },
       data: [
         {
           value: dashboard.value?.matchResults.wins ?? 0,
-          name: "勝利",
+          name: t('勝利'),
         },
         {
           value: dashboard.value?.matchResults.losses ?? 0,
-          name: "敗北",
+          name: t('敗北'),
         },
       ],
     },
@@ -208,7 +209,7 @@ const exerciseOption = computed<EChartsOption>(() => {
     },
     yAxis: {
       type: "value",
-      name: "重量（kg）",
+      name: t('重量（kg）'),
       scale: true,
     },
     series: [
@@ -317,12 +318,12 @@ onMounted(() => {
     >
       <div class="dashboard-intro-content">
         <a-typography-title id="dashboard-title" :level="2"
-          >ダッシュボード</a-typography-title
+          >{{ t('ダッシュボード') }}</a-typography-title
         >
         <a-typography-paragraph
           class="dashboard-description"
           type="secondary"
-          >トレーニングと試合の実績を確認できます。</a-typography-paragraph
+          >{{ t('トレーニングと試合の実績を確認できます。') }}</a-typography-paragraph
         >
       </div>
       <a-button
@@ -331,29 +332,29 @@ onMounted(() => {
         @click="
           router.push({ name: 'training-session-create' })
         "
-        >トレーニング新規</a-button
+        >{{ t('トレーニング新規') }}</a-button
       >
     </a-card>
 
-    <a-card title="検索条件" :bordered="false">
+    <a-card :title="t('検索条件')" :bordered="false">
       <a-alert
         v-if="choicesError"
         class="choice-alert"
         type="warning"
         show-icon
-        message="種目または対戦相手の選択肢を取得できませんでした。"
+        :message="t('種目または対戦相手の選択肢を取得できませんでした。')"
       >
         <template #action
           ><a-button
             size="small"
             :loading="choicesLoading"
             @click="loadChoices"
-            >再読み込み</a-button
+            >{{ t('再読み込み') }}</a-button
           ></template
         >
       </a-alert>
       <div class="filter-grid">
-        <a-form-item label="集計期間" class="filter-item"
+        <a-form-item :label="t('集計期間')" class="filter-item"
           ><a-select
             :value="period"
             :options="periodOptions"
@@ -361,35 +362,35 @@ onMounted(() => {
         /></a-form-item>
         <a-form-item
           v-if="period === 'custom'"
-          label="カスタム期間"
+          :label="t('カスタム期間')"
           class="filter-item"
         >
           <a-range-picker
             v-model:value="customRange"
             value-format="YYYY-MM-DD"
-            format="YYYY年MM月DD日"
+            :format="t('YYYY年MM月DD日')"
           />
         </a-form-item>
         <a-form-item
-          label="重量推移を表示する種目"
+          :label="t('重量推移を表示する種目')"
           class="filter-item"
         >
           <BaseSelect
             v-model:value="selectedExerciseId"
             :options="exerciseOptions"
             :loading="choicesLoading"
-            placeholder="種目を選択"
+            :placeholder="t('種目を選択')"
           />
         </a-form-item>
         <a-form-item
-          label="対戦成績を表示する相手"
+          :label="t('対戦成績を表示する相手')"
           class="filter-item"
         >
           <BaseSelect
             v-model:value="selectedOpponentId"
             :options="opponentOptions"
             :loading="choicesLoading"
-            placeholder="対戦相手を選択"
+            :placeholder="t('対戦相手を選択')"
           />
         </a-form-item>
       </div>
@@ -397,7 +398,7 @@ onMounted(() => {
 
     <a-alert
       v-if="dashboardError"
-      message="ダッシュボードデータの取得に失敗しました。"
+      :message="t('ダッシュボードデータの取得に失敗しました。')"
       type="error"
       show-icon
     >
@@ -408,14 +409,14 @@ onMounted(() => {
           size="small"
           :loading="dashboardLoading"
           @click="loadDashboard"
-          >再読み込み</a-button
+          >{{ t('再読み込み') }}</a-button
         ></template
       >
     </a-alert>
 
     <a-spin
       :spinning="dashboardLoading"
-      tip="ダッシュボードを読み込み中..."
+      :tip="t('ダッシュボードを読み込み中...')"
     >
       <div
         class="dashboard-content"
@@ -425,14 +426,14 @@ onMounted(() => {
           <a-col :xs="12" :sm="12" :xl="6"
             ><a-card :bordered="false" class="summary-card"
               ><a-statistic
-                title="トレーニング回数"
+                :title="t('トレーニング回数')"
                 :value="summary.trainingSessionCount"
-                suffix="回" /></a-card
+                :suffix="t('回')" /></a-card
           ></a-col>
           <a-col :xs="12" :sm="12" :xl="6"
             ><a-card :bordered="false" class="summary-card"
               ><a-statistic
-                title="トレーニング時間"
+                :title="t('トレーニング時間')"
                 :value="
                   formatDuration(
                     summary.totalDurationMinutes,
@@ -442,14 +443,14 @@ onMounted(() => {
           <a-col :xs="12" :sm="12" :xl="6"
             ><a-card :bordered="false" class="summary-card"
               ><a-statistic
-                title="試合数"
+                :title="t('試合数')"
                 :value="summary.matchCount"
-                suffix="試合" /></a-card
+                :suffix="t('試合')" /></a-card
           ></a-col>
           <a-col :xs="12" :sm="12" :xl="6"
             ><a-card :bordered="false" class="summary-card"
               ><a-statistic
-                title="勝率"
+                :title="t('勝率')"
                 :value="summary.winRate"
                 :precision="1"
                 suffix="%" /></a-card
@@ -457,25 +458,25 @@ onMounted(() => {
         </a-row>
 
         <a-card
-          title="月別トレーニング推移"
+          :title="t('月別トレーニング推移')"
           :bordered="false"
         >
           <BaseEChart
             :option="monthlyOption"
             :loading="dashboardLoading"
             :empty="!dashboard?.monthlyTraining.length"
-            empty-description="トレーニングデータがありません。"
+            :empty-description="t('トレーニングデータがありません。')"
             height="280px"
           />
         </a-card>
 
         <div class="chart-grid">
-          <a-card title="試合結果" :bordered="false">
+          <a-card :title="t('試合結果')" :bordered="false">
             <BaseEChart
               :option="matchOption"
               :loading="dashboardLoading"
               :empty="summary.matchCount === 0"
-              empty-description="試合データがありません。"
+              :empty-description="t('試合データがありません。')"
               height="240px"
             />
             <div
@@ -483,19 +484,19 @@ onMounted(() => {
               class="match-summary"
             >
               <span
-                >総試合数：{{
+                >{{ t('総試合数：') }}{{
                   summary.matchCount
-                }}試合</span
-              ><span>勝利：{{ summary.winCount }}回</span>
-              <span>敗北：{{ summary.lossCount }}回</span
+                }}{{ t('試合') }}</span
+              ><span>{{ t('勝利：') }}{{ summary.winCount }}{{ t('回') }}</span>
+              <span>{{ t('敗北：') }}{{ summary.lossCount }}{{ t('回') }}</span
               ><span
-                >勝率：{{
+                >{{ t('勝率：') }}{{
                   summary.winRate.toFixed(1)
                 }}%</span
               >
             </div>
           </a-card>
-          <a-card title="種目別重量推移" :bordered="false">
+          <a-card :title="t('種目別重量推移')" :bordered="false">
             <template #extra
               ><span v-if="selectedExerciseName">{{
                 selectedExerciseName
@@ -510,8 +511,8 @@ onMounted(() => {
               "
               :empty-description="
                 selectedExerciseId
-                  ? '選択した種目の重量データがありません。'
-                  : '種目を選択すると重量推移を確認できます。'
+                  ? t('選択した種目の重量データがありません。')
+                  : t('種目を選択すると重量推移を確認できます。')
               "
               height="264px"
             />
@@ -524,14 +525,14 @@ onMounted(() => {
             dashboard?.opponentMatchSummary
           "
           :bordered="false"
-          :title="`${dashboard.opponentMatchSummary.opponentName}さんとの対戦成績`"
+          :title="t('{0}さんとの対戦成績', { 0: dashboard.opponentMatchSummary.opponentName })"
         >
           <a-empty
             v-if="
               dashboard.opponentMatchSummary.matchCount ===
               0
             "
-            description="選択した対戦相手との試合データがありません。"
+            :description="t('選択した対戦相手との試合データがありません。')"
           />
           <a-row
             v-else
@@ -539,22 +540,22 @@ onMounted(() => {
             class="opponent-summary"
           >
             <a-col :xs="12" :md="6"
-              >対戦回数：{{
+              >{{ t('対戦回数：') }}{{
                 dashboard.opponentMatchSummary.matchCount
-              }}回</a-col
+              }}{{ t('回') }}</a-col
             >
             <a-col :xs="12" :md="6"
-              >勝利：{{
+              >{{ t('勝利：') }}{{
                 dashboard.opponentMatchSummary.winCount
-              }}回</a-col
+              }}{{ t('回') }}</a-col
             >
             <a-col :xs="12" :md="6"
-              >敗北：{{
+              >{{ t('敗北：') }}{{
                 dashboard.opponentMatchSummary.lossCount
-              }}回</a-col
+              }}{{ t('回') }}</a-col
             >
             <a-col :xs="12" :md="6"
-              >勝率：{{
+              >{{ t('勝率：') }}{{
                 dashboard.opponentMatchSummary.winRate.toFixed(
                   1,
                 )

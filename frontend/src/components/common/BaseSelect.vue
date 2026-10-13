@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { t } from '../../i18n';
 export interface SelectOption {
   value: number;
   label: string;
@@ -51,7 +52,7 @@ function filterOption(
     class="base-select"
     :value="value"
     :options="options"
-    :placeholder="placeholder"
+    :placeholder="placeholder === '選択してください' ? t('選択してください') : placeholder"
     :loading="loading"
     :disabled="disabled"
     :allow-clear="allowClear"

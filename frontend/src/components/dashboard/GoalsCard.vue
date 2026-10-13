@@ -1,21 +1,24 @@
 <script setup lang="ts">
+import { t } from '../../i18n';
+import { computed } from 'vue';
+
 interface GoalItem {
   completed: boolean;
   label: string;
 }
 
-const goals: readonly GoalItem[] = [
-  { label: "今週3回練習する", completed: true },
+const goals = computed<readonly GoalItem[]>(() => [
+  { label: t('今週3回練習する'), completed: true },
   {
-    label: "スマッシュ成功率を向上させる",
+    label: t('スマッシュ成功率を向上させる'),
     completed: false,
   },
-  { label: "フットワークを強化する", completed: false },
-];
+  { label: t('フットワークを強化する'), completed: false },
+]);
 </script>
 
 <template>
-  <a-card title="今週の目標" :bordered="false">
+  <a-card :title="t('今週の目標')" :bordered="false">
     <a-space direction="vertical" :size="8">
       <a-checkbox
         v-for="goal in goals"

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { formatLocalDate, t } from '../i18n';
 import { computed, onMounted, ref } from "vue";
 import axios from "axios";
 import type { EChartsOption } from "echarts";
@@ -49,7 +50,7 @@ const weeklyOption = computed<EChartsOption>(() => {
     color: ["#1677ff"],
     tooltip: {
       trigger: "axis",
-      valueFormatter: (value) => `${value}日`,
+      valueFormatter: (value) => t('{0}日', { 0: value }),
     },
     grid: { left: 48, right: 20, top: 28, bottom: 48 },
     xAxis: {
@@ -59,10 +60,10 @@ const weeklyOption = computed<EChartsOption>(() => {
       ),
       axisLabel: { hideOverlap: true },
     },
-    yAxis: { type: "value", name: "日数", minInterval: 1 },
+    yAxis: { type: "value", name: t('日数'), minInterval: 1 },
     series: [
       {
-        name: "トレーニング日数",
+        name: t('トレーニング日数'),
         type: "bar",
         data: rows.map((row) => row.trainingDays),
       },
@@ -80,12 +81,12 @@ const weightOption = computed<EChartsOption>(() => ({
         : params;
       const row = sortedWeights.value[item?.dataIndex ?? 0];
       return row
-        ? `${row.exerciseName}<br/>増加重量：${formatKg(row.improvementKg)} kg<br/>増加率：${formatRate(row.improvementRate)}<br/>自己ベスト：${formatKg(row.personalBestWeightKg)} kg`
+        ? t('{0}<br/>増加重量：{1} kg<br/>増加率：{2}<br/>自己ベスト：{3} kg', { 0: row.exerciseName, 1: formatKg(row.improvementKg), 2: formatRate(row.improvementRate), 3: formatKg(row.personalBestWeightKg) })
         : "";
     },
   },
   grid: { left: 110, right: 28, top: 20, bottom: 40 },
-  xAxis: { type: "value", name: "増加重量（kg）" },
+  xAxis: { type: "value", name: t('増加重量（kg）') },
   yAxis: {
     type: "category",
     inverse: true,
@@ -96,7 +97,7 @@ const weightOption = computed<EChartsOption>(() => ({
   },
   series: [
     {
-      name: "増加重量",
+      name: t('増加重量'),
       type: "bar",
       data: sortedWeights.value.map(
         (row) => row.improvementKg,
@@ -119,15 +120,15 @@ const balanceOption = computed<EChartsOption>(() => {
         label: { formatter: "{b}\n{d}%" },
         data: [
           {
-            name: "フィジカル",
+            name: t('フィジカル'),
             value: balance?.physicalRecordRate ?? 0,
           },
           {
-            name: "技術練習",
+            name: t('技術練習'),
             value: balance?.skillRecordRate ?? 0,
           },
           {
-            name: "その他",
+            name: t('その他'),
             value: balance?.otherRecordRate ?? 0,
           },
         ],
@@ -140,11 +141,10 @@ function formatDate(date: Date): string {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
 }
 function formatShortDate(value: string): string {
-  return `${Number(value.slice(5, 7))}/${Number(value.slice(8, 10))}週`;
+  return t('{0}/{1}週', { 0: Number(value.slice(5, 7)), 1: Number(value.slice(8, 10)) });
 }
 function formatJapaneseDate(value: string): string {
-  const [y, m, d] = value.split("-").map(Number);
-  return `${y}年${m}月${d}日`;
+  return formatLocalDate(value);
 }
 function formatKg(value: number): string {
   return Number.isInteger(value)
@@ -159,19 +159,19 @@ function disableFutureDate(value: DateLike): boolean {
 }
 function getErrorMessage(error: unknown): string {
   if (!axios.isAxiosError(error))
-    return "トレーニング分析データの取得に失敗しました。";
+    return 'トレーニング分析データの取得に失敗しました。';
   switch (error.response?.status) {
     case 404:
-      return "対象ユーザーまたは分析可能なデータが見つかりませんでした。";
+      return '対象ユーザーまたは分析可能なデータが見つかりませんでした。';
     case 400:
     case 422:
-      return "入力した分析期間を確認してください。";
+      return '入力した分析期間を確認してください。';
     case 503:
-      return "分析サービスまたはデータサービスに接続できませんでした。";
+      return '分析サービスまたはデータサービスに接続できませんでした。';
     case 504:
-      return "分析処理またはデータ取得がタイムアウトしました。";
+      return '分析処理またはデータ取得がタイムアウトしました。';
     default:
-      return "トレーニング分析データの取得に失敗しました。";
+      return 'トレーニング分析データの取得に失敗しました。';
   }
 }
 async function loadAnalysis(): Promise<void> {
@@ -181,7 +181,7 @@ async function loadAnalysis(): Promise<void> {
     selectedRange.value[0] > selectedRange.value[1]
   ) {
     errorMessage.value =
-      "開始日と終了日を正しく入力してください。";
+      '開始日と終了日を正しく入力してください。';
     return;
   }
   const currentRequest = ++requestId;
@@ -213,18 +213,18 @@ onMounted(() => void loadAnalysis());
   >
     <a-card class="page-intro" :bordered="false">
       <a-typography-title id="statistics-title" :level="2"
-        >統計</a-typography-title
+        >{{ t('統計') }}</a-typography-title
       >
       <a-typography-paragraph
         class="description"
         type="secondary"
-        >トレーニングの継続性や成長傾向を詳しく確認できます。</a-typography-paragraph
+        >{{ t('トレーニングの継続性や成長傾向を詳しく確認できます。') }}</a-typography-paragraph
       >
     </a-card>
-    <a-card title="分析期間" :bordered="false">
+    <a-card :title="t('分析期間')" :bordered="false">
       <div class="period-controls">
         <a-form-item
-          label="開始日・終了日"
+          :label="t('開始日・終了日')"
           class="period-field"
           required
         >
@@ -232,22 +232,22 @@ onMounted(() => void loadAnalysis());
             v-model:value="selectedRange"
             :disabled-date="disableFutureDate"
             value-format="YYYY-MM-DD"
-            format="YYYY年MM月DD日"
+            :format="t('YYYY年MM月DD日')"
             :allow-clear="false"
-            :placeholder="['開始日', '終了日']"
+            :placeholder="[t('開始日'), t('終了日')]"
           />
         </a-form-item>
         <a-button
           type="primary"
           :loading="loading"
           @click="loadAnalysis"
-          >分析する</a-button
+          >{{ t('分析する') }}</a-button
         >
       </div>
     </a-card>
     <a-alert
       v-if="errorMessage"
-      :message="errorMessage"
+      :message="t(errorMessage)"
       type="error"
       show-icon
     >
@@ -257,14 +257,14 @@ onMounted(() => void loadAnalysis());
           size="small"
           :loading="loading"
           @click="loadAnalysis"
-          >再試行</a-button
+          >{{ t('再試行') }}</a-button
         ></template
       >
     </a-alert>
 
     <a-spin
       :spinning="loading"
-      tip="トレーニングデータを分析しています。"
+      :tip="t('トレーニングデータを分析しています。')"
     >
       <div
         v-if="report && !loading"
@@ -272,80 +272,80 @@ onMounted(() => void loadAnalysis());
       >
         <a-empty
           v-if="isEntirelyEmpty"
-          description="選択した期間には分析可能なトレーニングデータがありません。"
+          :description="t('選択した期間には分析可能なトレーニングデータがありません。')"
         />
         <template v-else>
           <a-card
-            title="トレーニング継続性"
+            :title="t('トレーニング継続性')"
             :bordered="false"
             ><a-row :gutter="[8, 8]">
               <a-col :xs="12" :sm="12" :xl="6"
                 ><div class="metric">
                   <CalendarOutlined /><span
-                    >週平均トレーニング日数</span
+                    >{{ t('週平均トレーニング日数') }}</span
                   ><strong
                     >{{
                       report.frequency.trainingDaysPerWeek.toFixed(
                         1,
                       )
-                    }}日</strong
+                    }}{{ t('日') }}</strong
                   >
                 </div></a-col
               >
               <a-col :xs="12" :sm="12" :xl="6"
                 ><div class="metric">
-                  <FireOutlined /><span>最長連続日数</span
+                  <FireOutlined /><span>{{ t('最長連続日数') }}</span
                   ><strong
                     >{{
                       report.frequency
                         .longestTrainingStreakDays
-                    }}日</strong
+                    }}{{ t('日') }}</strong
                   >
                 </div></a-col
               >
               <a-col :xs="12" :sm="12" :xl="6"
                 ><div class="metric">
-                  <RiseOutlined /><span>現在の連続日数</span
+                  <RiseOutlined /><span>{{ t('現在の連続日数') }}</span
                   ><strong
                     >{{
                       report.frequency
                         .currentTrainingStreakDays
-                    }}日</strong
+                    }}{{ t('日') }}</strong
                   >
                 </div></a-col
               >
               <a-col :xs="12" :sm="12" :xl="6"
                 ><div class="metric">
                   <FieldTimeOutlined /><span
-                    >最終トレーニングからの日数</span
+                    >{{ t('最終トレーニングからの日数') }}</span
                   ><strong>{{
                     report.frequency
                       .daysSinceLastTraining === null
                       ? "－"
-                      : `${report.frequency.daysSinceLastTraining}日`
+                      : t('{0}日', { 0: report.frequency.daysSinceLastTraining })
                   }}</strong>
                 </div></a-col
               >
             </a-row></a-card
           >
           <a-card
-            title="週別トレーニング傾向"
+            :title="t('週別トレーニング傾向')"
             :bordered="false"
             ><BaseEChart
               :option="weeklyOption"
               :empty="
                 report.frequency.weeklyTrend.length === 0
               "
-              empty-description="週別傾向を表示するデータがありません。"
+              :empty-description="t('週別傾向を表示するデータがありません。')"
               height="260px"
           /></a-card>
 
           <div class="two-column">
-            <a-card title="重量成長分析" :bordered="false">
+            <a-card :title="t('重量成長分析')" :bordered="false">
               <BaseEChart
                 :option="weightOption"
                 :empty="sortedWeights.length === 0"
-                empty-description="重量の分析に必要なデータがありません。"
+                :empty-description="t('重量の分析に必要なデータがありません。')"
                 :height="`${Math.max(240, Math.min(sortedWeights.length, 10) * 32 + 80)}px`"
               />
               <div
@@ -359,12 +359,12 @@ onMounted(() => void loadAnalysis());
                 >
                   <strong>{{ item.exerciseName }}</strong
                   ><span
-                    >自己ベスト：{{
+                    >{{ t('自己ベスト：') }}{{
                       formatKg(item.personalBestWeightKg)
                     }}
                     kg</span
                   ><span
-                    >達成日：{{
+                    >{{ t('達成日：') }}{{
                       formatJapaneseDate(
                         item.personalBestDate,
                       )
@@ -374,7 +374,7 @@ onMounted(() => void loadAnalysis());
               </div>
             </a-card>
             <a-card
-              title="トレーニングバランス"
+              :title="t('トレーニングバランス')"
               :bordered="false"
             >
               <BaseEChart
@@ -388,13 +388,13 @@ onMounted(() => void loadAnalysis());
                       .otherRecordCount ===
                   0
                 "
-                empty-description="練習比率を表示するデータがありません。"
+                :empty-description="t('練習比率を表示するデータがありません。')"
                 height="260px"
               />
               <a-typography-paragraph
                 class="note"
                 type="secondary"
-                >種目カテゴリー名を基に分類しています。</a-typography-paragraph
+                >{{ t('種目カテゴリー名を基に分類しています。') }}</a-typography-paragraph
               >
               <a-alert
                 v-if="
@@ -403,21 +403,21 @@ onMounted(() => void loadAnalysis());
                 "
                 type="warning"
                 show-icon
-                :message="`分類を確認する必要があるカテゴリー：${report.trainingBalance.unclassifiedCategories.join('、')}`"
+                :message="t('分類を確認する必要があるカテゴリー：{0}', { 0: report.trainingBalance.unclassifiedCategories.join('、') })"
               />
             </a-card>
           </div>
 
           <div>
             <a-card
-              title="対戦相手別分析"
+              :title="t('対戦相手別分析')"
               :bordered="false"
             >
               <a-empty
                 v-if="
                   report.matches.byOpponent.length === 0
                 "
-                description="対戦分析に必要な試合データがありません。"
+                :description="t('対戦分析に必要な試合データがありません。')"
               />
               <div v-else>
                 <div
@@ -438,9 +438,9 @@ onMounted(() => void loadAnalysis());
                         `${(percent ?? 0).toFixed(1)}%`
                     "
                   /><span class="secondary"
-                    >対戦回数：{{
+                    >{{ t('対戦回数：') }}{{
                       opponent.matchCount
-                    }}回</span
+                    }}{{ t('回') }}</span
                   >
                 </div>
               </div>
@@ -450,7 +450,7 @@ onMounted(() => void loadAnalysis());
             v-if="warnings.length"
             type="warning"
             show-icon
-            message="分析時の確認事項"
+            :message="t('分析時の確認事項')"
             ><template #description
               ><ul class="warning-list">
                 <li

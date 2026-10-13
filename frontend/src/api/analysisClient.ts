@@ -1,3 +1,4 @@
+import { t } from '../i18n';
 import axios from 'axios'
 import { getAccessToken, getBearerToken, isAccessTokenValid, notifyUnauthorized } from '../utils/authSession'
 
@@ -11,7 +12,7 @@ analysisClient.interceptors.request.use(config => {
   const token = getAccessToken()
   if (!isAccessTokenValid(token)) {
     notifyUnauthorized(token)
-    return Promise.reject(new axios.CanceledError('ログイン情報が無効です。', config))
+    return Promise.reject(new axios.CanceledError(t('ログイン情報が無効です。'), config))
   }
   config.headers.Authorization = `Bearer ${token}`
   return config

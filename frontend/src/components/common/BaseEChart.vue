@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { locale, t } from '../../i18n';
 import { nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { use } from 'echarts/core'
 import { BarChart, LineChart, PieChart } from 'echarts/charts'
@@ -67,8 +68,8 @@ watch(() => props.empty, async (empty) => {
     renderChart()
   }
 })
-watch(() => props.loading, (loading) => {
-  if (loading) chart?.showLoading('default', { text: '読み込み中...' })
+watch([() => props.loading, locale], ([loading]) => {
+  if (loading) chart?.showLoading('default', { text: t('読み込み中...') })
   else chart?.hideLoading()
 }, { immediate: true })
 
@@ -81,9 +82,9 @@ onBeforeUnmount(() => {
 
 <template>
   <div class="chart-wrapper" :style="{ height }">
-    <a-empty v-if="empty && !loading" :description="emptyDescription" class="chart-empty" />
+    <a-empty v-if="empty && !loading" :description="emptyDescription === '表示するデータがありません。' ? t('表示するデータがありません。') : emptyDescription" class="chart-empty" />
     <div v-show="!empty" ref="container" class="chart-container" />
-    <div v-if="loading && empty" class="chart-loading"><a-spin tip="読み込み中..." /></div>
+    <div v-if="loading && empty" class="chart-loading"><a-spin :tip="t('読み込み中...')" /></div>
   </div>
 </template>
 

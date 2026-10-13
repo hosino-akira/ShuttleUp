@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { t } from '../../i18n';
 import { computed } from "vue";
 import type { TrainingSession } from "../../types/trainingSession";
 
@@ -38,19 +39,19 @@ const statistics = computed<readonly StatisticItem[]>(
 
     return [
       {
-        title: "トレーニング回数",
+        title: t('トレーニング回数'),
         value: props.sessions.length,
-        suffix: "回",
+        suffix: t('回'),
         precision: 0,
       },
       {
-        title: "累計時間",
+        title: t('累計時間'),
         value: totalMinutes / 60,
-        suffix: "時間",
+        suffix: t('時間'),
         precision: 1,
       },
       {
-        title: "平均コンディション",
+        title: t('平均コンディション'),
         value: averageFeeling,
         suffix: "/ 5",
         precision: 1,
