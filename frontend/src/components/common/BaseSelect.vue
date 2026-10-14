@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { t } from '../../i18n';
+import { selectPopupContainer } from '../../utils/selectPopupContainer';
 export interface SelectOption {
   value: number;
   label: string;
@@ -56,6 +57,8 @@ function filterOption(
     :loading="loading"
     :disabled="disabled"
     :allow-clear="allowClear"
+    :get-popup-container="selectPopupContainer"
+    :dropdown-style="{ pointerEvents: 'auto' }"
     show-search
     option-filter-prop="label"
     :filter-option="filterOption"

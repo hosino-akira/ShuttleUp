@@ -30,33 +30,42 @@ const submitting = ref(false)
 let typeRequestId = 0
 const form = reactive({ categoryId: undefined as number | undefined, exerciseTypeId: undefined as number | undefined, name: "" })
 const categoryOptions = computed(() => categories.value.map(item => ({ value: item.id, label: item.name })))
-const typeOptions = computed(() => types.value.map(item => ({ value: item.id, label: item.name })))
+const filteredTypes = computed(() => types.value.filter(item => form.categoryId == null || item.categoryId === form.categoryId))
+const typeOptions = computed(() => filteredTypes.value.map(item => ({ value: item.id, label: item.name })))
 
-async function loadCategories() {
-  categoriesLoading.value = true
-  try { categories.value = await getExerciseCategories() }
-  catch (error) { console.error(error); message.error(t('大分類の取得に失敗しました。')) }
-  finally { categoriesLoading.value = false }
-}
-
-async function loadTypes(categoryId: number, selectedTypeId?: number) {
+async function loadCategoriesAndTypes() {
   const requestId = ++typeRequestId
+  categoriesLoading.value = true
   typesLoading.value = true
   try {
-    const loaded = await getExerciseTypes(categoryId)
+    const loaded = await getExerciseCategories()
     if (requestId !== typeRequestId) return
-    types.value = loaded
-    if (selectedTypeId && loaded.some(item => item.id === selectedTypeId)) form.exerciseTypeId = selectedTypeId
+    categories.value = loaded
+  } catch (error) {
+    if (requestId === typeRequestId) {
+      console.error(error); message.error(t('大分類の取得に失敗しました。'))
+      typesLoading.value = false
+    }
+    return
+  } finally { if (requestId === typeRequestId) categoriesLoading.value = false }
+  try {
+    const loaded = await Promise.all(categories.value.map(category => getExerciseTypes(category.id)))
+    if (requestId !== typeRequestId) return
+    types.value = loaded.flat()
+    if (form.exerciseTypeId != null && !filteredTypes.value.some(item => item.id === form.exerciseTypeId)) {
+      form.exerciseTypeId = undefined
+    }
   } catch (error) {
     if (requestId !== typeRequestId) return
     console.error(error); message.error(t('中分類の取得に失敗しました。'))
   } finally { if (requestId === typeRequestId) typesLoading.value = false }
 }
 
-async function handleCategoryChange(categoryId: number | undefined) {
-  form.exerciseTypeId = undefined
-  types.value = []
-  if (categoryId) await loadTypes(categoryId)
+function handleCategoryChange(categoryId: number | undefined) {
+  form.categoryId = categoryId
+  if (form.exerciseTypeId != null && !filteredTypes.value.some(item => item.id === form.exerciseTypeId)) {
+    form.exerciseTypeId = undefined
+  }
 }
 
 function close() {
@@ -64,6 +73,7 @@ function close() {
 }
 
 async function submit() {
+  if (submitting.value || categoriesLoading.value || typesLoading.value) return
   try { await formRef.value?.validate() } catch { return }
   if (!form.exerciseTypeId || submitting.value) return
   submitting.value = true
@@ -78,29 +88,35 @@ async function submit() {
 
 watch(() => props.open, async open => {
   resetLocalizedValidation()
-  if (!open) { typeRequestId++; formRef.value?.resetFields(); types.value = []; return }
-  Object.assign(form, { categoryId: props.initialCategoryId, exerciseTypeId: undefined, name: "" })
+  if (!open) {
+    typeRequestId++
+    categoriesLoading.value = false
+    typesLoading.value = false
+    types.value = []
+    return
+  }
+  Object.assign(form, { categoryId: props.initialCategoryId, exerciseTypeId: props.initialExerciseTypeId, name: "" })
+  types.value = []
   formRef.value?.clearValidate()
-  if (categories.value.length === 0) await loadCategories()
-  if (form.categoryId) await loadTypes(form.categoryId, props.initialExerciseTypeId)
-})
+  await loadCategoriesAndTypes()
+}, { immediate: true })
 </script>
 
 <template>
   <BaseSmallModal :open="open" :title="t('新規種目登録')" :loading="submitting" @update:open="close">
     <a-form ref="formRef" :model="form" layout="vertical" @validate="onFormValidate">
-      <a-form-item :label="t('大分類')" name="categoryId" :rules="[{ required: true, message: t('大分類を選択してください。') }]">
+      <a-form-item :label="t('大分類')" name="categoryId">
         <BaseSelect v-model:value="form.categoryId" :options="categoryOptions" :loading="categoriesLoading" :placeholder="t('大分類を選択')" @change="handleCategoryChange" />
       </a-form-item>
       <a-form-item :label="t('中分類')" name="exerciseTypeId" :rules="[{ required: true, message: t('中分類を選択してください。') }]">
-        <BaseSelect v-model:value="form.exerciseTypeId" :options="typeOptions" :loading="typesLoading" :disabled="!form.categoryId" :placeholder="t('中分類を選択')" />
+        <BaseSelect v-model:value="form.exerciseTypeId" :options="typeOptions" :loading="typesLoading" :placeholder="t('中分類を選択')" />
       </a-form-item>
       <a-form-item :label="t('種目名')" name="name" :rules="[{ required: true, whitespace: true, message: t('種目名を入力してください。') }, { max: 100, message: t('種目名は100文字以内で入力してください。') }]">
         <a-input v-model:value="form.name" :maxlength="100" :placeholder="t('種目名を入力')" @press-enter="submit" />
       </a-form-item>
     </a-form>
     <template #footer>
-      <div class="modal-footer"><a-button :disabled="submitting" @click="close">{{ t('キャンセル') }}</a-button><a-button type="primary" :loading="submitting" @click="submit">{{ t('登録') }}</a-button></div>
+      <div class="modal-footer"><a-button :disabled="submitting" @click="close">{{ t('キャンセル') }}</a-button><a-button type="primary" :disabled="categoriesLoading || typesLoading" :loading="submitting" @click="submit">{{ t('登録') }}</a-button></div>
     </template>
   </BaseSmallModal>
 </template>

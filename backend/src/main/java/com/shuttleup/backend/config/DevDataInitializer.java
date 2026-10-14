@@ -7,134 +7,81 @@ import com.shuttleup.backend.repository.ExerciseCategoryRepository;
 import com.shuttleup.backend.repository.ExerciseRepository;
 import com.shuttleup.backend.repository.ExerciseTypeRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
+import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.List;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
-@Configuration
+@Component
 @Profile("dev")
 @RequiredArgsConstructor
-public class DevDataInitializer {
-
+@Slf4j
+public class DevDataInitializer implements CommandLineRunner {
     private final ExerciseCategoryRepository categoryRepository;
     private final ExerciseTypeRepository typeRepository;
     private final ExerciseRepository exerciseRepository;
 
-    @Bean
+    private record TypeKey(Long categoryId, String name) {}
+    private record ExerciseKey(Long typeId, String name) {}
+
+    /** 起動ごとに不足分のみ補完する。既存ID・表示設定・ユーザー種目は保持する。 */
+    @Override
     @Transactional
-    CommandLineRunner initializeExerciseMasterData() {
-        return args -> {
-            if (categoryRepository.existsByName("フィジカル")) {
-                return;
+    public void run(String... args) {
+        Map<String, ExerciseCategory> categories = new HashMap<>();
+        categoryRepository.findAll().forEach(category -> categories.putIfAbsent(category.getName(), category));
+        Map<TypeKey, ExerciseType> types = new HashMap<>();
+        typeRepository.findAll().forEach(type -> types.putIfAbsent(
+                new TypeKey(type.getCategory().getId(), type.getName()), type));
+        Set<ExerciseKey> exercises = new HashSet<>();
+        exerciseRepository.findBySystemPresetTrue().forEach(exercise -> exercises.add(
+                new ExerciseKey(exercise.getExerciseType().getId(), exercise.getName())));
+
+        LocalDateTime now = LocalDateTime.now();
+        int addedCategories = 0;
+        int addedTypes = 0;
+        int addedExercises = 0;
+        int categoryOrder = 0;
+        for (var categoryPreset : ExercisePresetCatalog.categories()) {
+            categoryOrder++;
+            ExerciseCategory category = categories.get(categoryPreset.name());
+            if (category == null) {
+                category = categoryRepository.save(ExerciseCategory.builder()
+                        .name(categoryPreset.name()).displayOrder(categoryOrder).enabled(true)
+                        .createdAt(now).updatedAt(now).build());
+                categories.put(category.getName(), category);
+                addedCategories++;
             }
-
-            LocalDateTime now = LocalDateTime.now();
-
-            ExerciseCategory physicalCategory =
-                    categoryRepository.save(
-                            ExerciseCategory.builder()
-                                    .name("フィジカル")
-                                    .displayOrder(1)
-                                    .enabled(true)
-                                    .createdAt(now)
-                                    .updatedAt(now)
-                                    .build()
-                    );
-
-            ExerciseCategory badmintonCategory =
-                    categoryRepository.save(
-                            ExerciseCategory.builder()
-                                    .name("バドミントン")
-                                    .displayOrder(2)
-                                    .enabled(true)
-                                    .createdAt(now)
-                                    .updatedAt(now)
-                                    .build()
-                    );
-
-            ExerciseType strengthType =
-                    typeRepository.save(
-                            ExerciseType.builder()
-                                    .category(physicalCategory)
-                                    .name("筋力")
-                                    .displayOrder(1)
-                                    .enabled(true)
-                                    .createdAt(now)
-                                    .updatedAt(now)
-                                    .build()
-                    );
-
-            ExerciseType powerType =
-                    typeRepository.save(
-                            ExerciseType.builder()
-                                    .category(physicalCategory)
-                                    .name("パワー")
-                                    .displayOrder(2)
-                                    .enabled(true)
-                                    .createdAt(now)
-                                    .updatedAt(now)
-                                    .build()
-                    );
-
-            ExerciseType strokeType =
-                    typeRepository.save(
-                            ExerciseType.builder()
-                                    .category(badmintonCategory)
-                                    .name("ストローク")
-                                    .displayOrder(1)
-                                    .enabled(true)
-                                    .createdAt(now)
-                                    .updatedAt(now)
-                                    .build()
-                    );
-
-            ExerciseType footworkType =
-                    typeRepository.save(
-                            ExerciseType.builder()
-                                    .category(badmintonCategory)
-                                    .name("フットワーク")
-                                    .displayOrder(2)
-                                    .enabled(true)
-                                    .createdAt(now)
-                                    .updatedAt(now)
-                                    .build()
-                    );
-
-            exerciseRepository.saveAll(
-                    List.of(
-                            createExercise("スクワット", strengthType, now),
-                            createExercise("ベンチプレス", strengthType, now),
-                            createExercise("デッドリフト", strengthType, now),
-
-                            createExercise("クリーン", powerType, now),
-                            createExercise("ボックスジャンプ", powerType, now),
-
-                            createExercise("スマッシュ", strokeType, now),
-                            createExercise("クリア", strokeType, now),
-                            createExercise("ドロップ", strokeType, now),
-
-                            createExercise("フットワーク練習", footworkType, now)
-                    )
-            );
-        };
-    }
-
-    private Exercise createExercise(
-            String name,
-            ExerciseType exerciseType,
-            LocalDateTime now
-    ) {
-        return Exercise.builder()
-                .exerciseType(exerciseType)
-                .name(name)
-                .systemPreset(true)
-                .createdAt(now)
-                .updatedAt(now)
-                .build();
+            int typeOrder = 0;
+            for (var typePreset : categoryPreset.types()) {
+                typeOrder++;
+                TypeKey typeKey = new TypeKey(category.getId(), typePreset.name());
+                ExerciseType type = types.get(typeKey);
+                if (type == null) {
+                    type = typeRepository.save(ExerciseType.builder()
+                            .category(category).name(typePreset.name()).displayOrder(typeOrder).enabled(true)
+                            .createdAt(now).updatedAt(now).build());
+                    types.put(typeKey, type);
+                    addedTypes++;
+                }
+                for (String name : typePreset.exercises()) {
+                    if (exercises.add(new ExerciseKey(type.getId(), name))) {
+                        exerciseRepository.save(Exercise.builder()
+                                .exerciseType(type).name(name).systemPreset(true)
+                                .createdAt(now).updatedAt(now).build());
+                        addedExercises++;
+                    }
+                }
+            }
+        }
+        log.info("Exercise presets added: {} categories, {} types, {} exercises",
+                addedCategories, addedTypes, addedExercises);
     }
 }

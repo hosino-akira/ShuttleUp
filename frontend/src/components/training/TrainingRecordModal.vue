@@ -2,7 +2,6 @@
 import { t } from '../../i18n';
 import {
   computed,
-  onMounted,
   reactive,
   ref,
   watch,
@@ -34,6 +33,7 @@ import BaseSelect from "../common/BaseSelect.vue";
 import ExerciseCreateModal from "./ExerciseCreateModal.vue";
 import { useUnsavedChanges } from "../../composables/useUnsavedChanges";
 import { useLocalizedForm } from '../../composables/useLocalizedForm';
+import { useExerciseFilters } from '../../composables/useExerciseFilters';
 
 type Mode = "create" | "edit";
 type ConfirmAction = "save" | "delete";
@@ -56,8 +56,6 @@ const { onValidate: onFormValidate, reset: resetLocalizedValidation } = useLocal
 const categories = ref<ExerciseCategoryResponse[]>([]);
 const exerciseTypes = ref<ExerciseTypeResponse[]>([]);
 const exercises = ref<ExerciseResponse[]>([]);
-const categoryId = ref<number>();
-const exerciseTypeId = ref<number>();
 const categoriesLoading = ref(false);
 const typesLoading = ref(false);
 const exercisesLoading = ref(false);
@@ -86,6 +84,14 @@ const emptyForm = (): TrainingRecordForm => ({
   note: null,
 });
 const form = reactive<TrainingRecordForm>(emptyForm());
+const {
+  categoryId,
+  exerciseTypeId,
+  filteredTypes,
+  filteredExercises,
+  handleCategoryChange,
+  handleExerciseTypeChange,
+} = useExerciseFilters(exerciseTypes, exercises, form);
 const { reset: resetDirtyState, confirmLeave } = useUnsavedChanges(
   () => ({
     categoryId: categoryId.value ?? null,
@@ -106,47 +112,41 @@ const categoryOptions = computed(() =>
   })),
 );
 const exerciseTypeOptions = computed(() =>
-  exerciseTypes.value.map((item) => ({
+  filteredTypes.value.map((item) => ({
     value: item.id,
     label: item.name,
   })),
 );
 const exerciseOptions = computed(() =>
-  exercises.value.map((exercise) => ({
+  filteredExercises.value.map((exercise) => ({
     value: exercise.id,
     label: exercise.name,
   })),
 );
 
 async function loadCategories(): Promise<void> {
-  categoriesLoading.value = true;
-  try {
-    categories.value = await getExerciseCategories();
-  } catch (error) {
-    console.error(error);
-    message.error(t('大分類の取得に失敗しました。'));
-  } finally {
-    categoriesLoading.value = false;
-  }
-}
-
-async function loadExerciseTypes(
-  selectedCategoryId: number,
-  selectedTypeId?: number,
-): Promise<void> {
   const requestId = ++typeRequestId;
+  categoriesLoading.value = true;
   typesLoading.value = true;
   try {
-    const loaded = await getExerciseTypes(
-      selectedCategoryId,
-    );
+    const loaded = await getExerciseCategories();
     if (requestId !== typeRequestId) return;
-    exerciseTypes.value = loaded;
-    if (
-      selectedTypeId &&
-      loaded.some((item) => item.id === selectedTypeId)
-    )
-      exerciseTypeId.value = selectedTypeId;
+    categories.value = loaded;
+  } catch (error) {
+    if (requestId === typeRequestId) {
+      console.error(error);
+      message.error(t('大分類の取得に失敗しました。'));
+      typesLoading.value = false;
+    }
+    return;
+  } finally {
+    if (requestId === typeRequestId) categoriesLoading.value = false;
+  }
+  try {
+    // 全大分類の中分類を取得し、選択された条件でローカルに絞り込む。
+    const loaded = await Promise.all(categories.value.map(category => getExerciseTypes(category.id)));
+    if (requestId !== typeRequestId) return;
+    exerciseTypes.value = loaded.flat();
   } catch (error) {
     if (requestId === typeRequestId) {
       console.error(error);
@@ -158,24 +158,16 @@ async function loadExerciseTypes(
   }
 }
 
-async function loadExercises(
-  selectedTypeId: number,
-  selectedExerciseId?: number,
-): Promise<void> {
+async function loadExercises(): Promise<void> {
   const requestId = ++exerciseRequestId;
   exercisesLoading.value = true;
   try {
     const loaded = await getExercises(
-      selectedTypeId,
+      undefined,
       props.userId,
     );
     if (requestId !== exerciseRequestId) return;
     exercises.value = loaded;
-    if (
-      selectedExerciseId &&
-      loaded.some((item) => item.id === selectedExerciseId)
-    )
-      form.exerciseId = selectedExerciseId;
   } catch (error: unknown) {
     if (requestId === exerciseRequestId) {
       console.error(error);
@@ -187,49 +179,25 @@ async function loadExercises(
   }
 }
 
-async function handleCategoryChange(
-  value: number | undefined,
-): Promise<void> {
-  typeRequestId++;
-  exerciseRequestId++;
-  exerciseTypeId.value = undefined;
-  form.exerciseId = 0;
-  exerciseTypes.value = [];
-  exercises.value = [];
-  if (value) await loadExerciseTypes(value);
-}
-
-async function handleExerciseTypeChange(
-  value: number | undefined,
-): Promise<void> {
-  exerciseRequestId++;
-  form.exerciseId = 0;
-  exercises.value = [];
-  if (value) await loadExercises(value);
-}
-
-async function handleExerciseCreated(
+function handleExerciseCreated(
   exercise: ExerciseResponse,
-): Promise<void> {
+): void {
+  exerciseRequestId++;
+  exercisesLoading.value = false;
+  exercises.value = [...exercises.value.filter(item => item.id !== exercise.id), exercise];
   categoryId.value = exercise.categoryId;
-  exerciseTypeId.value = undefined;
-  exerciseTypes.value = [];
-  exercises.value = [];
-  await loadExerciseTypes(
-    exercise.categoryId,
-    exercise.exerciseTypeId,
-  );
-  await loadExercises(exercise.exerciseTypeId, exercise.id);
+  exerciseTypeId.value = exercise.exerciseTypeId;
+  form.exerciseId = exercise.id;
 }
-
-onMounted(async () => {
-  await loadCategories();
-});
 
 watch(
   () => props.open,
   async (open) => {
-    if (!open) return;
+    if (!open) {
+      typeRequestId++;
+      exerciseRequestId++;
+      return;
+    }
     Object.assign(
       form,
       props.record
@@ -253,19 +221,9 @@ watch(
     formRef.value?.clearValidate();
     resetLocalizedValidation();
     resetDirtyState();
-    if (categories.value.length === 0)
-      await loadCategories();
-    if (props.record) {
-      await loadExerciseTypes(
-        props.record.categoryId,
-        props.record.exerciseTypeId,
-      );
-      await loadExercises(
-        props.record.exerciseTypeId,
-        props.record.exerciseId,
-      );
-    }
+    await Promise.all([loadCategories(), loadExercises()]);
   },
+  { immediate: true },
 );
 
 async function requestClose(): Promise<void> {
@@ -364,7 +322,6 @@ async function executeAction(): Promise<void> {
               v-model:value="exerciseTypeId"
               :options="exerciseTypeOptions"
               :loading="typesLoading"
-              :disabled="!categoryId"
               :placeholder="t('中分類を選択')"
               @change="handleExerciseTypeChange"
             /> </a-form-item
@@ -387,11 +344,10 @@ async function executeAction(): Promise<void> {
                 v-model:value="form.exerciseId"
                 :options="exerciseOptions"
                 :loading="exercisesLoading"
-                :disabled="!exerciseTypeId"
                 :placeholder="t('種目を選択')"
               /><a-button
                 type="primary"
-                :disabled="categoriesLoading"
+                :disabled="categoriesLoading || typesLoading || exercisesLoading"
                 @click="exerciseCreateOpen = true"
                 >{{ t('新規') }}</a-button
               >

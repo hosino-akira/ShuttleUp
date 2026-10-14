@@ -10,6 +10,8 @@ import java.util.List;
 public interface ExerciseRepository
         extends JpaRepository<Exercise, Long> {
 
+    List<Exercise> findBySystemPresetTrue();
+
     @Query("""
             select e from Exercise e
             where (:exerciseTypeId is null or e.exerciseType.id = :exerciseTypeId)
