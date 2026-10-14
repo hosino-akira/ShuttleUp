@@ -5,8 +5,7 @@ import axios from "axios";
 import { useRoute, useRouter } from "vue-router";
 import { useAuthStore } from "../stores/auth";
 import { resolveAuthRedirect } from "../router";
-import LanguageSwitcher from '../components/common/LanguageSwitcher.vue';
-import ThemeSwitcher from '../components/common/ThemeSwitcher.vue';
+import AuthShell from '../components/auth/AuthShell.vue';
 import type { FormInstance } from 'ant-design-vue';
 import { useLocalizedForm } from '../composables/useLocalizedForm';
 
@@ -48,15 +47,11 @@ async function handleSubmit(): Promise<void> {
 </script>
 
 <template>
-  <main class="login-page">
+  <AuthShell>
     <section
       class="login-card"
       aria-labelledby="login-title"
     >
-      <div class="auth-card-header">
-        <span class="brand-name">ShuttleUp</span>
-        <div class="auth-preferences"><ThemeSwitcher /><LanguageSwitcher /></div>
-      </div>
       <h1 id="login-title" class="app-page-title">{{ t('ログイン') }}</h1>
       <p>{{ t('トレーニングの記録を続けましょう。') }}</p>
 
@@ -114,48 +109,23 @@ async function handleSubmit(): Promise<void> {
         <RouterLink class="app-button" :to="{ name: 'register', query: { redirect: route.query.redirect } }">{{ t('アカウント登録') }}</RouterLink>
       </div>
     </section>
-  </main>
+  </AuthShell>
 </template>
 
 <style scoped>
-.login-page {
-  display: grid;
-  height: 100%;
-  padding: 16px;
-  overflow-y: auto;
-  background: var(--app-page-color);
-}
-
 .login-card {
   width: 100%;
-  max-width: 420px;
-  margin: auto;
-  padding: 20px;
-  border: 1px solid var(--app-border-color);
-  border-radius: 10px;
-  background: var(--app-surface-color);
-  box-shadow: 0 8px 32px rgb(0 0 0 / 4%);
 }
 
-.brand-name {
-  display: inline-block;
-  margin-bottom: 12px;
-  color: var(--app-primary-color);
-  font-size: 20px;
-  font-weight: 700;
-}
-
-.auth-card-header { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 12px; }
-.auth-preferences { display: flex; flex-wrap: wrap; gap: 8px; }
 .register-link .app-button { margin-inline-start: 6px; }
 
 h1 {
-  margin: 0 0 4px;
+  margin: 0 0 10px;
   color: var(--app-heading-color);
 }
 
 p {
-  margin: 0 0 16px;
+  margin: 0 0 28px;
   color: var(--app-muted-color);
 }
 
@@ -170,13 +140,9 @@ p {
   margin-bottom: 12px;
 }
 
-@media (max-width: 575px) {
-  .login-page {
-    padding: 16px;
-  }
-
-  .login-card {
-    padding: 16px;
-  }
-}
+.login-card :deep(.ant-input),
+.login-card :deep(.ant-input-affix-wrapper) { min-height: 42px; border-radius: 9px; }
+.login-card :deep(.ant-input-affix-wrapper .ant-input) { min-height: auto; }
+.login-card :deep(.ant-form-item) { margin-bottom: 20px; }
+.login-card :deep(.ant-btn-primary) { min-height: 44px; margin-top: 6px; font-size: 14px; }
 </style>

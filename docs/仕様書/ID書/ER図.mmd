@@ -1,0 +1,101 @@
+erDiagram
+    direction LR
+    exercise_types ||..o{ exercises : "exercise_type_id"
+    users |o..o{ exercises : "user_id"
+    exercise_categories ||..o{ exercise_types : "category_id"
+    training_sessions ||..o{ matches : "training_session_id"
+    opponents ||..o{ matches : "opponent_id"
+    users ||..o{ opponents : "user_id"
+    training_sessions ||..o{ training_records : "training_session_id"
+    exercises ||..o{ training_records : "exercise_id"
+    users ||..o{ training_sessions : "user_id"
+
+    exercises {
+        bigint id PK "BIGINT / NOT NULL"
+        bigint exercise_type_id FK "BIGINT / NOT NULL"
+        varchar name "VARCHAR(100) / NOT NULL"
+        boolean system_preset "BOOLEAN / NOT NULL"
+        bigint user_id FK "BIGINT / NULL可"
+        datetime created_at "DATETIME / NOT NULL"
+        datetime updated_at "DATETIME / NOT NULL"
+    }
+
+    exercise_categories {
+        bigint id PK "BIGINT / NOT NULL"
+        varchar name "VARCHAR(100) / NOT NULL"
+        int display_order "INT / NULL可"
+        boolean enabled "BOOLEAN / NOT NULL"
+        datetime created_at "DATETIME / NOT NULL"
+        datetime updated_at "DATETIME / NOT NULL"
+    }
+
+    exercise_types {
+        bigint id PK "BIGINT / NOT NULL"
+        bigint category_id FK "BIGINT / NOT NULL"
+        varchar name "VARCHAR(100) / NOT NULL"
+        int display_order "INT / NULL可"
+        boolean enabled "BOOLEAN / NOT NULL"
+        datetime created_at "DATETIME / NOT NULL"
+        datetime updated_at "DATETIME / NOT NULL"
+    }
+
+    matches {
+        bigint id PK "BIGINT / NOT NULL"
+        bigint training_session_id FK "BIGINT / NOT NULL"
+        bigint opponent_id FK "BIGINT / NOT NULL"
+        int my_score "INT / NULL可"
+        int opponent_score "INT / NULL可"
+        varchar video_url "VARCHAR(2048) / NULL可"
+        varchar note "VARCHAR(1000) / NULL可"
+        datetime created_at "DATETIME / NOT NULL"
+        datetime updated_at "DATETIME / NOT NULL"
+    }
+
+    opponents {
+        bigint id PK "BIGINT / NOT NULL"
+        bigint user_id FK "BIGINT / NOT NULL"
+        varchar name "VARCHAR(100) / NOT NULL"
+        varchar memo "VARCHAR(1000) / NULL可"
+        datetime created_at "DATETIME / NOT NULL"
+        datetime updated_at "DATETIME / NOT NULL"
+    }
+
+    training_records {
+        bigint id PK "BIGINT / NOT NULL"
+        bigint training_session_id FK "BIGINT / NOT NULL"
+        bigint exercise_id FK "BIGINT / NOT NULL"
+        int sets "INT / NULL可"
+        int repetitions "INT / NULL可"
+        double weight_kg "DOUBLE / NULL可"
+        int duration_minutes "INT / NULL可"
+        double distance_meters "DOUBLE / NULL可"
+        int success_count "INT / NULL可"
+        int attempt_count "INT / NULL可"
+        varchar note "VARCHAR(1000) / NULL可"
+        datetime created_at "DATETIME / NOT NULL"
+        datetime updated_at "DATETIME / NOT NULL"
+    }
+
+    training_sessions {
+        bigint id PK "BIGINT / NOT NULL"
+        bigint user_id FK "BIGINT / NOT NULL"
+        date training_date "DATE / NOT NULL"
+        int duration_minutes "INT / NOT NULL"
+        int feeling "INT / NULL可"
+        varchar note "VARCHAR(1000) / NULL可"
+        varchar plant_type "VARCHAR(24) / NULL可"
+        datetime created_at "DATETIME / NOT NULL"
+        datetime updated_at "DATETIME / NOT NULL"
+    }
+
+    users {
+        bigint id PK "BIGINT / NOT NULL"
+        varchar name "VARCHAR(100) / NOT NULL"
+        varchar email UK "VARCHAR(255) / NOT NULL"
+        varchar password_hash "VARCHAR(255) / NULL可"
+        bigint token_version "BIGINT / NOT NULL / DEFAULT 0"
+        string status "STRING(20) / NOT NULL / ACTIVE, DISABLED"
+        varchar avatar_url "VARCHAR(255) / NULL可"
+        datetime created_at "DATETIME / NOT NULL"
+        datetime updated_at "DATETIME / NOT NULL"
+    }

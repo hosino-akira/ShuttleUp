@@ -1,53 +1,43 @@
 # ShuttleUp トレーニング分析サービス
 
-Spring Bootが管理する業務データをHTTPで取得し、pandasで期間分析するFastAPIサービスです。MySQLへの直接接続や業務データの永続化は行いません。Spring Bootはデータ管理・所有者確認を、FastAPIは分析計算を担当します。
+更新日：2026-10-14。FastAPIがSpring BootからHTTPで本人の期間データを取得し、pandasで分析する。MySQLへ直接接続・業務データ永続化はしない。
 
-## 動作環境とセットアップ
+## セットアップ
 
-Python 3.12以上が必要です。
+Python>=3.12。
 
-```bash
+```powershell
 cd python-analysis
 python -m venv .venv
-.venv\Scripts\activate
-pip install -e ".[test]"
-copy .env.example .env
+.\.venv\Scripts\python.exe -m pip install -e .
+# .envが未作成の場合のみコピー
+Copy-Item .env.example .env
 ```
 
-環境変数は必須の`SPRING_API_BASE_URL`と、`SPRING_API_TIMEOUT_SECONDS`（既定値10秒）です。実際の`.env`はGit管理対象外です。
+必須SPRING_API_BASE_URL、既定SPRING_API_TIMEOUT_SECONDS=10、CORS_ALLOWED_ORIGINS=["http://localhost:5173"]。実.envはGitに含めない。本番Originは配置先で決定。
 
-## 起動と利用
+## 起動・API
 
-Spring Bootを起動後、次を実行します。
-
-```bash
-cd python-analysis
-.\.venv\Scripts\Activate.ps1
-python -m uvicorn app.main:app --reload --port 8000
+```powershell
+.\.venv\Scripts\python.exe -m uvicorn app.main:app --reload --port 8000
+$headers = @{Authorization='Bearer <本人のJWT>'}
+Invoke-RestMethod -Uri 'http://localhost:8000/api/analysis/users/<本人ID>/training-report?from=2026-10-01&to=2026-10-14' -Headers $headers
 ```
 
-Swagger UIは`http://localhost:8000/docs`です。
+GET /api/analysis/users/{user_id}/training-report、必須from/to。Swaggerはhttp://localhost:8000/docs。分析APIはBearer必須。同じトークンをSpring AD-001へ要求単位で転送し、Springに署名・本人所属検証を委ねる。共有クライアントに利用者トークンを固定しない。
 
-```bash
-curl.exe "http://localhost:8000/api/analysis/users/1/training-report?from=2026-08-01&to=2026-08-31"
+## 計算・エラー
+
+実施日は重複排除、週は月曜開始、現在連続はto起点（to未実施なら0）。重量は同日最大・最新−初回、初回0の率はnull。欠損／同点試合は除外と警告。カテゴリはNFKC正規化、複数一致OTHERと警告。時間未入力の明細へセッション時間を配分しない。
+
+未認証401、権限403、不存在404、日付／入力422、上流形式502、接続／上流5xx503、timeout504。空データは200で構造を保持。
+
+## 動作確認と制限
+
+```powershell
+.\.venv\Scripts\python.exe -c "from app.main import app; print('FastAPI import OK')"
 ```
-## テスト
 
-```bash
-cd C:\Users\27357\ShuttleUp\python-analysis
-.\.venv\Scripts\Activate.ps1
-python -m pytest
-```
+2026-10-14の整理でtests、テスト専用依存、pytest設定と生成egg-infoを削除。起動後は認証・期間・空データ・集計結果・上流エラーを専用データで手動確認する。複数ゲーム制・機械学習・文章生成・DB直接接続は提供しない。
 
-HTTPクライアントテストはモックを使用するため、Spring Bootを起動する必要はありません。
-
-## Category分類
-
-カテゴリ名をNFKC正規化し、空白除去・大文字小文字の正規化後に専用キーワードと照合します。フィジカル系、バドミントン技術系、OTHERへ分類します。複数分類に一致したカテゴリはOTHERとして警告へ追加します。OTHERのカテゴリ名は`unclassifiedCategories`で確認できます。
-
-## 現時点の制限
-
-- 複数ゲーム制、機械学習、文章生成には対応していません。
-- 認証はSpring Boot側に現時点で導入されていないため引き継ぐ認証ヘッダーはありません。
-- `currentTrainingStreakDays`は期間終了日に練習がなければ0です。
-- 時間未入力のRecordへSession時間を配分しません。
+[API仕様](../docs/api-design.md)、[構成](../docs/architecture.md)、[試験](../docs/testing.md)、[運用](../docs/deployment.md)。

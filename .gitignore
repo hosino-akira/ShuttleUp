@@ -3,3 +3,8 @@ python-analysis/.env
 python-analysis/.venv/
 python-analysis/**/__pycache__/
 python-analysis/.pytest_cache/
+/.idea/
+**/__pycache__/
+*.py[cod]
+*.egg-info/
+/database/backups/

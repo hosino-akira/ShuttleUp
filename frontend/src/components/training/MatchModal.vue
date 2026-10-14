@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { t } from '../../i18n';
+import { t } from "../../i18n";
 import { computed, reactive, ref, watch } from "vue";
 import { message } from "ant-design-vue";
 import type { FormInstance } from "ant-design-vue";
@@ -16,7 +16,7 @@ import type { OpponentResponse } from "../../types/opponent";
 import BaseLargeModal from "../common/BaseLargeModal.vue";
 import ConfirmModal from "../common/ConfirmModal.vue";
 import { useUnsavedChanges } from "../../composables/useUnsavedChanges";
-import { useLocalizedForm } from '../../composables/useLocalizedForm';
+import { useLocalizedForm } from "../../composables/useLocalizedForm";
 
 type Mode = "create" | "edit";
 type Action = "save" | "delete";
@@ -35,7 +35,10 @@ const emit = defineEmits<{
   createOpponent: [name: string];
 }>();
 const formRef = ref<FormInstance>();
-const { onValidate: onFormValidate, reset: resetLocalizedValidation } = useLocalizedForm(formRef);
+const {
+  onValidate: onFormValidate,
+  reset: resetLocalizedValidation,
+} = useLocalizedForm(formRef);
 const submitting = ref(false);
 const confirmOpen = ref(false);
 const action = ref<Action>("save");
@@ -48,9 +51,12 @@ const emptyForm = (): MatchCreateRequest => ({
   note: null,
 });
 const form = reactive<MatchCreateRequest>(emptyForm());
-const { reset: resetDirtyState, confirmLeave } = useUnsavedChanges(
-  () => ({ ...form, videoUrl: form.videoUrl ?? "", note: form.note ?? "" }),
-);
+const { reset: resetDirtyState, confirmLeave } =
+  useUnsavedChanges(() => ({
+    ...form,
+    videoUrl: form.videoUrl ?? "",
+    note: form.note ?? "",
+  }));
 const options = computed(() => {
   const items = props.opponents.map((item) => ({
     value: item.id,
@@ -63,7 +69,7 @@ const options = computed(() => {
   )
     items.push({
       value: -1,
-      label: t('＋「{0}」を新規登録', { 0: name }),
+      label: t("「{0}」を新規登録", { 0: name }),
     });
   return items;
 });
@@ -131,7 +137,7 @@ async function executeAction() {
     if (action.value === "delete") {
       if (!props.match) return;
       await deleteMatch(props.match.id);
-      message.success(t('試合記録を削除しました。'));
+      message.success(t("試合記録を削除しました。"));
     } else {
       const request = {
         ...form,
@@ -143,8 +149,8 @@ async function executeAction() {
       else await createMatch(props.sessionId, request);
       message.success(
         props.mode === "edit"
-          ? t('試合記録を更新しました。')
-          : t('試合記録を登録しました。'),
+          ? t("試合記録を更新しました。")
+          : t("試合記録を登録しました。"),
       );
     }
     confirmOpen.value = false;
@@ -155,8 +161,8 @@ async function executeAction() {
     console.error(error);
     message.error(
       action.value === "delete"
-        ? t('試合記録の削除に失敗しました。')
-        : t('試合記録の保存に失敗しました。'),
+        ? t("試合記録の削除に失敗しました。")
+        : t("試合記録の保存に失敗しました。"),
     );
   } finally {
     submitting.value = false;
@@ -174,7 +180,12 @@ async function executeAction() {
     "
     @update:open="(value) => value || requestClose()"
   >
-    <a-form ref="formRef" :model="form" layout="vertical" @validate="onFormValidate">
+    <a-form
+      ref="formRef"
+      :model="form"
+      layout="vertical"
+      @validate="onFormValidate"
+    >
       <a-row :gutter="12">
         <a-col :xs="24" :md="12"
           ><a-form-item
@@ -201,7 +212,7 @@ async function executeAction() {
             <a-button
               class="manage-button"
               @click="emit('manageOpponents')"
-              >{{ t('対戦相手を管理') }}</a-button
+              >{{ t("対戦相手を管理") }}</a-button
             >
           </a-form-item></a-col
         >
@@ -241,18 +252,18 @@ async function executeAction() {
           danger
           :disabled="submitting"
           @click="requestDelete"
-          >{{ t('削除') }}</a-button
+          >{{ t("削除") }}</a-button
         ><span v-else />
         <a-space
           ><a-button
             :disabled="submitting"
             @click="requestClose"
-            >{{ t('キャンセル') }}</a-button
+            >{{ t("キャンセル") }}</a-button
           ><a-button
             type="primary"
             :loading="submitting"
             @click="requestSave"
-            >{{ t('保存') }}</a-button
+            >{{ t("保存") }}</a-button
           ></a-space
         >
       </div></template

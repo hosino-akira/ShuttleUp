@@ -2,6 +2,7 @@ package com.shuttleup.backend.controller;
 
 import com.shuttleup.backend.exception.BadRequestException;
 import com.shuttleup.backend.exception.EmailAlreadyExistsException;
+import com.shuttleup.backend.exception.TrainingDateAlreadyExistsException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -47,6 +48,12 @@ public class ApiExceptionHandler {
     public ResponseEntity<Map<String, String>> handleDuplicateEmail(EmailAlreadyExistsException exception) {
         return ResponseEntity.status(HttpStatus.CONFLICT)
                 .body(Map.of("message", exception.getMessage()));
+    }
+
+    @ExceptionHandler(TrainingDateAlreadyExistsException.class)
+    public ResponseEntity<Map<String, String>> handleDuplicateTrainingDate(TrainingDateAlreadyExistsException exception) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(Map.of("code", "TRAINING_DATE_ALREADY_EXISTS", "message", exception.getMessage()));
     }
 
     /** 入力内容が業務ルールに反する場合は400を返す。 */

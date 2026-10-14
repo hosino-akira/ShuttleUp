@@ -1,0 +1,11 @@
+{
+  "asset": "badminton-court-hero.webp",
+  "mode": "built-in image_gen",
+  "prompt": "Use case: photorealistic-natural. Asset type: portrait login-page hero photograph for ShuttleUp, a badminton training journal. Create a polished editorial sports still-life photograph, vertical 2:3 composition. A realistic white feather badminton shuttlecock with a small rounded cork base rests beside a slim unbranded dark badminton racket on the matte deep emerald-green floor of an indoor badminton court. The racket head has fine, straight crossed strings and a narrow oval frame. Place the shuttlecock and racket in the lower half of the image; preserve calm, dark negative space in the upper third for live HTML headings. White badminton court lines recede diagonally into the distance, with a very subtle out-of-focus net at the far background. Soft late-afternoon light from the side, tactile feather detail, cinematic but natural, sophisticated forest green and warm ivory palette. Close low-angle composition, intentional soft depth of field. No people, no text, no lettering, no branding, no watermark. This is a photograph asset, not a UI mockup.",
+  "source": "AI-generated for ShuttleUp",
+  "dimensions": {
+    "width": 1024,
+    "height": 1536
+  },
+  "delivery": "WebP, quality 84; original generated PNG retained in Codex generated_images"
+}

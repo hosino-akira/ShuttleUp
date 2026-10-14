@@ -5,13 +5,16 @@ import com.shuttleup.backend.dto.request.TrainingSessionUpdateRequest;
 import com.shuttleup.backend.dto.response.TrainingSessionResponse;
 import com.shuttleup.backend.entity.TrainingSession;
 import com.shuttleup.backend.entity.User;
+import com.shuttleup.backend.exception.TrainingDateAlreadyExistsException;
 import com.shuttleup.backend.repository.TrainingSessionRepository;
 import com.shuttleup.backend.repository.UserRepository;
 import com.shuttleup.backend.security.CurrentUser;
 import org.springframework.stereotype.Service;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.sql.SQLException;
 import java.util.List;
 
 @Service
@@ -57,6 +60,10 @@ public class TrainingSessionService {
         User user = userRepository.findById(request.getUserId())
                 .orElseThrow(() -> new IllegalArgumentException("指定されたユーザーが見つかりません。"));
 
+        if (trainingSessionRepository.existsByUserIdAndTrainingDate(request.getUserId(), request.getTrainingDate())) {
+            throw new TrainingDateAlreadyExistsException();
+        }
+
         LocalDateTime now = LocalDateTime.now();
         TrainingSession trainingSession = new TrainingSession();
         trainingSession.setUser(user);
@@ -68,7 +75,7 @@ public class TrainingSessionService {
         trainingSession.setCreatedAt(now);
         trainingSession.setUpdatedAt(now);
 
-        return toResponse(trainingSessionRepository.save(trainingSession));
+        return saveSession(trainingSession);
     }
 
     /**
@@ -78,6 +85,10 @@ public class TrainingSessionService {
     public TrainingSessionResponse updateTrainingSession(
             Long id, TrainingSessionUpdateRequest request) {
         TrainingSession trainingSession = findTrainingSession(id);
+        if (trainingSessionRepository.existsByUserIdAndTrainingDateAndIdNot(
+                trainingSession.getUser().getId(), request.getTrainingDate(), id)) {
+            throw new TrainingDateAlreadyExistsException();
+        }
         trainingSession.setTrainingDate(request.getTrainingDate());
         trainingSession.setDurationMinutes(request.getDurationMinutes());
         trainingSession.setFeeling(request.getFeeling());
@@ -88,7 +99,7 @@ public class TrainingSessionService {
         }
         trainingSession.setUpdatedAt(LocalDateTime.now());
 
-        return toResponse(trainingSessionRepository.save(trainingSession));
+        return saveSession(trainingSession);
     }
 
     /**
@@ -97,6 +108,22 @@ public class TrainingSessionService {
     @Transactional
     public void deleteTrainingSession(Long id) {
         trainingSessionRepository.delete(findTrainingSession(id));
+    }
+
+    private TrainingSessionResponse saveSession(TrainingSession trainingSession) {
+        try {
+            // Flush here so a concurrent insert/update is reported as a date conflict.
+            return toResponse(trainingSessionRepository.saveAndFlush(trainingSession));
+        } catch (DataIntegrityViolationException exception) {
+            for (Throwable cause = exception; cause != null; cause = cause.getCause()) {
+                if (cause instanceof SQLException sqlException && sqlException.getErrorCode() == 1062
+                        && sqlException.getMessage() != null
+                        && sqlException.getMessage().contains("uk_training_sessions_user_date")) {
+                    throw new TrainingDateAlreadyExistsException(exception);
+                }
+            }
+            throw exception;
+        }
     }
 
     private TrainingSession findTrainingSession(Long id) {

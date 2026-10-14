@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import BadmintonIcon from '../components/common/BadmintonIcon.vue';
 import { t } from '../i18n';
 import { computed, onMounted, reactive, ref } from "vue";
 import { message } from "ant-design-vue";
@@ -175,11 +176,12 @@ onMounted(loadTrainingSessions);
   >
     <div class="operation-bar">
       <h2 id="training-history-title" class="app-page-title">
+        <BadmintonIcon kind="racket" :size="24" class="history-racket" />
         {{ t('トレーニング履歴の操作') }}
       </h2>
       <div class="operation-actions">
         <a-button type="primary" @click="openCreateModal"
-          >{{ t('新規登録') }}</a-button
+          >{{ t('新規') }}</a-button
         >
         <a-button
           type="primary"
@@ -282,6 +284,7 @@ onMounted(loadTrainingSessions);
 </template>
 
 <style scoped>
+.history-racket { margin-inline-end: 7px; color: var(--app-primary-color); }
 .training-history {
   display: flex;
   flex-direction: column;

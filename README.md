@@ -112,7 +112,6 @@ Vue 3 / TypeScript
 * pandas
 * httpx
 * Pydantic
-* pytest
 
 ### データベース
 
@@ -184,7 +183,7 @@ python -m uvicorn app.main:app --reload --port 8000
 
 ```powershell
 cd frontend
-npm install
+npm ci
 npm run dev
 ```
 
@@ -218,12 +217,12 @@ http://localhost:5173
 * パスワード変更は現在のパスワードを BCrypt の `matches` で確認し、新しいパスワードを `encode` で保存します。6文字以上かつUTF-8で72バイト以内が必要です。同じパスワードへの変更はできません。
 * 変更後は `users.token_version` を増やし、変更前に発行したすべての JWT を失効させます。新しいパスワードで再ログインしてください。
 * 開発環境の `ddl-auto=update` では、バックエンド再起動時に `token_version` 列（初期値0）が追加されます。既存パスワードは変更しません。
-* ログイン成功後は Dashboard に移動します。右上のユーザーアイコンからプロフィールを開けます。
-* JWT は1時間有効です。フロントエンドはタブの `sessionStorage` に保存し、API 呼び出し時に `Authorization: Bearer ...` を送信します。
+* ログイン成功後は安全な内部 redirect 先へ移動し、未指定・不正な場合は Dashboard に移動します。右上のユーザーアイコンからプロフィールを開けます。
+* JWT は24時間（86400秒）有効です。フロントエンドはタブの `sessionStorage` に保存し、API 呼び出し時に `Authorization: Bearer ...` を送信します。
 * ページを再読み込みすると `/api/auth/me` でユーザー情報を復元します。未ログインや期限切れの場合はログイン画面に戻ります。
 * Spring Security は登録・ログイン以外の API を保護します。各ユーザーは本人の記録と共通の種目のみ利用できます。
 * FastAPI は受け取った JWT を Spring Boot に転送し、認証とデータの所属ユーザーの確認を委ねます。
-* プロフィールからログアウトすると、このタブの JWT とユーザー情報を削除します。発行済み JWT のサーバー側失効はまだ実装していません。
+* プロフィールからログアウトすると、このタブの JWT とユーザー情報を削除します。発行済み JWT のログアウト専用失効 API は提供していません。パスワード変更時の tokenVersion による失効は実装済みです。
 * 開発環境で `SHUTTLEUP_JWT_SECRET` が未設定の場合、署名鍵は起動ごとに生成されるため、バックエンド再起動後は再ログインが必要です。固定する場合は32バイト以上のランダムな鍵を Base64 で環境変数に設定してください。
 * 既存ユーザーのパスワードハッシュが未設定の場合はログインできません。事前に作成した Java Scratch File で生成したハッシュを設定してください。
 
@@ -269,19 +268,15 @@ FastAPI を利用して、トレーニングデータから一歩進んだ分析
 * データ入力完全率
 * フィジカル練習と技術練習の比率
 
-## テスト
+## ビルドと動作確認
+
+2026-10-14の整理で、backend/src/test、frontend/tests、python-analysis/testsと手工APIテストファイルを削除した。現在は自動テストスクリプトを同梱せず、ビルドと手動の主要操作確認を行う。設計文書内の自動テスト実行記録は削除前の履歴。
 
 ### Spring Boot
 
 ```powershell
 cd backend
-.\mvnw.cmd test
-```
-
-実際の MySQL を使わず、認証と業務ロジックの回帰テストのみ実行する場合：
-
-```powershell
-.\mvnw.cmd '-Dtest=!BackendApplicationTests' test
+.\mvnw.cmd package
 ```
 
 ### FastAPI
@@ -289,7 +284,7 @@ cd backend
 ```powershell
 cd python-analysis
 .\.venv\Scripts\Activate.ps1
-python -m pytest
+python -c "from app.main import app; print('FastAPI import OK')"
 ```
 
 ### Vue
@@ -301,13 +296,13 @@ cd frontend
 npm run
 ```
 
-型チェックや Lint のスクリプトが存在する場合は実行します。
+現行のスクリプトで型検査とproduction buildを実行します。
 
 ```powershell
-npm run type-check
-npm run lint
 npm run build
 ```
+
+ビルド後はログイン、基本情報の保存、同日重複の拒否、明細・試合、森林の区画切替、分析画面を手動確認する。過去の回帰結果と今回のビルド・動作確認を混同しない。
 
 ## 開発環境の注意事項
 
@@ -325,3 +320,9 @@ npm run build
 * 外部バドミントンデータとの連携
 * Docker による開発環境の統一
 * クラウド環境へのデプロイ
+
+## 設計・検証・運用文書
+
+[文書索引](docs/README.md)から、要件（非機能含む）、システム基本設計、画面・遷移・イベント、API・DB、テスト、運用・リリースのExcelとMarkdownを参照できます。
+
+本番の配置先・SLO・RTO/RPO・ブラウザー正式対象等は決定待ちです。現行実装と将来計画、未実行の検証を区別して記載しています。

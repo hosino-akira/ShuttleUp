@@ -10,6 +10,7 @@ import ForestPlant from '../components/forest/ForestPlant.vue'
 import ForestScene from '../components/forest/ForestScene.vue'
 import PlantPicker from '../components/forest/PlantPicker.vue'
 import NativeSelect from '../components/common/NativeSelect.vue'
+import BadmintonIcon from '../components/common/BadmintonIcon.vue'
 
 const router = useRouter()
 const route = useRoute()
@@ -63,7 +64,7 @@ onMounted(loadForest)
   <section class="forest-page" aria-labelledby="forest-title">
     <header class="forest-header">
       <div>
-        <p class="eyebrow">SHUTTLEUP · {{ t('小さな積み重ね、大きな森。') }}</p>
+        <p class="eyebrow forest-sport-label"><BadmintonIcon :size="18" /> SHUTTLEUP · {{ t('コートの努力が、森になる。') }}</p>
         <h1 id="forest-title" class="app-page-title">{{ t('トレーニングの森') }}<span aria-hidden="true">✦</span></h1>
         <p class="subtitle">{{ t('トレーニングをひとつ終えるたび、あなたの森に新しい命が育ちます。') }}</p>
       </div>
@@ -154,6 +155,7 @@ onMounted(loadForest)
 .forest-page { --forest-ink: var(--app-heading-color); --forest-muted: var(--app-muted-color); width: 100%; padding: 24px 28px 28px; color: var(--forest-ink); background: var(--app-page-color); border-radius: 16px; }
 .forest-header { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 24px; }
 .eyebrow { margin: 0 0 8px; font-size: 11px; font-weight: 600; color: var(--app-muted-color); letter-spacing: .12em; }
+.forest-sport-label { display: flex; align-items: center; gap: 7px; }
 h1 { margin: 0; }
 h1 span { margin-left: 12px; color: var(--app-accent-color); font-size: .8em; }
 .subtitle { margin: 8px 0 0; color: var(--forest-muted); font-size: 13px; line-height: 1.8; }

@@ -1,16 +1,19 @@
 <script setup lang="ts">
-import { t } from '../i18n';
+import { t } from "../i18n";
 import { computed, ref } from "vue";
 import { useRoute } from "vue-router";
 import {
-  BellOutlined,
   MenuFoldOutlined,
   MenuUnfoldOutlined,
   UserOutlined,
+  BarChartOutlined,
 } from "@ant-design/icons-vue";
 import { NAVIGATION_MENU } from "../constants/navigation";
-import LanguageSwitcher from '../components/common/LanguageSwitcher.vue';
-import ThemeSwitcher from '../components/common/ThemeSwitcher.vue';
+import LanguageSwitcher from "../components/common/LanguageSwitcher.vue";
+import ThemeSwitcher from "../components/common/ThemeSwitcher.vue";
+import ShuttleBrand from '../components/common/ShuttleBrand.vue';
+import BadmintonIcon from '../components/common/BadmintonIcon.vue';
+import CourtLines from '../components/common/CourtLines.vue';
 
 const route = useRoute();
 const isSidebarCollapsed = ref(false);
@@ -34,8 +37,7 @@ function toggleSidebar(): void {
       theme="light"
     >
       <RouterLink class="brand" :to="{ name: 'dashboard' }">
-        <span class="brand-mark" aria-hidden="true">S</span>
-        <span class="brand-name">ShuttleUp</span>
+        <ShuttleBrand />
       </RouterLink>
 
       <a-menu
@@ -46,11 +48,18 @@ function toggleSidebar(): void {
           v-for="item in NAVIGATION_MENU"
           :key="item.key"
         >
-          <RouterLink :to="item.to">{{
+          <RouterLink class="navigation-link" :to="item.to">
+            <BadmintonIcon v-if="item.key === 'dashboard'" kind="court" :size="19" />
+            <BadmintonIcon v-else-if="item.key === 'training-history'" kind="racket" :size="19" />
+            <svg v-else-if="item.key === 'training-plan'" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M20 4C12 3 6 6 6 12a6 6 0 0 0 6 6c6 0 9-6 8-14ZM4 21l11-11" /></svg>
+            <BarChartOutlined v-else-if="item.key === 'statistics'" aria-hidden="true" />
+            <UserOutlined v-else aria-hidden="true" />
+            <span>{{
             t(item.label)
-          }}</RouterLink>
+          }}</span></RouterLink>
         </a-menu-item>
       </a-menu>
+      <div class="sidebar-court" aria-hidden="true"><CourtLines /><span>ShuttleUp · {{ t('一球ずつ、積み重ねる。') }}</span></div>
     </a-layout-sider>
 
     <a-layout class="application-layout">
@@ -73,25 +82,30 @@ function toggleSidebar(): void {
             class="sidebar-toggle-icon"
           />
         </a-button>
+        <span class="header-sport"><BadmintonIcon :size="18" />{{ t('バドミントントレーニング') }}</span>
 
         <div class="header-actions">
           <ThemeSwitcher />
           <LanguageSwitcher />
           <div class="header-utility">
-            <a-badge :count="0" :show-zero="false">
+            <!-- <a-badge :count="0" :show-zero="false">
               <a-button
                 class="app-button-icon"
                 :aria-label="t('通知')"
               >
                 <BellOutlined />
               </a-button>
-            </a-badge>
+            </a-badge> -->
             <a-tooltip :title="t('プロフィール')">
               <RouterLink
                 class="profile-link app-button app-button-icon"
                 :to="{ name: 'profile' }"
                 :aria-label="t('プロフィールを開く')"
-                :aria-current="route.name === 'profile' ? 'page' : undefined"
+                :aria-current="
+                  route.name === 'profile'
+                    ? 'page'
+                    : undefined
+                "
               >
                 <UserOutlined aria-hidden="true" />
               </RouterLink>
@@ -136,7 +150,7 @@ function toggleSidebar(): void {
   display: flex;
   align-items: center;
   gap: 8px;
-  height: 48px;
+  height: 72px;
   padding: 0 16px;
   overflow: hidden;
   color: var(--app-heading-color);
@@ -146,16 +160,15 @@ function toggleSidebar(): void {
   white-space: nowrap;
 }
 
-.brand-mark {
-  display: grid;
-  flex: 0 0 auto;
-  width: 28px;
-  height: 28px;
-  place-items: center;
-  border-radius: 8px;
-  color: #fff;
-  background: var(--app-primary-color);
-}
+.brand :deep(.shuttle-brand-name) { font-size: 18px; }
+.brand :deep(.shuttle-brand-mark) { width: 32px; height: 32px; }
+.navigation-link { display: flex; align-items: center; gap: 10px; }
+.navigation-link :deep(.anticon) { font-size: 18px; }
+.sidebar-court { margin: 36px 20px 20px; color: var(--app-accent-color); }
+.sidebar-court :deep(.court-lines) { width: 100%; opacity: .25; }
+.sidebar-court span { display: block; margin-top: 10px; font-size: 9px; color: var(--app-muted-color); text-align: center; }
+.header-sport { display: flex; align-items: center; gap: 7px; font-size: 11px; color: var(--app-muted-color); margin-inline-end: auto; margin-inline-start: 12px; }
+@media (max-width: 760px) { .header-sport { display: none; } }
 
 .application-header {
   display: flex;
@@ -174,7 +187,11 @@ function toggleSidebar(): void {
   align-items: center;
   gap: 8px;
 }
-.header-utility { display: flex; align-items: center; gap: 8px; }
+.header-utility {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
 
 .profile-link {
   font-size: 16px;
@@ -230,7 +247,13 @@ function toggleSidebar(): void {
     align-items: flex-start;
     padding-block: 8px;
   }
-  .header-actions { flex-wrap: wrap; justify-content: flex-end; gap: 6px; }
-  .header-utility { gap: 6px; }
+  .header-actions {
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 6px;
+  }
+  .header-utility {
+    gap: 6px;
+  }
 }
 </style>

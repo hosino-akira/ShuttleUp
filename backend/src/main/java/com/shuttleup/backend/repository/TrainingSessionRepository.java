@@ -11,6 +11,10 @@ import java.util.List;
 public interface TrainingSessionRepository
         extends JpaRepository<TrainingSession, Long> {
 
+    boolean existsByUserIdAndTrainingDate(Long userId, LocalDate trainingDate);
+
+    boolean existsByUserIdAndTrainingDateAndIdNot(Long userId, LocalDate trainingDate, Long id);
+
     /**
      * ユーザーIDに紐づくトレーニング記録を、
      * トレーニング日の降順で取得する。

@@ -1,13 +1,16 @@
 <script setup lang="ts">
 import { t } from '../i18n';
+import BadmintonIcon from '../components/common/BadmintonIcon.vue';
 import {
   computed,
   onBeforeUnmount,
   onMounted,
   reactive,
   ref,
+  watch,
 } from "vue";
 import { message } from "ant-design-vue";
+import { isAxiosError } from "axios";
 import { requireUserId } from "../stores/auth";
 import type { FormInstance } from "ant-design-vue";
 import {
@@ -18,6 +21,7 @@ import {
 import {
   createTrainingSession,
   getTrainingSession,
+  getTrainingSessions,
   updateTrainingSession,
 } from "../api/trainingSessionApi";
 import {
@@ -76,6 +80,22 @@ const form = reactive<TrainingSessionUpdateRequest & { plantType: PlantType }>({
   note: null,
   plantType: isPlantType(route.query.plant) ? route.query.plant : 'cedar',
 });
+const saveError = ref('');
+const conflictingTrainingDate = ref<string | null>(null);
+const duplicateDate = computed(() => conflictingTrainingDate.value !== null
+  && conflictingTrainingDate.value === form.trainingDate);
+watch(() => form.trainingDate, (date) => {
+  if (conflictingTrainingDate.value !== null && date !== conflictingTrainingDate.value) {
+    conflictingTrainingDate.value = null;
+    saveError.value = '';
+  }
+});
+function showDuplicateDateError(date: string) {
+  conflictingTrainingDate.value = date;
+  saveError.value = 'この日付のトレーニングは既に登録されています。1日に1件のみ登録できます。';
+  message.error({ content: t('日付が重複しています'), duration: 6 });
+  formRef.value?.scrollToField('trainingDate');
+}
 const recordModalOpen = ref(false);
 const recordMode = ref<Mode>("create");
 const editingRecord = ref<TrainingRecordResponse | null>(
@@ -146,6 +166,8 @@ async function initialize() {
 async function saveSession() {
   if (saving.value || loading.value) return;
   saving.value = true;
+  saveError.value = '';
+  conflictingTrainingDate.value = null;
   try {
     await formRef.value?.validate();
   } catch {
@@ -157,6 +179,12 @@ async function saveSession() {
       ...form,
       note: form.note?.trim() || null,
     };
+    const existingSessions = await getTrainingSessions(userId);
+    if (existingSessions.some(existing => existing.trainingDate === request.trainingDate
+      && existing.id !== sessionId.value)) {
+      showDuplicateDateError(request.trainingDate);
+      return;
+    }
     const creating = isCreate.value;
     const saved = creating
       ? await createTrainingSession({ userId, ...request })
@@ -179,7 +207,17 @@ async function saveSession() {
       : t('トレーニングを保存しました。'));
   } catch (error) {
     console.error(error);
-    message.error(t('トレーニングの保存に失敗しました。'));
+    const duplicateDateMessage = 'この日付のトレーニングは既に登録されています。1日に1件のみ登録できます。';
+    if (isAxiosError(error) && error.response?.status === 409
+      && (error.response.data?.code === 'TRAINING_DATE_ALREADY_EXISTS'
+        || error.response.data?.message === duplicateDateMessage)) {
+      showDuplicateDateError(form.trainingDate);
+    } else {
+      saveError.value = isAxiosError(error) && !error.response
+        ? '通信に失敗しました。時間をおいて再度お試しください。'
+        : 'トレーニングの保存に失敗しました。';
+      message.error({ content: t(saveError.value), duration: 6 });
+    }
   } finally {
     saving.value = false;
   }
@@ -273,6 +311,7 @@ onBeforeUnmount(() =>
     <section class="detail-page">
       <header class="page-header">
         <h1 class="app-page-title">
+          <BadmintonIcon :size="26" class="detail-shuttle" />
           {{
             isCreate
               ? t('トレーニング新規登録')
@@ -297,10 +336,20 @@ onBeforeUnmount(() =>
             ></a-space
           ></template
         >
+        <a-alert
+          v-if="saveError"
+          class="session-save-error"
+          type="error"
+          show-icon
+          role="alert"
+          :message="duplicateDate ? t('日付が重複しています') : t('トレーニングの保存に失敗しました。')"
+          :description="t(saveError)"
+        />
         <a-form
           ref="formRef"
           @validate="onFormValidate"
           :model="form"
+          :disabled="saving"
           layout="vertical"
         >
           <a-row :gutter="12">
@@ -308,6 +357,8 @@ onBeforeUnmount(() =>
               ><a-form-item
                 :label="t('トレーニング日')"
                 name="trainingDate"
+                :validate-status="duplicateDate ? 'error' : undefined"
+                :help="duplicateDate ? t('この日付のトレーニングは既に登録されています。1日に1件のみ登録できます。') : undefined"
                 :rules="[
                   {
                     required: true,
@@ -387,7 +438,7 @@ onBeforeUnmount(() =>
             type="primary"
             :disabled="sessionId === null"
             @click="openRecordCreate"
-            >{{ t('＋ 新規登録') }}</a-button
+            >{{ t('新規') }}</a-button
           ></template
         >
         <TrainingRecordTable
@@ -411,7 +462,7 @@ onBeforeUnmount(() =>
               type="primary"
               :disabled="sessionId === null"
               @click="openMatchCreate"
-              >{{ t('＋ 新規登録') }}</a-button
+              >{{ t('新規') }}</a-button
             ></a-space
           ></template
         >
@@ -460,6 +511,7 @@ onBeforeUnmount(() =>
 </template>
 
 <style scoped>
+.detail-shuttle { margin-inline-end: 7px; color: var(--app-primary-color); }
 .detail-page {
   display: flex;
   flex: 1;
@@ -503,6 +555,10 @@ onBeforeUnmount(() =>
 }
 .full-width {
   width: 100%;
+}
+.session-save-error {
+  margin-bottom: 16px;
+  border-width: 2px;
 }
 .training-plant-picker { max-width: 650px; }
 .training-plant-picker :deep(.plant-picker) { grid-template-columns: repeat(6, minmax(0, 1fr)); }

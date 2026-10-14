@@ -41,7 +41,7 @@ async function remove(item: OpponentResponse) {
         <a-popconfirm :title="t('この対戦相手を削除しますか？')" @confirm="remove(record)"><a-button size="small" danger>{{ t('削除') }}</a-button></a-popconfirm>
       </template></a-table-column>
     </a-table>
-    <a-divider>{{ editingId ? t('対戦相手を編集') : t('新規登録') }}</a-divider>
+    <a-divider>{{ editingId ? t('対戦相手を編集') : t('新規') }}</a-divider>
     <a-form layout="vertical"><a-form-item :label="t('名前')" required><a-input v-model:value="form.name" :maxlength="100" /></a-form-item>
       <a-form-item :label="t('メモ')"><a-textarea v-model:value="form.memo" :maxlength="1000" :rows="3" show-count /></a-form-item>
       <a-space><a-button type="primary" :loading="submitting" @click="save">{{ t('保存') }}</a-button><a-button v-if="editingId" @click="resetForm">{{ t('キャンセル') }}</a-button></a-space>

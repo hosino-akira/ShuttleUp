@@ -6,6 +6,8 @@ import { useRouter } from "vue-router";
 import type { EChartsOption } from "echarts";
 import BaseEChart from "../components/common/BaseEChart.vue";
 import BaseSelect from "../components/common/BaseSelect.vue";
+import BadmintonIcon from '../components/common/BadmintonIcon.vue';
+import CourtLines from '../components/common/CourtLines.vue';
 import { getDashboard } from "../api/dashboardApi";
 import { getExercises } from "../api/exerciseApi";
 import { getOpponents } from "../api/opponentApi";
@@ -317,6 +319,7 @@ onMounted(() => {
       class="page-intro dashboard-intro"
       :bordered="false"
     >
+      <span class="dashboard-emblem"><BadmintonIcon kind="racket" :size="32" /></span>
       <div class="dashboard-intro-content">
         <a-typography-title id="dashboard-title" class="app-page-title" :level="2"
           >{{ t('ダッシュボード') }}</a-typography-title
@@ -324,9 +327,10 @@ onMounted(() => {
         <a-typography-paragraph
           class="dashboard-description"
           type="secondary"
-          >{{ t('トレーニングと試合の実績を確認できます。') }}</a-typography-paragraph
+          >{{ t('コートでの積み重ねを、次の一球につなげよう。') }}</a-typography-paragraph
         >
       </div>
+      <CourtLines class="dashboard-court" />
       <a-button
         class="dashboard-create-button"
         type="primary"
@@ -584,12 +588,19 @@ onMounted(() => {
 .dashboard-intro :deep(.ant-card-body) {
   flex-wrap: nowrap;
   align-items: center;
+  position: relative;
+  padding: 20px;
+  overflow: hidden;
+  isolation: isolate;
 }
+.dashboard-intro { background: linear-gradient(110deg, var(--app-surface-color), var(--app-soft-color)); }
+.dashboard-emblem { display: grid; place-items: center; width: 52px; height: 52px; border: 1px solid var(--app-border-color); border-radius: 15px; color: var(--app-primary-color); background: var(--app-surface-color); flex-shrink: 0; }
+.dashboard-court { position: absolute; width: 210px; right: 12%; top: -35px; transform: rotate(-15deg); color: var(--app-primary-color); opacity: .1; z-index: -1; }
 .dashboard-intro-content {
   display: flex;
   flex: 1;
-  flex-wrap: wrap;
-  align-items: baseline;
+  flex-direction: column;
+  align-items: flex-start;
   gap: 4px 16px;
   min-width: 0;
 }
