@@ -330,7 +330,7 @@ onMounted(() => {
           >{{ t('コートでの積み重ねを、次の一球につなげよう。') }}</a-typography-paragraph
         >
       </div>
-      <CourtLines class="dashboard-court" />
+      <CourtLines class="dashboard-court" orientation="landscape" />
       <a-button
         class="dashboard-create-button"
         type="primary"

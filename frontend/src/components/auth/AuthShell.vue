@@ -23,7 +23,7 @@ import ThemeSwitcher from '../common/ThemeSwitcher.vue'
             <p>{{ t('練習も、試合も、成長も。あなたのバドミントンをひとつに。') }}</p>
           </div>
           <div class="hero-footer">
-            <CourtLines class="hero-court" />
+            <CourtLines class="hero-court" orientation="landscape" />
             <div><span>{{ t('記録する。振り返る。強くなる。') }}</span><small>ShuttleUp · {{ t('あなたのコートサイドパートナー') }}</small></div>
           </div>
         </aside>
@@ -57,7 +57,7 @@ import ThemeSwitcher from '../common/ThemeSwitcher.vue'
 .hero-copy h2 { margin: 24px 0 18px; color: #fff; font-size: clamp(29px, 3.2vw, 42px); font-weight: 650; line-height: 1.45; letter-spacing: -.04em; }
 .hero-copy p { max-width: 310px; margin: 0; font-size: 14px; line-height: 1.9; color: #e4eee5; }
 .hero-footer { display: flex; gap: 14px; align-items: center; padding-top: 40px; }
-.hero-court { width: 63px; height: 40px; color: #d6eac2; opacity: .75; flex-shrink: 0; }
+.hero-court { width: 63px; height: auto; color: #d6eac2; opacity: .75; flex-shrink: 0; }
 .hero-footer span { display: block; font-size: 13px; letter-spacing: .04em; }
 .hero-footer small { display: block; margin-top: 6px; color: #c8d7cd; font-size: 10px; }
 .auth-form-panel { align-self: stretch; display: flex; flex-direction: column; justify-content: center; min-width: 0; padding: 46px 48px 32px; }

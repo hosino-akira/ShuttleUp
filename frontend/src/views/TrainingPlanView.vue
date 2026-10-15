@@ -35,7 +35,7 @@ const streak = computed(() => trainingStreak(grown.value, today.value))
 const species = computed(() => new Set(filtered.value.map(getPlantType)).size)
 const milestone = computed(() => (Math.floor(grown.value.length / 10) + 1) * 10)
 const milestoneProgress = computed(() => grown.value.length % 10 * 10)
-watch(period, () => { page.value = 1 })
+watch(period, () => { page.value = plotCount.value })
 
 async function loadForest() {
   loading.value = true
@@ -44,7 +44,7 @@ async function loadForest() {
   try {
     sessions.value = await getTrainingSessions(userId)
     const index = filtered.value.findIndex(session => session.id === highlightedId)
-    if (index >= 0) page.value = Math.floor(index / 36) + 1
+    page.value = index >= 0 ? Math.floor(index / 36) + 1 : plotCount.value
   } catch {
     failed.value = true
   } finally {

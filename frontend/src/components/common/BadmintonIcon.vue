@@ -1,11 +1,12 @@
 <script setup lang="ts">
+import CourtLines from './CourtLines.vue'
 withDefaults(defineProps<{ kind?: 'shuttle' | 'racket' | 'court'; size?: number }>(), {
   kind: 'shuttle', size: 24,
 })
 </script>
 
 <template>
-  <svg :width="size" :height="size" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false" class="badminton-icon">
+  <svg v-if="kind !== 'court'" :width="size" :height="size" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false" class="badminton-icon">
     <g v-if="kind === 'shuttle'" transform="rotate(28 16 16)">
       <path d="M11.5 22h9v3a4.5 4.5 0 0 1-9 0z" fill="currentColor" fill-opacity=".16" />
       <path d="M11.5 22 5 7l5-3 6 2 6-2 5 3-6.5 15z" />
@@ -15,14 +16,11 @@ withDefaults(defineProps<{ kind?: 'shuttle' | 'racket' | 'court'; size?: number 
       <ellipse cx="16" cy="11" rx="8" ry="10" fill="currentColor" fill-opacity=".06" />
       <path d="M16 21v4m-2 0h4v6h-4zM12 3v16M16 1v20M20 3v16M9 7h14M8 11h16M9 15h14" />
     </g>
-    <g v-else>
-      <rect x="3" y="5" width="26" height="22" rx="1.5" />
-      <path d="M6 5v22M26 5v22M3 16h26M3 11h26M3 21h26M16 5v6M16 21v6" />
-      <path d="M1 16h30" stroke-width="2.2" />
-    </g>
   </svg>
+  <CourtLines v-else orientation="landscape" :style="{ width: `${size}px`, height: `${size}px` }" class="badminton-icon badminton-court-icon" />
 </template>
 
 <style scoped>
 .badminton-icon { display: inline-block; flex: 0 0 auto; vertical-align: middle; }
+.badminton-court-icon :deep(rect), .badminton-court-icon :deep(path) { stroke-width: .7px; }
 </style>
