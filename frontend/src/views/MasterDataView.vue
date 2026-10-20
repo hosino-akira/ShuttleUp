@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import PageIntro from '../components/common/PageIntro.vue'
 import { computed, onBeforeUnmount, onMounted, reactive, ref } from 'vue'
 import { message } from 'ant-design-vue'
 import type { FormInstance } from 'ant-design-vue'
@@ -153,10 +154,15 @@ onBeforeUnmount(() => { requestId++ })
 
 <template>
   <div class="master-page">
-    <a-card class="intro-card" :bordered="false">
-      <header class="page-heading"><h1 class="app-page-title">{{ t('マスタ管理') }}</h1><a-button :loading="loading" :disabled="saving" @click="load">{{ t('再読み込み') }}</a-button></header>
-      <p class="compact-notes"><span>{{ t('自分だけに反映。クリックで選択、ダブルクリックで編集。') }}</span><span>{{ t('有効＝新規選択可／無効＝非表示（履歴保持）') }}</span></p>
-    </a-card>
+    <PageIntro :title="t('マスタ管理')">
+      <template #description>
+        <span>{{ t('自分だけに反映。クリックで選択、ダブルクリックで編集。') }}</span>
+        <span>{{ t('有効＝新規選択可／無効＝非表示（履歴保持）') }}</span>
+      </template>
+      <template #actions>
+        <a-button :loading="loading" :disabled="saving" @click="load">{{ t('再読み込み') }}</a-button>
+      </template>
+    </PageIntro>
     <a-alert v-if="error && !modalOpen" type="error" :message="t(error)" show-icon role="alert" />
     <a-alert v-if="loadError" type="error" :message="t('マスタの取得に失敗しました。再読み込みしてください。')" show-icon role="alert" />
     <a-card class="content-card" :bordered="false">
@@ -191,13 +197,10 @@ onBeforeUnmount(() => { requestId++ })
 
 <style scoped>
 .master-page { display: flex; flex-direction: column; gap: var(--app-section-gap); }
-.intro-card :deep(.ant-card-body), .content-card :deep(.ant-card-body) { padding: 12px 16px; }
-.page-heading { display: flex; justify-content: space-between; align-items: center; gap: 16px; }
-.page-heading h1 { margin: 0; }
-.compact-notes { display: flex; flex-wrap: wrap; gap: 2px 16px; margin: 4px 0 0; color: var(--app-muted-color); font-size: 12px; line-height: 1.5; }
+.master-page :deep(.page-intro-description) { display: flex; flex-wrap: wrap; gap: 2px 16px; }
 .hint { color: var(--app-muted-color); font-size: 12px; margin: 4px 0 8px; }
 .master-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--app-section-gap); align-items: start; }
 .editor-footer { display: flex; justify-content: flex-end; gap: 8px; }
 .editor-error { margin-bottom: 16px; }
-@media (max-width: 800px) { .master-grid { grid-template-columns: 1fr; } .page-heading { align-items: flex-start; } }
+@media (max-width: 800px) { .master-grid { grid-template-columns: 1fr; } }
 </style>

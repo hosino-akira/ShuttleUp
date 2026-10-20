@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import PageIntro from '../components/common/PageIntro.vue'
 import { computed, onMounted, reactive, ref } from 'vue'
 import { message, type FormInstance } from 'ant-design-vue'
 import axios from 'axios'
@@ -64,9 +65,8 @@ onMounted(loadBodyData)
 
 <template>
   <section class="body-data-page" aria-labelledby="body-data-title">
-    <a-card class="body-data-card" :bordered="false">
-      <a-typography-title id="body-data-title" class="app-page-title" :level="2">{{ t('身体データ') }}</a-typography-title>
-      <p class="body-data-hint">{{ t('各項目は任意です。空欄で保存すると、その値を削除します。') }}</p>
+    <PageIntro title-id="body-data-title" :title="t('身体データ')" :description="t('各項目は任意です。空欄で保存すると、その値を削除します。')" />
+    <a-card :bordered="false">
       <a-alert v-if="bodyError" :message="t(bodyError)" type="error" show-icon role="alert" class="body-data-error" />
       <a-button v-if="!savedBody && !loadingBody" @click="loadBodyData">{{ t('再読み込み') }}</a-button>
       <a-spin :spinning="loadingBody">
@@ -102,9 +102,7 @@ onMounted(loadBodyData)
 </template>
 
 <style scoped>
-.body-data-page { width: 100%; max-width: 960px; margin: 0 auto; }
-.body-data-card { border-radius: 8px; }
-.body-data-hint { color: var(--app-muted-color); font-size: 13px; margin: 0 0 24px; }
+.body-data-page { display: flex; flex-direction: column; gap: var(--app-section-gap); min-width: 0; }
 .body-data-error { margin-bottom: 12px; }
 .body-data-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; }
 .body-data-grid :deep(.ant-input-number) { width: 100%; }

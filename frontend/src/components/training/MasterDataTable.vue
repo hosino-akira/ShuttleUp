@@ -96,8 +96,6 @@ watch([() => props.selectedId, filtered, tableRef], async () => {
 
 <style scoped>
 .master-data-table { min-width: 0; }
-.table-card :deep(.ant-card-head) { min-height: 38px; }
-.table-card :deep(.ant-card-body) { padding: 12px 16px; }
 .vxe-table-wrapper { margin-top: 8px; }
 .inactive, .parent-disabled { color: var(--app-muted-color); }
 .parent-disabled { margin-inline-start: 6px; font-size: 12px; }

@@ -30,9 +30,11 @@ SC-005は新規・詳細の2ルート。SC-006～009はモーダル／DrawerでU
 
 ## レイアウト・操作
 
-バドミントンを共通モチーフとして、ShuttleUpロゴとfaviconにシャトル、主要ナビゲーションにラケット・コート・葉・グラフのアイコンを使用する。Dashboard導入カードとサイドバーには控えめなコート線、履歴・基本情報・森林の見出しにも競技モチーフを配置する。配色は既存の5テーマ変数に追従する。
+バドミントンを共通モチーフとして、ShuttleUpロゴとfaviconにシャトル、主要ナビゲーションにラケット・コート・葉・グラフのアイコンを使用する。サイドバーには控えめなコート線を配置する。配色は既存の5テーマ変数に追従する。
 
-CourtLinesは双打13.40×6.10mの比率で描画し、サイドバーは縦向き、Dashboard・認証画面は横向きで共通の図形を回転する。単打幅5.18m、ネットから短サービスライン1.98m、後方から双打の長サービスライン0.76mを反映する。中線はサービスラインで止め、ネットは破線で区別。viewBoxとpreserveAspectRatio、height:autoで比率を保持し、ナビゲーションの小さいコートアイコンも同じ図形を利用する。寸法の参照：[Badminton England／Sport England Court Design Guide](https://www.badmintonengland.co.uk/wp-content/uploads/2022/01/Badminton-Design-Guide.pdf)。
+認証後の全画面は統計画面のカード配置を基準とする。共通PageIntroでページ見出しを表示し、装飾アイコン・背景図形は付けない。補足文は見出し右側でベースラインを揃え、幅が足りなければ下段へ折り返す。操作ボタンは右側に配置し、狭い画面では折り返す。カード間隔8px、本文余白12px、角丸10px。プロフィール・身体データも共通コンテンツ幅を使用し、ページ見出しとフォームを別カードにする。森林の外側の追加余白をなくし、カードの余白・角丸・間隔も同じ基準に揃える。
+
+CourtLinesは双打13.40×6.10mの比率で描画し、サイドバーは縦向き、認証画面は横向きで共通の図形を回転する。単打幅5.18m、ネットから短サービスライン1.98m、後方から双打の長サービスライン0.76mを反映する。中線はサービスラインで止め、ネットは破線で区別。viewBoxとpreserveAspectRatio、height:autoで比率を保持し、ナビゲーションの小さいコートアイコンも同じ図形を利用する。寸法の参照：[Badminton England／Sport England Court Design Guide](https://www.badmintonengland.co.uk/wp-content/uploads/2022/01/Badminton-Design-Guide.pdf)。
 
 ログイン・登録は共通AuthShellの2カラム構成。左側にラケット・シャトルの生成写真、右側に入力フォームを配置し、760px以下で縦積みにする。写真はfrontend/public/images/badminton-court-hero.webp（1024×1536、約106KB）。組み込みImageGenで生成した素材で、正確なプロンプトは同名.meta.jsonに保存。見出し・補足は画像へ焼き込まず、ja／en／zhで切り替える。認証・登録処理と離脱動作は従来のまま。
 

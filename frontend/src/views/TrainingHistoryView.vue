@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import BadmintonIcon from '../components/common/BadmintonIcon.vue';
+import PageIntro from '../components/common/PageIntro.vue'
 import { t } from '../i18n';
 import { computed, onMounted, reactive, ref } from "vue";
 import { message } from "ant-design-vue";
@@ -175,12 +175,8 @@ onMounted(loadTrainingSessions);
     class="training-history"
     aria-labelledby="training-history-title"
   >
-    <div class="operation-bar">
-      <h2 id="training-history-title" class="app-page-title">
-        <BadmintonIcon kind="racket" :size="24" class="history-racket" />
-        {{ t('トレーニング履歴の操作') }}
-      </h2>
-      <div class="operation-actions">
+    <PageIntro title-id="training-history-title" :title="t('トレーニング履歴の操作')">
+      <template #actions>
         <a-button type="primary" @click="openCreateModal"
           >{{ t('新規') }}</a-button
         >
@@ -197,8 +193,8 @@ onMounted(loadTrainingSessions);
           @click="deleteConfirmOpen = true"
           >{{ t('削除') }}</a-button
         >
-      </div>
-    </div>
+      </template>
+    </PageIntro>
 
     <a-card
       class="table-card"
@@ -285,7 +281,6 @@ onMounted(loadTrainingSessions);
 </template>
 
 <style scoped>
-.history-racket { margin-inline-end: 7px; color: var(--app-primary-color); }
 .training-history {
   display: flex;
   flex-direction: column;
@@ -294,27 +289,6 @@ onMounted(loadTrainingSessions);
   min-width: 0;
   min-height: 0;
   overflow: hidden;
-}
-.operation-bar {
-  display: flex;
-  flex: 0 0 auto;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px 12px;
-  padding: 8px 12px;
-  border-radius: 8px;
-  background: var(--app-surface-color);
-}
-.operation-bar h2 {
-  margin: 0;
-  color: var(--app-heading-color);
-}
-.operation-actions {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 8px;
 }
 .table-card {
   display: flex;
@@ -326,7 +300,6 @@ onMounted(loadTrainingSessions);
 }
 .table-card :deep(.ant-card-head) {
   flex: 0 0 auto;
-  min-height: 38px;
 }
 .table-card :deep(.ant-card-body) {
   display: flex;
@@ -335,7 +308,6 @@ onMounted(loadTrainingSessions);
   min-height: 0;
   overflow: hidden;
   flex-direction: column;
-  padding: 12px 16px;
 }
 .table-scroll-area {
   flex: 1;

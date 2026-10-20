@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import PageIntro from '../components/common/PageIntro.vue'
 import { intlLocale, t } from '../i18n';
 import { chartColors, palette } from '../theme';
 import { computed, onMounted, ref, watch } from "vue";
@@ -6,8 +7,6 @@ import { useRouter } from "vue-router";
 import type { EChartsOption } from "echarts";
 import BaseEChart from "../components/common/BaseEChart.vue";
 import BaseSelect from "../components/common/BaseSelect.vue";
-import BadmintonIcon from '../components/common/BadmintonIcon.vue';
-import CourtLines from '../components/common/CourtLines.vue';
 import { getDashboard } from "../api/dashboardApi";
 import { getExercises } from "../api/exerciseApi";
 import { getOpponents } from "../api/opponentApi";
@@ -315,31 +314,11 @@ onMounted(() => {
     class="dashboard"
     aria-labelledby="dashboard-title"
   >
-    <a-card
-      class="page-intro dashboard-intro"
-      :bordered="false"
-    >
-      <span class="dashboard-emblem"><BadmintonIcon kind="racket" :size="32" /></span>
-      <div class="dashboard-intro-content">
-        <a-typography-title id="dashboard-title" class="app-page-title" :level="2"
-          >{{ t('ダッシュボード') }}</a-typography-title
-        >
-        <a-typography-paragraph
-          class="dashboard-description"
-          type="secondary"
-          >{{ t('コートでの積み重ねを、次の一球につなげよう。') }}</a-typography-paragraph
-        >
-      </div>
-      <CourtLines class="dashboard-court" orientation="landscape" />
-      <a-button
-        class="dashboard-create-button"
-        type="primary"
-        @click="
-          router.push({ name: 'training-session-create' })
-        "
-        >{{ t('トレーニング新規') }}</a-button
-      >
-    </a-card>
+    <PageIntro title-id="dashboard-title" :title="t('ダッシュボード')" :description="t('コートでの積み重ねを、次の一球につなげよう。')">
+      <template #actions>
+        <a-button type="primary" @click="router.push({ name: 'training-session-create' })">{{ t('トレーニング新規') }}</a-button>
+      </template>
+    </PageIntro>
 
     <a-card :title="t('検索条件')" :bordered="false">
       <a-alert
@@ -581,34 +560,8 @@ onMounted(() => {
   gap: var(--app-section-gap);
   min-width: 0;
 }
-.dashboard-description,
 .filter-item {
   margin-bottom: 0;
-}
-.dashboard-intro :deep(.ant-card-body) {
-  flex-wrap: nowrap;
-  align-items: center;
-  position: relative;
-  padding: 20px;
-  overflow: hidden;
-  isolation: isolate;
-}
-.dashboard-intro { background: linear-gradient(110deg, var(--app-surface-color), var(--app-soft-color)); }
-.dashboard-emblem { display: grid; place-items: center; width: 52px; height: 52px; border: 1px solid var(--app-border-color); border-radius: 15px; color: var(--app-primary-color); background: var(--app-surface-color); flex-shrink: 0; }
-.dashboard-court { position: absolute; width: 210px; right: 12%; top: -35px; transform: rotate(-15deg); color: var(--app-primary-color); opacity: .1; z-index: -1; }
-.dashboard-intro-content {
-  display: flex;
-  flex: 1;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 4px 16px;
-  min-width: 0;
-}
-.dashboard-intro-content :deep(.ant-typography) {
-  margin: 0;
-}
-.dashboard-create-button {
-  flex-shrink: 0;
 }
 .dashboard-content.is-loading {
   min-height: 280px;

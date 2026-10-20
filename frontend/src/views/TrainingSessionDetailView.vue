@@ -1,6 +1,6 @@
 <script setup lang="ts">
+import PageIntro from '../components/common/PageIntro.vue'
 import { t } from '../i18n';
-import BadmintonIcon from '../components/common/BadmintonIcon.vue';
 import {
   computed,
   onBeforeUnmount,
@@ -310,16 +310,7 @@ onBeforeUnmount(() =>
 <template>
   <a-spin :spinning="loading">
     <section class="detail-page">
-      <header class="page-header">
-        <h1 class="app-page-title">
-          <BadmintonIcon :size="26" class="detail-shuttle" />
-          {{
-            isCreate
-              ? t('トレーニング新規登録')
-              : t('トレーニング詳細・編集')
-          }}
-        </h1>
-      </header>
+      <PageIntro :title="isCreate ? t('トレーニング新規登録') : t('トレーニング詳細・編集')" />
       <a-card
         class="form-card"
         :title="t('基本情報')"
@@ -512,7 +503,6 @@ onBeforeUnmount(() =>
 </template>
 
 <style scoped>
-.detail-shuttle { margin-inline-end: 7px; color: var(--app-primary-color); }
 .detail-page {
   display: flex;
   flex: 1;
@@ -546,14 +536,6 @@ onBeforeUnmount(() =>
 .match-card :deep(.ant-card-body) {
   overflow-y: auto;
 }
-.page-header {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-.page-header h1 {
-  margin: 0;
-}
 .full-width {
   width: 100%;
 }
@@ -577,10 +559,6 @@ onBeforeUnmount(() =>
     flex: 1 0 auto;
     white-space: normal;
   }
-  .page-header {
-    align-items: flex-start;
-    flex-direction: column;
-    gap: 4px;
-  }
+
 }
 </style>

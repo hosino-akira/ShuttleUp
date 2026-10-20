@@ -18,6 +18,7 @@
   --app-danger-bg: #fbeee9;
   --app-section-gap: 8px;
   --app-page-title-size: 22px;
+  --app-card-radius: 10px;
   color: var(--app-text-color);
   font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   font-synthesis: none;
@@ -48,16 +49,48 @@ body,
   color: var(--app-heading-color);
 }
 
-/* Shared title rows for overview pages; keep table styles separate. */
+/* Page cards follow the compact statistics layout. */
+.page-intro {
+  flex: 0 0 auto;
+  min-width: 0;
+}
+
 .page-intro > .ant-card-body {
   display: flex;
   flex-wrap: wrap;
-  align-items: baseline;
+  align-items: center;
   gap: 4px 16px;
 }
 
-.page-intro > .ant-card-body > .ant-typography {
+.page-intro-content {
+  display: flex;
+  flex: 1 1 320px;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 16px;
+  min-width: 0;
+}
+
+.page-intro-content > .app-page-title {
+  flex: 0 0 auto;
+  max-width: 100%;
+  overflow-wrap: anywhere;
   margin: 0;
+}
+
+.page-intro-description {
+  min-width: 0;
+  color: var(--app-muted-color);
+  overflow-wrap: anywhere;
+}
+
+.page-intro-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-inline-start: auto;
+  max-width: 100%;
 }
 
 .page-intro > .ant-card-body::before,

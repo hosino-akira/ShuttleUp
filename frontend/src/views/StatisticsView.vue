@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import PageIntro from '../components/common/PageIntro.vue'
 import { formatLocalDate, t } from '../i18n';
 import { chartColors, palette } from '../theme';
 import { computed, onMounted, ref } from "vue";
@@ -212,16 +213,7 @@ onMounted(() => void loadAnalysis());
     class="statistics"
     aria-labelledby="statistics-title"
   >
-    <a-card class="page-intro" :bordered="false">
-      <a-typography-title id="statistics-title" class="app-page-title" :level="2"
-        >{{ t('統計') }}</a-typography-title
-      >
-      <a-typography-paragraph
-        class="description"
-        type="secondary"
-        >{{ t('トレーニングの継続性や成長傾向を詳しく確認できます。') }}</a-typography-paragraph
-      >
-    </a-card>
+    <PageIntro title-id="statistics-title" :title="t('統計')" :description="t('トレーニングの継続性や成長傾向を詳しく確認できます。')" />
     <a-card :title="t('分析期間')" :bordered="false">
       <div class="period-controls">
         <a-form-item
@@ -482,7 +474,6 @@ onMounted(() => void loadAnalysis());
   gap: var(--app-section-gap);
   min-width: 0;
 }
-.description,
 .period-field,
 .note {
   margin-bottom: 0;

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import PageIntro from '../components/common/PageIntro.vue'
 import { t } from '../i18n';
 import { computed, reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
@@ -90,14 +91,8 @@ async function logout(): Promise<void> {
 
 <template>
   <section class="profile-page" aria-labelledby="profile-title">
-    <a-card :bordered="false" class="profile-card">
-      <a-typography-title id="profile-title" class="app-page-title" :level="2"
-        >{{ t('プロフィール') }}</a-typography-title
-      >
-      <a-typography-paragraph type="secondary">
-        {{ t('アカウント情報を確認・変更できます。') }}
-      </a-typography-paragraph>
-
+    <PageIntro title-id="profile-title" :title="t('プロフィール')" :description="t('アカウント情報を確認・変更できます。')" />
+    <a-card :bordered="false">
       <div class="profile-summary">
         <a-avatar :size="48" class="profile-avatar"><UserOutlined aria-hidden="true" /></a-avatar>
         <div>
@@ -166,13 +161,12 @@ async function logout(): Promise<void> {
 </template>
 
 <style scoped>
-.profile-page { width: 100%; max-width: 960px; margin: 0 auto; }
-.profile-card { border-radius: 8px; }
+.profile-page { display: flex; flex-direction: column; gap: var(--app-section-gap); min-width: 0; }
 .profile-form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; }
 .profile-form-grid > * { min-width: 0; }
 .profile-form-grid :deep(.ant-form) { margin-top: 12px; }
 .profile-form-grid > .ant-form { margin-top: 0; }
-.profile-summary { display: flex; align-items: center; gap: 12px; margin-top: 12px; }
+.profile-summary { display: flex; align-items: center; gap: 12px; }
 .profile-avatar { flex-shrink: 0; color: var(--app-primary-color); background: var(--app-soft-color); }
 .profile-summary h3 { margin: 0 0 2px; font-size: 18px; overflow-wrap: anywhere; }
 .profile-email { color: var(--app-muted-color); overflow-wrap: anywhere; }

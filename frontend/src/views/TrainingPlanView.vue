@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import PageIntro from '../components/common/PageIntro.vue'
 import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { getTrainingSessions } from '../api/trainingSessionApi'
@@ -10,7 +11,6 @@ import ForestPlant from '../components/forest/ForestPlant.vue'
 import ForestScene from '../components/forest/ForestScene.vue'
 import PlantPicker from '../components/forest/PlantPicker.vue'
 import NativeSelect from '../components/common/NativeSelect.vue'
-import BadmintonIcon from '../components/common/BadmintonIcon.vue'
 
 const router = useRouter()
 const route = useRoute()
@@ -62,14 +62,11 @@ onMounted(loadForest)
 
 <template>
   <section class="forest-page" aria-labelledby="forest-title">
-    <header class="forest-header">
-      <div>
-        <p class="eyebrow forest-sport-label"><BadmintonIcon :size="18" /> SHUTTLEUP · {{ t('コートの努力が、森になる。') }}</p>
-        <h1 id="forest-title" class="app-page-title">{{ t('トレーニングの森') }}<span aria-hidden="true">✦</span></h1>
-        <p class="subtitle">{{ t('トレーニングをひとつ終えるたび、あなたの森に新しい命が育ちます。') }}</p>
-      </div>
-      <RouterLink class="app-button" :to="{ name: 'training-history' }">{{ t('トレーニング履歴') }} <span aria-hidden="true">↗</span></RouterLink>
-    </header>
+    <PageIntro title-id="forest-title" :title="t('トレーニングの森')" :description="t('トレーニングをひとつ終えるたび、あなたの森に新しい命が育ちます。')">
+      <template #actions>
+        <RouterLink class="app-button" :to="{ name: 'training-history' }">{{ t('トレーニング履歴') }}</RouterLink>
+      </template>
+    </PageIntro>
 
     <div v-if="failed" class="forest-message" role="alert">
       <p>{{ t('森の読み込みに失敗しました。もう一度お試しください。') }}</p>
@@ -87,7 +84,7 @@ onMounted(loadForest)
       <div class="forest-layout">
         <section class="garden-card" aria-labelledby="garden-title">
           <header class="garden-header">
-            <div><h2 id="garden-title">{{ t('あなたの森') }}</h2><p>{{ t('一株ずつ、努力の足あと。') }}</p></div>
+            <div class="garden-heading"><h2 id="garden-title">{{ t('あなたの森') }}</h2><p>{{ t('一株ずつ、努力の足あと。') }}</p></div>
             <NativeSelect v-model="period" :label="t('表示する期間')" class="period-select">
               <option value="all">{{ t('すべての期間') }}</option>
               <option v-for="month in months" :key="month" :value="month">{{ formatLocalDate(month, { year: 'numeric', month: 'long' }) }}</option>
@@ -152,24 +149,20 @@ onMounted(loadForest)
 </template>
 
 <style scoped>
-.forest-page { --forest-ink: var(--app-heading-color); --forest-muted: var(--app-muted-color); width: 100%; padding: 24px 28px 28px; color: var(--forest-ink); background: var(--app-page-color); border-radius: 16px; }
-.forest-header { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 24px; }
+.forest-page { --forest-ink: var(--app-heading-color); --forest-muted: var(--app-muted-color); display: flex; flex-direction: column; gap: var(--app-section-gap); min-width: 0; width: 100%; color: var(--forest-ink); }
 .eyebrow { margin: 0 0 8px; font-size: 11px; font-weight: 600; color: var(--app-muted-color); letter-spacing: .12em; }
-.forest-sport-label { display: flex; align-items: center; gap: 7px; }
-h1 { margin: 0; }
-h1 span { margin-left: 12px; color: var(--app-accent-color); font-size: .8em; }
-.subtitle { margin: 8px 0 0; color: var(--forest-muted); font-size: 13px; line-height: 1.8; }
-.forest-stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; margin-bottom: 22px; }
-.forest-stats > div { display: flex; align-items: center; gap: 14px; background: var(--app-surface-color); padding: 18px 20px; border: 1px solid var(--app-border-color); border-radius: 15px; }
+.forest-stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--app-section-gap); }
+.forest-stats > div { display: flex; align-items: center; gap: 14px; background: var(--app-surface-color); padding: 12px; border-radius: var(--app-card-radius); }
 .stat-icon { display: grid; place-items: center; width: 42px; height: 42px; flex-shrink: 0; border-radius: 13px; background: var(--app-soft-color); color: var(--app-primary-color); font-size: 25px; }
 .forest-stats p { margin: 0 0 4px; font-size: 11px; color: var(--forest-muted); }
 .forest-stats strong { font-size: 25px; font-weight: 600; line-height: 1.3; white-space: nowrap; }
 .forest-stats small { font-size: 12px; color: var(--forest-muted); font-weight: 400; }
-.forest-layout { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 22px; }
-.garden-card { display: flex; flex-direction: column; min-width: 0; background: var(--app-soft-color); border: 1px solid var(--app-border-color); border-radius: 20px; overflow: hidden; }
-.garden-header { display: flex; justify-content: space-between; align-items: center; padding: 22px 24px 0; gap: 12px; }
-h2 { margin: 0; font-size: 17px; font-weight: 600; }
-.garden-header p { margin: 5px 0 0; color: var(--app-muted-color); font-size: 12px; }
+.forest-layout { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: var(--app-section-gap); }
+.garden-card { display: flex; flex-direction: column; min-width: 0; background: var(--app-surface-color); border-radius: var(--app-card-radius); overflow: hidden; }
+.garden-header { display: flex; justify-content: space-between; align-items: center; padding: 12px; border-bottom: 1px solid var(--app-border-color); gap: 12px; }
+h2 { margin: 0; font-size: 14px; font-weight: 600; }
+.garden-heading { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 16px; min-width: 0; }
+.garden-header p { margin: 0; color: var(--app-muted-color); font-size: 12px; }
 .period-select { max-width: 50%; }
 .garden-scene { position: relative; display: flex; align-items: center; flex: 1; min-height: 350px; background: radial-gradient(ellipse at 50% 65%, var(--app-soft-color), transparent 75%); }
 .garden-badge { position: absolute; top: 18px; left: 24px; color: var(--app-muted-color); font-size: 11px; }
@@ -177,12 +170,12 @@ h2 { margin: 0; font-size: 17px; font-weight: 600; }
 .empty-forest { position: absolute; bottom: 12px; inset-inline: 20px; text-align: center; background: var(--app-soft-color); padding: 10px; border-radius: 12px; }
 .empty-forest strong { font-size: 13px; font-weight: 500; }
 .empty-forest p { margin: 5px 0 0; color: var(--app-muted-color); font-size: 11px; }
-.garden-footer { padding: 14px 22px; display: flex; justify-content: space-between; align-items: center; gap: 12px; border-top: 1px solid var(--app-border-color); background: var(--app-surface-color); }
+.garden-footer { padding: 12px; display: flex; justify-content: space-between; align-items: center; gap: 12px; border-top: 1px solid var(--app-border-color); background: var(--app-surface-color); }
 .garden-footer p { margin: 0; font-size: 11px; line-height: 1.7; color: var(--app-muted-color); }
 .plot-pagination { display: flex; align-items: center; gap: 9px; font-size: 11px; flex-shrink: 0; }
 .plot-pagination button:disabled { opacity: .4; cursor: default; }
-.seed-card { text-align: center; padding: 23px 20px 17px; background: var(--app-surface-color); border: 1px solid var(--app-border-color); border-radius: 20px; }
-.seed-card h2 { font-size: 17px; }
+.seed-card { text-align: center; padding: 12px; background: var(--app-surface-color); border-radius: var(--app-card-radius); }
+.seed-card h2 { font-size: 14px; }
 .seed-preview { position: relative; margin: 16px auto 9px; width: 164px; }
 .preview-ring { display: grid; place-items: center; width: 164px; height: 164px; border: 1px solid var(--app-border-color); outline: 7px solid var(--app-page-color); border-radius: 50%; background: radial-gradient(circle, var(--app-soft-color) 40%, var(--app-surface-color) 70%); }
 .preview-spark { position: absolute; right: 3px; top: 20px; color: var(--app-accent-color); font-size: 30px; }
@@ -191,7 +184,8 @@ h2 { margin: 0; font-size: 17px; font-weight: 600; }
 button:focus-visible, a:focus-visible { outline: 2px solid var(--app-primary-color); outline-offset: 3px; }
 .start-button { width: 100%; margin-top: 18px; }
 .seed-hint { margin: 9px 0 0; color: var(--app-muted-color); font-size: 10px; line-height: 1.8; }
-.forest-bottom { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 22px; margin-top: 23px; }
+.forest-bottom { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: var(--app-section-gap); }
+.recent-section { min-width: 0; padding: 12px; background: var(--app-surface-color); border-radius: var(--app-card-radius); }
 .recent-section h2 { margin: 0 0 12px; font-size: 14px; }
 .recent-plants { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
 .recent-plants button { display: flex; align-items: center; gap: 9px; min-width: 0; text-align: start; background: var(--app-surface-color); border: 1px solid var(--app-border-color); border-radius: 13px; padding: 10px; color: var(--forest-ink); font: inherit; cursor: pointer; }
@@ -200,7 +194,7 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--app-primary-col
 .recent-plants small { display: block; margin-top: 4px; color: var(--app-muted-color); font-size: 10px; line-height: 1.5; }
 .recent-arrow { margin-left: auto; color: var(--app-neutral-color); }
 .no-recent { color: var(--forest-muted); font-size: 12px; }
-.milestone-card { display: flex; align-items: center; gap: 13px; padding: 18px 16px; border-radius: 15px; background: var(--app-soft-color); }
+.milestone-card { display: flex; align-items: center; gap: 13px; padding: 12px; border-radius: var(--app-card-radius); background: var(--app-surface-color); }
 .milestone-symbol { font-size: 32px; color: var(--app-accent-color); }
 .milestone-card > div { flex: 1; }
 .milestone-card h3 { margin: 0; font-size: 12px; font-weight: 600; }
@@ -211,8 +205,8 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--app-primary-col
 .plant-memory { text-align: center; color: var(--app-heading-color); padding: 12px 0; }
 .memory-plant { display: flex; justify-content: center; padding: 20px; background: var(--app-soft-color); width: 180px; margin: 0 auto 15px; border-radius: 50%; }
 .memory-note { white-space: pre-wrap; overflow-wrap: anywhere; color: var(--app-muted-color); background: var(--app-surface-color); padding: 14px; border-radius: 12px; margin: 18px 0; }
-@media (min-width: 1500px) { .forest-page { padding-inline: 48px; } .forest-layout, .forest-bottom { grid-template-columns: minmax(0, 1fr) 340px; } }
-@media (max-width: 1150px) { .forest-page { padding: 20px; } .forest-stats { gap: 9px; } .forest-stats > div { padding: 14px 12px; gap: 9px; } .stat-icon { width: 34px; height: 34px; font-size: 22px; } .forest-stats strong { font-size: 22px; } .forest-layout, .forest-bottom { grid-template-columns: minmax(0, 1fr) 280px; gap: 14px; } .recent-plants { grid-template-columns: 1fr; } .recent-plants button { padding: 8px 12px; } }
-@media (max-width: 760px) { .forest-page { padding: 18px 12px; } .forest-header { align-items: flex-start; flex-direction: column; gap: 12px; margin-bottom: 16px; } .forest-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); } .forest-stats p { font-size: 10px; } .forest-stats strong { font-size: 21px; } .forest-layout, .forest-bottom { grid-template-columns: 1fr; } .garden-header { padding: 18px 16px 0; } .garden-scene { min-height: 290px; } .garden-badge { top: 12px; left: 16px; } .garden-footer { flex-wrap: wrap; padding: 12px 16px; } .seed-card { padding: 23px; } .seed-card :deep(.plant-picker) { grid-template-columns: repeat(6, minmax(0, 1fr)); } .seed-preview { margin-top: 22px; } .seed-card :deep(.plant-option) { font-size: 10px; } .forest-bottom { margin-top: 20px; } }
+@media (min-width: 1500px) { .forest-layout, .forest-bottom { grid-template-columns: minmax(0, 1fr) 340px; } }
+@media (max-width: 1150px) { .forest-stats > div { gap: 9px; } .stat-icon { width: 34px; height: 34px; font-size: 22px; } .forest-stats strong { font-size: 22px; } .forest-layout, .forest-bottom { grid-template-columns: minmax(0, 1fr) 280px; gap: var(--app-section-gap); } .recent-plants { grid-template-columns: 1fr; } .recent-plants button { padding: 8px 12px; } }
+@media (max-width: 760px) { .forest-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); } .forest-stats p { font-size: 10px; } .forest-stats strong { font-size: 21px; } .forest-layout, .forest-bottom { grid-template-columns: 1fr; } .garden-scene { min-height: 290px; } .garden-badge { top: 12px; left: 16px; } .garden-footer { flex-wrap: wrap; padding: 12px; } .seed-card :deep(.plant-picker) { grid-template-columns: repeat(6, minmax(0, 1fr)); } .seed-preview { margin-top: 22px; } .seed-card :deep(.plant-option) { font-size: 10px; } }
 @media (max-width: 440px) { .seed-card :deep(.plant-picker) { grid-template-columns: repeat(3, minmax(0, 1fr)); } .garden-scene { min-height: 260px; } .empty-forest { bottom: 0; inset-inline: 8px; } }
 </style>
