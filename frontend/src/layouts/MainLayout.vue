@@ -53,7 +53,7 @@ function toggleSidebar(): void {
           <RouterLink class="navigation-link" :to="item.to">
             <BadmintonIcon v-if="item.key === 'dashboard'" kind="court" :size="19" />
             <BadmintonIcon v-else-if="item.key === 'training-history'" kind="racket" :size="19" />
-            <svg v-else-if="item.key === 'training-plan'" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M20 4C12 3 6 6 6 12a6 6 0 0 0 6 6c6 0 9-6 8-14ZM4 21l11-11" /></svg>
+            <svg v-else-if="item.key === 'forest'" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M20 4C12 3 6 6 6 12a6 6 0 0 0 6 6c6 0 9-6 8-14ZM4 21l11-11" /></svg>
             <BarChartOutlined v-else-if="item.key === 'statistics'" aria-hidden="true" />
             <SettingOutlined v-else-if="item.key === 'master-data'" aria-hidden="true" />
             <HeartOutlined v-else-if="item.key === 'body-data'" aria-hidden="true" />

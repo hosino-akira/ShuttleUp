@@ -317,7 +317,7 @@ onBeforeUnmount(() =>
         :bordered="false"
         ><template #extra>
           <a-space wrap>
-            <RouterLink class="app-button" :to="{ name: 'training-plan', query: sessionId ? { planted: sessionId } : {} }">{{ t('森を見る') }}</RouterLink>
+            <RouterLink class="app-button" :to="{ name: 'forest', query: sessionId ? { planted: sessionId } : {} }">{{ t('森を見る') }}</RouterLink>
             <a-button @click="goBack"
               >{{ t('一覧へ戻る') }}</a-button
             ><a-button

@@ -43,10 +43,14 @@ const router = createRouter({
       meta: { requiresAuth: true },
     },
     {
-      path: '/plan',
-      name: 'training-plan',
+      path: '/forest',
+      name: 'forest',
       component: () => import('../views/TrainingPlanView.vue'),
       meta: { requiresAuth: true },
+    },
+    {
+      path: '/plan',
+      redirect: to => ({ name: 'forest', query: to.query, hash: to.hash }),
     },
     {
       path: '/statistics',

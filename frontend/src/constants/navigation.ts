@@ -18,9 +18,9 @@ export const NAVIGATION_MENU: readonly NavigationMenuItem[] = [
     to: { name: 'training-history' },
   },
   {
-    key: 'training-plan',
+    key: 'forest',
     label: 'トレーニングの森',
-    to: { name: 'training-plan' },
+    to: { name: 'forest' },
   },
   {
     key: 'statistics',
