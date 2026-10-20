@@ -12,6 +12,7 @@ public class AnalysisTrainingRecordResponse {
     private Long exerciseId;
     private String exerciseName;
     private String categoryName;
+    private com.shuttleup.backend.entity.TrainingKind statisticsType;
     private Integer sets;
     private Integer repetitions;
     private Double weightKg;

@@ -50,6 +50,11 @@ public class ExerciseType {
     @Column(name = "enabled", nullable = false)
     private Boolean enabled;
 
+    /** nullは共通プリセット、値ありは本人の追加分類。 */
+    @jakarta.persistence.ManyToOne
+    @jakarta.persistence.JoinColumn(name = "user_id")
+    private User user;
+
     /** 作成日時 */
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;

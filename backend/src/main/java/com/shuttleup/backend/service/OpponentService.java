@@ -5,7 +5,6 @@ import com.shuttleup.backend.dto.request.OpponentUpdateRequest;
 import com.shuttleup.backend.dto.response.OpponentResponse;
 import com.shuttleup.backend.entity.Opponent;
 import com.shuttleup.backend.entity.User;
-import com.shuttleup.backend.repository.MatchRepository;
 import com.shuttleup.backend.repository.OpponentRepository;
 import com.shuttleup.backend.repository.UserRepository;
 import com.shuttleup.backend.security.CurrentUser;
@@ -20,15 +19,12 @@ public class OpponentService {
 
     private final OpponentRepository opponentRepository;
     private final UserRepository userRepository;
-    private final MatchRepository matchRepository;
 
     public OpponentService(
             OpponentRepository opponentRepository,
-            UserRepository userRepository,
-            MatchRepository matchRepository) {
+            UserRepository userRepository) {
         this.opponentRepository = opponentRepository;
         this.userRepository = userRepository;
-        this.matchRepository = matchRepository;
     }
 
     /** 指定されたユーザーが登録した対戦相手一覧を名前順で取得する。 */
@@ -52,7 +48,8 @@ public class OpponentService {
     public OpponentResponse createOpponent(
             Long userId,
             OpponentCreateRequest request) {
-        User user = findUser(userId);
+        CurrentUser.requireOwner(userId);
+        User user = userRepository.findByIdForUpdate(userId).orElseThrow();
         String name = request.getName().trim();
         if (opponentRepository.existsByUserIdAndName(userId, name)) {
             throw duplicateNameException();
@@ -73,6 +70,7 @@ public class OpponentService {
     public OpponentResponse updateOpponent(
             Long opponentId,
             OpponentUpdateRequest request) {
+        userRepository.findByIdForUpdate(CurrentUser.id()).orElseThrow();
         Opponent opponent = findOpponent(opponentId);
         String name = request.getName().trim();
         Long userId = opponent.getUser().getId();
@@ -83,19 +81,9 @@ public class OpponentService {
 
         opponent.setName(name);
         opponent.setMemo(normalizeMemo(request.getMemo()));
+        if (request.getEnabled() != null) opponent.setEnabled(request.getEnabled());
         opponent.setUpdatedAt(LocalDateTime.now());
         return toResponse(opponentRepository.save(opponent));
-    }
-
-    /** 試合で未使用の対戦相手を削除する。 */
-    @Transactional
-    public void deleteOpponent(Long opponentId) {
-        Opponent opponent = findOpponent(opponentId);
-        if (matchRepository.existsByOpponentId(opponentId)) {
-            throw new IllegalStateException(
-                    "この対戦相手は試合記録で使用されているため削除できません。");
-        }
-        opponentRepository.delete(opponent);
     }
 
     private User findUser(Long userId) {
@@ -115,7 +103,7 @@ public class OpponentService {
 
     private IllegalStateException duplicateNameException() {
         return new IllegalStateException(
-                "同じ名前の対戦相手が既に登録されています。");
+                "同じ名前の対戦相手が既に登録されています。無効な項目は再度有効にするか、別の名前を入力してください。");
     }
 
     private String normalizeMemo(String memo) {
@@ -130,6 +118,7 @@ public class OpponentService {
                 .id(opponent.getId())
                 .userId(opponent.getUser().getId())
                 .name(opponent.getName())
+                .enabled(opponent.getEnabled()).available(opponent.getEnabled())
                 .memo(opponent.getMemo())
                 .createdAt(opponent.getCreatedAt())
                 .updatedAt(opponent.getUpdatedAt())

@@ -19,6 +19,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+@org.springframework.core.annotation.Order(0)
 @Component
 @Profile("dev")
 @RequiredArgsConstructor
@@ -36,9 +37,9 @@ public class DevDataInitializer implements CommandLineRunner {
     @Transactional
     public void run(String... args) {
         Map<String, ExerciseCategory> categories = new HashMap<>();
-        categoryRepository.findAll().forEach(category -> categories.putIfAbsent(category.getName(), category));
+        categoryRepository.findAll().stream().filter(category -> category.getUser() == null).forEach(category -> categories.putIfAbsent(category.getName(), category));
         Map<TypeKey, ExerciseType> types = new HashMap<>();
-        typeRepository.findAll().forEach(type -> types.putIfAbsent(
+        typeRepository.findAll().stream().filter(type -> type.getUser() == null).forEach(type -> types.putIfAbsent(
                 new TypeKey(type.getCategory().getId(), type.getName()), type));
         Set<ExerciseKey> exercises = new HashSet<>();
         exerciseRepository.findBySystemPresetTrue().forEach(exercise -> exercises.add(

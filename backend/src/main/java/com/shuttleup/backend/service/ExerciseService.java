@@ -1,138 +1,57 @@
 package com.shuttleup.backend.service;
 
-import com.shuttleup.backend.dto.request.ExerciseCreateRequest;
-import com.shuttleup.backend.dto.request.ExerciseUpdateRequest;
+import com.shuttleup.backend.dto.request.*;
 import com.shuttleup.backend.dto.response.ExerciseResponse;
-import com.shuttleup.backend.entity.Exercise;
-import com.shuttleup.backend.entity.ExerciseCategory;
-import com.shuttleup.backend.entity.ExerciseType;
-import com.shuttleup.backend.entity.User;
-import com.shuttleup.backend.repository.ExerciseRepository;
-import com.shuttleup.backend.repository.ExerciseTypeRepository;
-import com.shuttleup.backend.repository.UserRepository;
+import com.shuttleup.backend.entity.MasterKind;
+import com.shuttleup.backend.exception.BadRequestException;
 import com.shuttleup.backend.security.CurrentUser;
+import com.shuttleup.backend.repository.UserRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class ExerciseService {
+    private final ExerciseCatalogService catalogs;
+    private final MasterDataService masters;
+    private final UserRepository users;
 
-    private final ExerciseRepository exerciseRepository;
-    private final ExerciseTypeRepository exerciseTypeRepository;
-    private final UserRepository userRepository;
-
-    public ExerciseService(
-            ExerciseRepository exerciseRepository,
-            ExerciseTypeRepository exerciseTypeRepository,
-            UserRepository userRepository) {
-        this.exerciseRepository = exerciseRepository;
-        this.exerciseTypeRepository = exerciseTypeRepository;
-        this.userRepository = userRepository;
-    }
-
-    /**
-     * すべての種目を取得する。
-     */
     @Transactional(readOnly = true)
-    public List<ExerciseResponse> getAvailableExercises(
-            Long exerciseTypeId, Long userId) {
-        findUser(userId);
-        return exerciseRepository.findAvailableExercises(exerciseTypeId, userId)
-                .stream()
-                .map(this::toResponse)
-                .toList();
+    public List<ExerciseResponse> getAvailableExercises(Long typeId, Long userId, boolean includeDisabled) {
+        CurrentUser.requireOwner(userId);
+        return catalogs.load().exerciseResponses(typeId, includeDisabled);
     }
 
-    /**
-     * IDを指定して種目を取得する。
-     */
     @Transactional(readOnly = true)
     public ExerciseResponse getExerciseById(Long id) {
-        return toResponse(findExercise(id));
+        var catalog = catalogs.load();
+        return catalog.exerciseResponse(catalog.exercise(id));
     }
 
-    /**
-     * ユーザー用の種目を新規作成する。
-     */
     @Transactional
     public ExerciseResponse createExercise(ExerciseCreateRequest request) {
-        ExerciseType exerciseType = findExerciseType(request.getExerciseTypeId());
-        User user = findUser(request.getUserId());
-
-        LocalDateTime now = LocalDateTime.now();
-        Exercise exercise = new Exercise();
-        exercise.setExerciseType(exerciseType);
-        exercise.setName(request.getName().trim());
-        exercise.setSystemPreset(false);
-        exercise.setUser(user);
-        exercise.setCreatedAt(now);
-        exercise.setUpdatedAt(now);
-
-        return toResponse(exerciseRepository.save(exercise));
+        CurrentUser.requireOwner(request.getUserId());
+        users.findByIdForUpdate(CurrentUser.id()).orElseThrow();
+        var catalog = catalogs.load();
+        if (!catalog.typeAvailable(catalog.type(request.getExerciseTypeId())))
+            throw new BadRequestException("無効な分類には種目を追加できません。");
+        var created = masters.create(MasterKind.EXERCISE,
+                new MasterCreateRequest(request.getName(), request.getExerciseTypeId(), null));
+        return getExerciseById(created.id());
     }
 
-    /**
-     * 種目を更新する。システムプリセット区分は変更しない。
-     */
     @Transactional
     public ExerciseResponse updateExercise(Long id, ExerciseUpdateRequest request) {
-        Exercise exercise = findExercise(id);
-        CurrentUser.requireOwner(exercise.getUser() == null ? null : exercise.getUser().getId());
-        exercise.setExerciseType(findExerciseType(request.getExerciseTypeId()));
-        exercise.setName(request.getName());
-        exercise.setUpdatedAt(LocalDateTime.now());
-
-        return toResponse(exerciseRepository.save(exercise));
-    }
-
-    /**
-     * IDを指定して種目を削除する。
-     */
-    @Transactional
-    public void deleteExercise(Long id) {
-        Exercise exercise = findExercise(id);
-        CurrentUser.requireOwner(exercise.getUser() == null ? null : exercise.getUser().getId());
-        exerciseRepository.delete(exercise);
-    }
-
-    private Exercise findExercise(Long id) {
-        Exercise exercise = exerciseRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("指定された種目が見つかりません。"));
-        if (!Boolean.TRUE.equals(exercise.getSystemPreset())) {
-            CurrentUser.requireOwner(exercise.getUser() == null ? null : exercise.getUser().getId());
-        }
-        return exercise;
-    }
-
-    private ExerciseType findExerciseType(Long id) {
-        return exerciseTypeRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("指定された種別が見つかりません。"));
-    }
-
-    private User findUser(Long id) {
-        CurrentUser.requireOwner(id);
-        return userRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("指定されたユーザーが見つかりません。"));
-    }
-
-    private ExerciseResponse toResponse(Exercise exercise) {
-        ExerciseType exerciseType = exercise.getExerciseType();
-        ExerciseCategory category = exerciseType.getCategory();
-
-        return ExerciseResponse.builder()
-                .id(exercise.getId())
-                .name(exercise.getName())
-                .exerciseTypeId(exerciseType.getId())
-                .exerciseTypeName(exerciseType.getName())
-                .categoryId(category.getId())
-                .categoryName(category.getName())
-                .systemPreset(exercise.getSystemPreset())
-                .userId(exercise.getUser() == null ? null : exercise.getUser().getId())
-                .createdAt(exercise.getCreatedAt())
-                .updatedAt(exercise.getUpdatedAt())
-                .build();
+        users.findByIdForUpdate(CurrentUser.id()).orElseThrow();
+        var catalog = catalogs.load();
+        var exercise = catalog.exercise(id);
+        if (!exercise.getExerciseType().getId().equals(request.getExerciseTypeId()))
+            throw new BadRequestException("所属する分類は変更できません。");
+        boolean enabled = request.getEnabled() == null
+                ? catalog.exerciseResponse(exercise).getEnabled() : request.getEnabled();
+        masters.update(MasterKind.EXERCISE, id, new MasterUpdateRequest(request.getName(), enabled));
+        return getExerciseById(id);
     }
 }

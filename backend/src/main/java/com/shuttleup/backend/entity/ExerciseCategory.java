@@ -35,6 +35,10 @@ public class ExerciseCategory {
     @Column(name = "name", nullable = false, length = 100)
     private String name;
 
+    @jakarta.persistence.Enumerated(jakarta.persistence.EnumType.STRING)
+    @Column(name = "statistics_type", length = 20)
+    private TrainingKind statisticsType;
+
     /** 表示順 */
     @Column(name = "display_order")
     private Integer displayOrder;
@@ -42,6 +46,11 @@ public class ExerciseCategory {
     /** 有効フラグ */
     @Column(name = "enabled", nullable = false)
     private Boolean enabled;
+
+    /** nullは共通プリセット、値ありは本人の追加分類。 */
+    @jakarta.persistence.ManyToOne
+    @jakarta.persistence.JoinColumn(name = "user_id")
+    private User user;
 
     /** 作成日時 */
     @Column(name = "created_at", nullable = false)

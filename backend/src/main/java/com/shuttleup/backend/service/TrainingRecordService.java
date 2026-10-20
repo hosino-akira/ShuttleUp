@@ -8,7 +8,6 @@ import com.shuttleup.backend.entity.ExerciseCategory;
 import com.shuttleup.backend.entity.ExerciseType;
 import com.shuttleup.backend.entity.TrainingRecord;
 import com.shuttleup.backend.entity.TrainingSession;
-import com.shuttleup.backend.repository.ExerciseRepository;
 import com.shuttleup.backend.repository.TrainingRecordRepository;
 import com.shuttleup.backend.repository.TrainingSessionRepository;
 import com.shuttleup.backend.security.CurrentUser;
@@ -23,15 +22,15 @@ public class TrainingRecordService {
 
     private final TrainingRecordRepository trainingRecordRepository;
     private final TrainingSessionRepository trainingSessionRepository;
-    private final ExerciseRepository exerciseRepository;
+    private final ExerciseCatalogService catalogs;
 
     public TrainingRecordService(
             TrainingRecordRepository trainingRecordRepository,
             TrainingSessionRepository trainingSessionRepository,
-            ExerciseRepository exerciseRepository) {
+            ExerciseCatalogService catalogs) {
         this.trainingRecordRepository = trainingRecordRepository;
         this.trainingSessionRepository = trainingSessionRepository;
-        this.exerciseRepository = exerciseRepository;
+        this.catalogs = catalogs;
     }
 
     /**
@@ -40,9 +39,10 @@ public class TrainingRecordService {
     @Transactional(readOnly = true)
     public List<TrainingRecordResponse> getTrainingRecords(Long sessionId) {
         findTrainingSession(sessionId);
+        var catalog = catalogs.load();
         return trainingRecordRepository.findByTrainingSessionIdOrderByIdAsc(sessionId)
                 .stream()
-                .map(this::toResponse)
+                .map(record -> toResponse(record, catalog))
                 .toList();
     }
 
@@ -51,7 +51,7 @@ public class TrainingRecordService {
      */
     @Transactional(readOnly = true)
     public TrainingRecordResponse getTrainingRecord(Long recordId) {
-        return toResponse(findTrainingRecord(recordId));
+        return toResponse(findTrainingRecord(recordId), catalogs.load());
     }
 
     /**
@@ -62,7 +62,9 @@ public class TrainingRecordService {
             Long sessionId,
             TrainingRecordCreateRequest request) {
         TrainingSession trainingSession = findTrainingSession(sessionId);
-        Exercise exercise = findExercise(request.getExerciseId());
+        var catalog = catalogs.load();
+        Exercise exercise = catalog.exercise(request.getExerciseId());
+        catalog.requireAvailable(exercise);
 
         LocalDateTime now = LocalDateTime.now();
         TrainingRecord trainingRecord = new TrainingRecord();
@@ -72,7 +74,7 @@ public class TrainingRecordService {
         trainingRecord.setCreatedAt(now);
         trainingRecord.setUpdatedAt(now);
 
-        return toResponse(trainingRecordRepository.save(trainingRecord));
+        return toResponse(trainingRecordRepository.save(trainingRecord), catalogs.load());
     }
 
     /**
@@ -83,11 +85,14 @@ public class TrainingRecordService {
             Long recordId,
             TrainingRecordUpdateRequest request) {
         TrainingRecord trainingRecord = findTrainingRecord(recordId);
-        trainingRecord.setExercise(findExercise(request.getExerciseId()));
+        var catalog = catalogs.load();
+        var exercise = catalog.exercise(request.getExerciseId());
+        if (!trainingRecord.getExercise().getId().equals(exercise.getId())) catalog.requireAvailable(exercise);
+        trainingRecord.setExercise(exercise);
         applyValues(trainingRecord, request);
         trainingRecord.setUpdatedAt(LocalDateTime.now());
 
-        return toResponse(trainingRecordRepository.save(trainingRecord));
+        return toResponse(trainingRecordRepository.save(trainingRecord), catalogs.load());
     }
 
     /**
@@ -112,15 +117,6 @@ public class TrainingRecordService {
         return record;
     }
 
-    private Exercise findExercise(Long exerciseId) {
-        Exercise exercise = exerciseRepository.findById(exerciseId)
-                .orElseThrow(() -> new IllegalArgumentException("指定された種目が見つかりません。"));
-        if (!Boolean.TRUE.equals(exercise.getSystemPreset())) {
-            CurrentUser.requireOwner(exercise.getUser() == null ? null : exercise.getUser().getId());
-        }
-        return exercise;
-    }
-
     private void applyValues(
             TrainingRecord trainingRecord,
             TrainingRecordCreateRequest request) {
@@ -147,7 +143,7 @@ public class TrainingRecordService {
         trainingRecord.setNote(request.getNote());
     }
 
-    private TrainingRecordResponse toResponse(TrainingRecord trainingRecord) {
+    private TrainingRecordResponse toResponse(TrainingRecord trainingRecord, ExerciseCatalogService.Catalog catalog) {
         Exercise exercise = trainingRecord.getExercise();
         ExerciseType exerciseType = exercise.getExerciseType();
         ExerciseCategory category = exerciseType.getCategory();
@@ -156,11 +152,11 @@ public class TrainingRecordService {
                 .id(trainingRecord.getId())
                 .trainingSessionId(trainingRecord.getTrainingSession().getId())
                 .exerciseId(exercise.getId())
-                .exerciseName(exercise.getName())
+                .exerciseName(catalog.exerciseName(exercise))
                 .exerciseTypeId(exerciseType.getId())
-                .exerciseTypeName(exerciseType.getName())
+                .exerciseTypeName(catalog.typeName(exerciseType))
                 .categoryId(category.getId())
-                .categoryName(category.getName())
+                .categoryName(catalog.categoryName(category))
                 .sets(trainingRecord.getSets())
                 .repetitions(trainingRecord.getRepetitions())
                 .weightKg(trainingRecord.getWeightKg())

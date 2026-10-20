@@ -15,7 +15,3 @@ export async function updateOpponent(id: number, request: OpponentUpdateRequest)
   const response = await http.put<OpponentResponse>(`/opponents/${id}`, request)
   return response.data
 }
-
-export async function deleteOpponent(id: number): Promise<void> {
-  await http.delete(`/opponents/${id}`)
-}

@@ -52,6 +52,11 @@ public class Exercise {
     @JoinColumn(name = "user_id")
     private User user;
 
+    @Builder.Default
+    @org.hibernate.annotations.ColumnDefault("true")
+    @Column(name = "enabled", nullable = false)
+    private Boolean enabled = true;
+
     /** 作成日時 */
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;

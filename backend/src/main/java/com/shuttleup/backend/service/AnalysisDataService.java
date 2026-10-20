@@ -26,15 +26,17 @@ public class AnalysisDataService {
     private final TrainingSessionRepository sessionRepository;
     private final TrainingRecordRepository recordRepository;
     private final MatchRepository matchRepository;
+    private final ExerciseCatalogService catalogs;
 
     public AnalysisDataService(UserRepository userRepository,
             TrainingSessionRepository sessionRepository,
             TrainingRecordRepository recordRepository,
-            MatchRepository matchRepository) {
+            MatchRepository matchRepository, ExerciseCatalogService catalogs) {
         this.userRepository = userRepository;
         this.sessionRepository = sessionRepository;
         this.recordRepository = recordRepository;
         this.matchRepository = matchRepository;
+        this.catalogs = catalogs;
     }
 
     /** 指定期間の分析用データを返す。 */
@@ -47,13 +49,14 @@ public class AnalysisDataService {
         if (!userRepository.existsById(userId)) {
             throw new IllegalArgumentException("指定されたユーザーが見つかりません。");
         }
+        var catalog = catalogs.load();
         return AnalysisDataResponse.builder()
                 .userId(userId)
                 .sessions(sessionRepository
                         .findByUserIdAndTrainingDateBetweenOrderByTrainingDateAscIdAsc(userId, from, to)
                         .stream().map(this::toSessionResponse).toList())
                 .records(recordRepository.findAnalysisRecords(userId, from, to)
-                        .stream().map(this::toRecordResponse).toList())
+                        .stream().map(record -> toRecordResponse(record, catalog)).toList())
                 .matches(matchRepository.findAnalysisMatches(userId, from, to)
                         .stream().map(this::toMatchResponse).toList())
                 .build();
@@ -66,11 +69,12 @@ public class AnalysisDataService {
                 .updatedAt(session.getUpdatedAt()).build();
     }
 
-    private AnalysisTrainingRecordResponse toRecordResponse(TrainingRecord record) {
+    private AnalysisTrainingRecordResponse toRecordResponse(TrainingRecord record, ExerciseCatalogService.Catalog catalog) {
         return AnalysisTrainingRecordResponse.builder().id(record.getId())
                 .trainingSessionId(record.getTrainingSession().getId())
-                .exerciseId(record.getExercise().getId()).exerciseName(record.getExercise().getName())
-                .categoryName(record.getExercise().getExerciseType().getCategory().getName())
+                .exerciseId(record.getExercise().getId()).exerciseName(catalog.exerciseName(record.getExercise()))
+                .categoryName(catalog.categoryName(record.getExercise().getExerciseType().getCategory()))
+                .statisticsType(record.getExercise().getExerciseType().getCategory().getStatisticsType())
                 .sets(record.getSets()).repetitions(record.getRepetitions()).weightKg(record.getWeightKg())
                 .durationMinutes(record.getDurationMinutes()).distanceMeters(record.getDistanceMeters())
                 .successCount(record.getSuccessCount()).attemptCount(record.getAttemptCount())

@@ -9,9 +9,12 @@ import lombok.Setter;
 @Setter
 public class ExerciseUpdateRequest {
 
+    private Boolean enabled;
+
     @NotNull
     private Long exerciseTypeId;
 
     @NotBlank
+    @jakarta.validation.constraints.Size(max = 100)
     private String name;
 }

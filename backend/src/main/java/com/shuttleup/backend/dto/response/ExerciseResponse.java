@@ -11,6 +11,8 @@ public class ExerciseResponse {
 
     private Long id;
     private String name;
+    private Boolean enabled;
+    private Boolean available;
     private Long exerciseTypeId;
     private String exerciseTypeName;
     private Long categoryId;

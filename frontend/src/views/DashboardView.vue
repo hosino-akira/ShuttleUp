@@ -58,13 +58,13 @@ const exerciseOptions = computed(() =>
     )
     .map((exercise) => ({
       value: exercise.id,
-      label: exercise.name,
+      label: exercise.available ? exercise.name : `${exercise.name} (${t('無効')})`,
     })),
 );
 const opponentOptions = computed(() =>
   opponents.value.map((opponent) => ({
     value: opponent.id,
-    label: opponent.name,
+    label: opponent.enabled ? opponent.name : `${opponent.name} (${t('無効')})`,
   })),
 );
 const selectedExerciseName = computed(
@@ -276,7 +276,7 @@ async function loadChoices(): Promise<void> {
   try {
     const [loadedExercises, loadedOpponents] =
       await Promise.all([
-        getExercises(undefined, requireUserId()),
+        getExercises(undefined, requireUserId(), true),
         getOpponents(requireUserId()),
       ]);
     exercises.value = loadedExercises;

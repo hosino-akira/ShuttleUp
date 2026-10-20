@@ -10,16 +10,17 @@ Spring Data JPAのEntityを論理モデルの基準とする。MySQLの実DDL・
 |---|---|---|
 | users | 9 | email UK、password_hash nullable、token_version、status。 |
 | training_sessions | 9 | 本人user_id、日付・時間・feeling・メモ・plant_type。 |
-| exercise_categories | 6 | 共通大分類・display_order・enabled。 |
-| exercise_types | 7 | 大分類category_id、中分類・display_order・enabled。 |
-| exercises | 7 | 中分類exercise_type_id、system_preset、所有user_id nullable。 |
+| exercise_categories | 8 | 大分類・display_order・enabled、所有user_id nullable、固定statistics_type。 |
+| exercise_types | 8 | 大分類category_id、中分類・display_order・enabled、所有user_id nullable。 |
+| exercises | 8 | 中分類exercise_type_id、system_preset、所有user_id nullable、enabled。 |
 | training_records | 13 | 親セッションと種目、任意の実績7数値・メモ。 |
 | matches | 9 | 親セッションと相手、得点・video_url(2048)・メモ。 |
-| opponents | 6 | 本人user_id、名前・メモ。 |
+| opponents | 7 | 本人user_id、名前・メモ、enabled。 |
+| exercise_master_settings | 6 | 本人user_id、target_kind、target_id、個人名name・enabled。 |
 
 ## ER・関連
 
-[編集可能なER図](仕様書/ID書/ER図.xlsx)、[画像](仕様書/ID書/ER図.svg)、[テーブル定義](テーブル定義書.xlsx)。8表66列9関連。各表はIDENTITY BIGINT id、created_at／updated_atはService設定。試合日は親training_sessions.training_dateから取得し、matches.match_dateは物理列として持たない。
+[編集可能なER図](仕様書/ID書/ER図.xlsx)、[画像](仕様書/ID書/ER図.svg)、[テーブル定義](テーブル定義書.xlsx)。旧ER成果物は8表の版。2026-10-20追加の個人設定表・所有者・統計区分・enabled列はEntityと本節を参照。各表はIDENTITY BIGINT id、created_at／updated_atはService設定。試合日は親training_sessions.training_dateから取得し、matches.match_dateは物理列として持たない。
 
 共通プリセットはexercises.user_id=NULL、独自種目は本人ID。マスターはexercise_categories／exercise_types／共通exercises、本人独自種目とopponents・セッション・明細・試合は本人所属を検証する。
 
@@ -31,7 +32,7 @@ VARCHARの長さはEntityの文字数。byte長欄はutf8mb4データ部の最�
 
 users.token_versionはDB DEFAULT 0、statusはACTIVE指定。system_presetのfalseはJava初期値でDB DEFAULT指定なし。plant_typeの新規省略／旧NULLのcedar補完はService／画面で行う。更新省略時は保存値保持。DB DEFAULT・Java値・画面補完を混同しない。
 
-削除は物理削除。cascade／orphanRemoval指定なし。子明細・試合のあるセッション削除は実DBのFKによって409となり得る。使用中相手はServiceで409。
+業務記録の削除は物理削除。マスタは2026-10-20から停用／復元のみ。cascade／orphanRemoval指定なし。子明細・試合のあるセッション削除は実DBのFKによって409となり得る。対戦相手・種目のDELETEエンドポイントは提供しない。
 
 ## スキーマ変更と移行
 
@@ -59,3 +60,16 @@ ALTER TABLE training_sessions
 開発プリセット補完はdevだけで6大分類・36中分類・216種目を不足分だけ追加する。prodにはこの補完が動かないため、必要なマスターの導入を別途計画する。
 
 根拠：backend/src/main/java/com/shuttleup/backend/entity・config/DevDataInitializer.java。参照：[運用](deployment.md)、[テスト](testing.md)。
+
+
+## 2026-10-20 マスタ管理のスキーマ更新
+
+既存のddl-auto=updateを利用する。新しいexercises.enabledとopponents.enabledにはDB DEFAULT trueを宣言し、既存行も有効として保持する。category/typeのuser_id=NULLは共有原本、本人IDは個人追加。既存ID・FK・名前・履歴は保持する。
+
+exercise_master_settingsは(user_id,target_kind,target_id)にUK（uk_master_setting_user_target）を持つ。target_kindはCATEGORY／TYPE／EXERCISE。異なる表を指すtarget_idはサービスで可視性と存在を検証し、マスタ自体の削除を提供しない。個人追加データは元行を更新し、共有行への個人変更だけをこの表に保存する。
+
+大分類statistics_typeはPHYSICAL／SKILL／OTHER。起動時CategoryStatisticsInitializerがNULLだけを旧名称ルールで補完する。dev補完は共有行のみ照合してから実行する。統計区分はその後の名称変更で再計算しない。
+
+個人別重名チェックは共有原本＋個人設定＋本人追加を合成して実施する。同一ユーザーのマスタ書込・相手書込ではusers行をPESSIMISTIC_WRITEでロックして同時登録を直列化する。同名照合には停用項目も含む。既存の同名データは削除せず、名前を維持したSwitch操作は許可する。
+
+稼働DBを使ったDDL適用・既存データ移行・実並行リクエストは未検証。起動前にバックアップを取り、別の検証DBで追加列の初期値、FK、UK、件数維持と2ユーザーの分離を確認する。JavaとPythonを両方更新・再起動する。

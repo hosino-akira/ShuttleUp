@@ -136,3 +136,24 @@ TC-053はCLI検証済みで失敗（buildのTS6133）。その他55件は実測�
 同日の追加検証：保存エラーの持続表示・日付強調変更後はFrontend 49件成功、build成功。TrainingSessionControllerTest／ApiExceptionHandlerTestの3件成功。保存前の重複判定、自己除外、日付修正後の再保存、競合時の固定codeと旧message、通信失敗と別原因409の区別を実コンポーネントの処理で検証。実画面の見た目は未検証。
 
 [手動検証仕様書](仕様書/テスト/テスト仕様書.xlsx)、[要件](requirements.md)、[運用](deployment.md)。
+
+
+## 2026-10-20 マスタ管理 初版の検証
+
+今回の変更からJava/Pythonの対象回帰テストを追加した。過去に削除したテスト群を再実行したものではない。
+
+| 検証 | 結果 | 範囲 |
+|---|---|---|
+| Java package・回帰 | 21件成功 | ExerciseCatalogTest 5件、MasterDataServiceTest 8件、InactiveMasterRecordTest 8件。共有原本と個人設定の分離、祖先停用と下位Switch保持、停用を含む同名照合、旧同名項目のSwitch操作、本人追加、不可視ID拒否、履歴名称・値保持、停用項目の新規／変更拒否と元項目保持。 |
+| Python unittest | 4件成功 | 固定統計区分を改名から分離、明示OTHER、旧応答フォールバック、camelCase転送。 |
+| Frontend production build | 成功 | vue-tscとVite。既存のbundleサイズ警告あり。 |
+| ブラウザー確認 | 隔離fixtureで実施 | 実コンポーネント＋一時的なメモリAPI。分類3階層の新規、個人名保存、上位Switchと下位Switch保持、重名エラーと入力保持、対戦相手の停用・名称／メモ編集と停用保持、日中切替、狭い幅の縦配置。実DB接続は使用しない。 |
+| 実MySQL・実HTTP結合 | 未実施 | DDL適用、既存行default、FK/UK、並行書込、実アカウント2名での分離は検証DBで確認が必要。 |
+
+再実行: backendでmvnw.cmd package、python-analysisで.venv/Scripts/python.exe -m unittest discover -s tests -v、frontendでnpm run build。今回の実行環境ではJDKのJAR実パス取得がサンドボックスで拒否されるため、依存をtarget/master-m2/repositoryへ複写し、許可されたローカル実行で生成クラスを再作成してJava packageを完了した。実DBのddl-auto更新をビルド成功から推定しない。
+
+追加手動ケース（未実施）: Aが共有大分類・中分類・小分類を改名／停用してもBは原名・元の可用性を維持すること。Aの過去明細の値・日付・FKと件数が保持されること。元の停用種目／対戦相手を保持した実HTTP更新は成功し、別の停用項目への変更は400となること。Java/Python双方更新後、名称を変えても統計割合が変わらないこと。
+
+2026-10-20追加UI回帰：新規大分類で技術練習をクリックしてもその他のままになる問題を隔離fixtureで再現（FAIL）。DOMの実クリック対象と算出styleを確認し、メニューのpointer-events:none継承を特定。既存BaseSelectと同じポップアップコンテナ・pointerEvents:auto設定を適用後、技術練習選択、モーダルを開き直したフィジカル選択の両方がPASS。分類一覧の標準／自分で追加の非表示も確認。実MySQLを使わないUI確認。
+
+2026-10-20 vxe-table変更の検証：Frontend production build成功。隔離fixtureで大分類の単クリック選択とハイライト・ダブルクリック編集、小分類の単クリックで編集を開かないこと・ダブルクリック編集、Switchが選択を変更しないことを確認。対戦相手13行を全件DOM描画（ページャーなし）し、末尾行のダブルクリック編集を確認。名称／有効・無効の表頭とSwitchの状態文字、説明文を画面確認した。バックエンド変更はないためJava/Pythonは今回再実行していない。

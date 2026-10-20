@@ -27,6 +27,7 @@ export const NAVIGATION_MENU: readonly NavigationMenuItem[] = [
     label: '統計',
     to: { name: 'statistics' },
   },
+  { key: 'master-data', label: 'マスタ管理', to: { name: 'master-data' } },
   {
     key: 'profile',
     label: 'プロフィール',

@@ -8,6 +8,9 @@ import java.util.List;
 public interface ExerciseCategoryRepository
         extends JpaRepository<ExerciseCategory, Long> {
 
+    @org.springframework.data.jpa.repository.Query("select c from ExerciseCategory c where c.user is null or c.user.id = :userId order by c.displayOrder, c.id")
+    List<ExerciseCategory> findVisible(@org.springframework.data.repository.query.Param("userId") Long userId);
+
     boolean existsByName(String name);
 
     List<ExerciseCategory> findByEnabledTrueOrderByDisplayOrderAscNameAsc();

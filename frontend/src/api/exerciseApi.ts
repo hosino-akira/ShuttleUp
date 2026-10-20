@@ -11,29 +11,31 @@ import { requireUserId } from "../stores/auth";
 export async function getExercises(
   exerciseTypeId?: number,
   userId = requireUserId(),
+  includeDisabled = false,
 ): Promise<ExerciseResponse[]> {
   const response = await http.get<ExerciseResponse[]>(
     "/exercises",
-    { params: { exerciseTypeId, userId } },
+    { params: { exerciseTypeId, userId, includeDisabled } },
   );
   return response.data;
 }
 
-export async function getExerciseCategories(): Promise<
+export async function getExerciseCategories(includeDisabled = false): Promise<
   ExerciseCategoryResponse[]
 > {
   const response = await http.get<
     ExerciseCategoryResponse[]
-  >("/exercise-categories");
+  >("/exercise-categories", { params: { includeDisabled } });
   return response.data;
 }
 
 export async function getExerciseTypes(
   categoryId: number,
+  includeDisabled = false,
 ): Promise<ExerciseTypeResponse[]> {
   const response = await http.get<ExerciseTypeResponse[]>(
     "/exercise-types",
-    { params: { categoryId } },
+    { params: { categoryId, includeDisabled } },
   );
   return response.data;
 }
@@ -66,10 +68,4 @@ export async function updateExercise(
     request,
   );
   return response.data;
-}
-
-export async function deleteExercise(
-  id: number,
-): Promise<void> {
-  await http.delete(`/exercises/${id}`);
 }

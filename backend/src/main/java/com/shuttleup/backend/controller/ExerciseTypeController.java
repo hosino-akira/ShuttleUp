@@ -23,7 +23,8 @@ public class ExerciseTypeController {
 
     @GetMapping
     public ResponseEntity<List<ExerciseTypeResponse>> getTypes(
-            @RequestParam Long categoryId) {
-        return ResponseEntity.ok(exerciseMasterService.getTypes(categoryId));
+            @RequestParam Long categoryId,
+            @RequestParam(defaultValue = "false") boolean includeDisabled) {
+        return ResponseEntity.ok(exerciseMasterService.getTypes(categoryId, includeDisabled));
     }
 }

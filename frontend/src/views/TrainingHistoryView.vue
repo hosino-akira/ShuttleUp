@@ -4,6 +4,7 @@ import { t } from '../i18n';
 import { computed, onMounted, reactive, ref } from "vue";
 import { message } from "ant-design-vue";
 import { requireUserId } from "../stores/auth";
+import { COMPACT_TABLE_CELL_CONFIG } from '../constants/table';
 import { useRouter } from "vue-router";
 import type {
   VxeTableEvents,
@@ -212,7 +213,7 @@ onMounted(loadTrainingSessions);
           stripe
           show-overflow
           :row-config="{ isCurrent: true }"
-          :cell-config="{ height: 32 }"
+          :cell-config="COMPACT_TABLE_CELL_CONFIG"
           :column-config="columnConfig"
           :data="pagedSessions"
           :sort-config="{ remote: true }"

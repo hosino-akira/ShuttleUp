@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { apiError } from '../../utils/apiError'
 import { t } from '../../i18n';
 import { computed, reactive, ref, watch } from "vue"
 import { message } from "ant-design-vue"
@@ -27,6 +28,7 @@ const types = ref<ExerciseTypeResponse[]>([])
 const categoriesLoading = ref(false)
 const typesLoading = ref(false)
 const submitting = ref(false)
+const errorMessage = ref('')
 let typeRequestId = 0
 const form = reactive({ categoryId: undefined as number | undefined, exerciseTypeId: undefined as number | undefined, name: "" })
 const categoryOptions = computed(() => categories.value.map(item => ({ value: item.id, label: item.name })))
@@ -41,6 +43,7 @@ async function loadCategoriesAndTypes() {
     const loaded = await getExerciseCategories()
     if (requestId !== typeRequestId) return
     categories.value = loaded
+    if (!loaded.some(item => item.id === form.categoryId)) form.categoryId = undefined
   } catch (error) {
     if (requestId === typeRequestId) {
       console.error(error); message.error(t('大分類の取得に失敗しました。'))
@@ -76,17 +79,19 @@ async function submit() {
   if (submitting.value || categoriesLoading.value || typesLoading.value) return
   try { await formRef.value?.validate() } catch { return }
   if (!form.exerciseTypeId || submitting.value) return
+  errorMessage.value = ''
   submitting.value = true
   try {
     const created = await createExercise({ exerciseTypeId: form.exerciseTypeId, name: form.name.trim(), userId: props.userId })
     message.success(t('種目を登録しました。'))
     emit("created", created)
     emit("update:open", false)
-  } catch (error) { console.error(error); message.error(t('種目の登録に失敗しました。')) }
+  } catch (error) { errorMessage.value = apiError(error, '種目の登録に失敗しました。') }
   finally { submitting.value = false }
 }
 
 watch(() => props.open, async open => {
+  errorMessage.value = ''
   resetLocalizedValidation()
   if (!open) {
     typeRequestId++
@@ -104,6 +109,7 @@ watch(() => props.open, async open => {
 
 <template>
   <BaseSmallModal :open="open" :title="t('新規種目登録')" :loading="submitting" @update:open="close">
+    <a-alert v-if="errorMessage" :message="t(errorMessage)" type="error" show-icon role="alert" style="margin-bottom: 12px" />
     <a-form ref="formRef" :model="form" layout="vertical" @validate="onFormValidate">
       <a-form-item :label="t('大分類')" name="categoryId">
         <BaseSelect v-model:value="form.categoryId" :options="categoryOptions" :loading="categoriesLoading" :placeholder="t('大分類を選択')" @change="handleCategoryChange" />

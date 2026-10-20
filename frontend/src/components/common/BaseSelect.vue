@@ -4,6 +4,7 @@ import { selectPopupContainer } from '../../utils/selectPopupContainer';
 export interface SelectOption {
   value: number;
   label: string;
+  disabled?: boolean;
 }
 
 withDefaults(

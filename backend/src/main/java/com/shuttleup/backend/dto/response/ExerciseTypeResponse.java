@@ -9,4 +9,6 @@ public class ExerciseTypeResponse {
     private Long id;
     private Long categoryId;
     private String name;
+    private Boolean enabled;
+    private Boolean available;
 }

@@ -1,5 +1,6 @@
 from datetime import date
 from pydantic import BaseModel, ConfigDict
+from app.analysis.classification import TrainingKind
 
 
 class SpringModel(BaseModel):
@@ -23,6 +24,7 @@ class TrainingRecord(SpringModel):
     exercise_id: int | None = None
     exercise_name: str | None = None
     category_name: str | None = None
+    statistics_type: TrainingKind | None = None
     sets: int | None = None
     repetitions: int | None = None
     weight_kg: float | None = None

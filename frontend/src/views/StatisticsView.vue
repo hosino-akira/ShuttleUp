@@ -395,7 +395,7 @@ onMounted(() => void loadAnalysis());
               <a-typography-paragraph
                 class="note"
                 type="secondary"
-                >{{ t('種目カテゴリー名を基に分類しています。') }}</a-typography-paragraph
+                >{{ t('大分類に設定された統計区分をもとに分類しています。') }}</a-typography-paragraph
               >
               <a-alert
                 v-if="

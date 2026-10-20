@@ -280,6 +280,7 @@ async function refreshOpponents(selectedId?: number) {
   );
   if (selectedId !== undefined)
     selectedOpponentId.value = selectedId;
+  await refreshMatches();
 }
 function createOpponentFromMatch(name: string) {
   opponentInitialName.value = name;

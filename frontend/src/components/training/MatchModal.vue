@@ -58,9 +58,10 @@ const { reset: resetDirtyState, confirmLeave } =
     note: form.note ?? "",
   }));
 const options = computed(() => {
-  const items = props.opponents.map((item) => ({
+  const items = props.opponents.filter(item => item.enabled || item.id === props.match?.opponentId).map((item) => ({
     value: item.id,
-    label: item.name,
+    label: item.enabled ? item.name : `${item.name} (${t('無効')})`,
+    disabled: !item.enabled,
   }));
   const name = opponentSearch.value.trim();
   if (
@@ -69,6 +70,7 @@ const options = computed(() => {
   )
     items.push({
       value: -1,
+      disabled: false,
       label: t("「{0}」を新規登録", { 0: name }),
     });
   return items;
@@ -101,9 +103,17 @@ watch(
     if (
       props.open &&
       props.mode === "create" &&
-      id !== undefined
+      id !== undefined &&
+      props.opponents.some(item => item.id === id && item.enabled)
     )
       form.opponentId = id;
+  },
+);
+watch(
+  () => props.opponents,
+  (items) => {
+    if (!props.open || form.opponentId === props.match?.opponentId) return;
+    if (!items.some(item => item.id === form.opponentId && item.enabled)) form.opponentId = 0;
   },
 );
 function handleOpponentChange(value: number) {

@@ -16,5 +16,6 @@ public class ExerciseCreateRequest {
     private Long userId;
 
     @NotBlank
+    @jakarta.validation.constraints.Size(max = 100)
     private String name;
 }

@@ -46,6 +46,11 @@ public class Opponent {
     @Column(name = "memo", length = 1000)
     private String memo;
 
+    @Builder.Default
+    @org.hibernate.annotations.ColumnDefault("true")
+    @Column(name = "enabled", nullable = false)
+    private Boolean enabled = true;
+
     /** 作成日時 */
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;

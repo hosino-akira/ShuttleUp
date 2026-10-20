@@ -1,4 +1,6 @@
 export interface ExerciseResponse {
+  enabled: boolean
+  available: boolean
   id: number
   name: string
   exerciseTypeId: number
@@ -17,14 +19,18 @@ export interface ExerciseCreateRequest {
   userId: number
 }
 
-export type ExerciseUpdateRequest = Omit<ExerciseCreateRequest, 'userId'>
+export type ExerciseUpdateRequest = Omit<ExerciseCreateRequest, 'userId'> & { enabled?: boolean }
 
 export interface ExerciseCategoryResponse {
+  enabled: boolean
+  available: boolean
   id: number
   name: string
 }
 
 export interface ExerciseTypeResponse {
+  enabled: boolean
+  available: boolean
   id: number
   categoryId: number
   name: string

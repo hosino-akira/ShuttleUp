@@ -9,6 +9,8 @@ import lombok.Setter;
 @Setter
 public class OpponentUpdateRequest {
 
+    private Boolean enabled;
+
     @NotBlank
     @Size(max = 100)
     private String name;

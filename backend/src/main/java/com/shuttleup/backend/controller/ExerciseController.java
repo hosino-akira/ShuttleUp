@@ -9,7 +9,6 @@ import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -38,9 +37,10 @@ public class ExerciseController {
     @GetMapping
     public ResponseEntity<List<ExerciseResponse>> getAllExercises(
             @RequestParam(required = false) Long exerciseTypeId,
-            @RequestParam(required = false) Long userId) {
+            @RequestParam(required = false) Long userId,
+            @RequestParam(defaultValue = "false") boolean includeDisabled) {
         return ResponseEntity.ok(
-                exerciseService.getAvailableExercises(exerciseTypeId, userId == null ? CurrentUser.id() : userId));
+                exerciseService.getAvailableExercises(exerciseTypeId, userId == null ? CurrentUser.id() : userId, includeDisabled));
     }
 
     /**
@@ -71,12 +71,4 @@ public class ExerciseController {
         return ResponseEntity.ok(exerciseService.updateExercise(id, request));
     }
 
-    /**
-     * IDを指定して種目を削除する。
-     */
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteExercise(@PathVariable Long id) {
-        exerciseService.deleteExercise(id);
-        return ResponseEntity.noContent().build();
-    }
 }

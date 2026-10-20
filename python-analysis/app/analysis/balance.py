@@ -10,9 +10,10 @@ def analyze_balance(records: list[TrainingRecord], warnings: list[str]) -> Train
     rows: list[dict[str, object]] = []
     unclassified: set[str] = set()
     for record in records:
-        kind, ambiguous = classify_category(record.category_name)
+        # Explicit stable types take precedence; fallback supports older Spring responses.
+        kind, ambiguous = (record.statistics_type, False) if record.statistics_type is not None else classify_category(record.category_name)
         category = (record.category_name or "").strip()
-        if kind == TrainingKind.OTHER and category:
+        if record.statistics_type is None and kind == TrainingKind.OTHER and category:
             unclassified.add(category)
         if ambiguous:
             warnings.append(f"カテゴリ「{category}」は複数分類に一致したためOTHERに分類しました。")

@@ -28,7 +28,6 @@
 | EX-002 | Exercise | 種目詳細取得 | GET | /api/exercises/{id} | 200 OK |
 | EX-003 | Exercise | ユーザー種目新規登録 | POST | /api/exercises | 201 Created |
 | EX-004 | Exercise | ユーザー種目更新 | PUT | /api/exercises/{id} | 200 OK |
-| EX-005 | Exercise | ユーザー種目削除 | DELETE | /api/exercises/{id} | 204 No Content |
 | AU-001 | Auth | ログイン | POST | /api/auth/login | 200 OK |
 | AU-002 | Auth | アカウント登録 | POST | /api/auth/register | 201 Created |
 | AU-003 | Auth | 本人プロフィール取得 | GET | /api/auth/me | 200 OK |
@@ -45,7 +44,6 @@
 | OP-002 | Opponent | 対戦相手詳細取得 | GET | /api/opponents/{opponentId} | 200 OK |
 | OP-003 | Opponent | 対戦相手新規登録 | POST | /api/users/{userId}/opponents | 201 Created |
 | OP-004 | Opponent | 対戦相手更新 | PUT | /api/opponents/{opponentId} | 200 OK |
-| OP-005 | Opponent | 対戦相手削除 | DELETE | /api/opponents/{opponentId} | 204 No Content |
 | DB-001 | Dashboard | Dashboard集計取得 | GET | /api/dashboard/users/{userId} | 200 OK |
 | AD-001 | AnalysisData | 分析用データ一括取得 | GET | /api/analysis-data/users/{userId} | 200 OK |
 | AN-001 | Analysis | トレーニング詳細分析 | GET | /api/analysis/users/{user_id}/training-report | 200 OK |
@@ -73,3 +71,21 @@ PUTはRequest DTOの必要項目を送る。任意値の省略はnullとして�
 明細数値の範囲・成功≤試行、種目名／セッション・明細メモのAPI長さに不足がある。videoUrlは最大2048文字だがURL形式のAPI検証なし。改善時は要件・CHK・API・TCを同時改訂する。
 
 根拠：Controller、Request/Response DTO、Service、python-analysis/app/api/reports.py・clients/spring_api.py。参照：[要件](requirements.md)、[試験](testing.md)。
+
+
+## 2026-10-20 マスタ管理 API
+
+| Method | Path | 契約 |
+|---|---|---|
+| GET | /api/master-data/training | 本人用categories/types/exercises。停用を含む全可視項目。 |
+| POST | /api/master-data/{kind} | kind=CATEGORY/TYPE/EXERCISE。name(1〜100)、下位はparentId、大分類はstatisticsType必須。201。 |
+| PUT | /api/master-data/{kind}/{id} | nameとenabled必須。共有原本は本人設定だけ更新。所属・統計区分は更新対象外。 |
+| PUT | /api/opponents/{id} | 既存name/memoに任意enabledを追加。省略時は既存状態保持。 |
+
+MasterItem応答はid、parentId、name、enabled（自身のSwitch）、available（親を含めた利用可否）、systemPreset、statisticsType。認証ユーザーをサーバーで確定し、所有者指定は受け付けない。
+
+既存GET /api/exercises、/api/exercise-categories、/api/exercise-typesはincludeDisabled=falseが既定。trueなら本人の停用項目を含む。全て個人設定反映後の名前とenabled/availableを返す。GET /api/users/{userId}/opponentsは従来どおり本人の全件を返し、enabled/availableを追加。入力候補は有効項目に絞り、履歴フィルターは全件を利用する。
+
+既存PUT /api/exercises/{id}も個人設定に対応。exerciseTypeIdは現在の所属と同じ値だけ許可し、enabled省略時は保持する。種目・対戦相手のDELETEは廃止（405）。重名は409と復元／別名案内。新規記録・別項目への変更で停用項目を指定すると400、元の停用項目を保持した記録更新は許可。
+
+AD-001のrecordsにstatisticsTypeを追加し、categoryName/exerciseNameは本人の表示名を返す。PythonはstatisticsTypeで集計し、旧Spring応答で欠落した場合だけ名称ルールへフォールバックする。

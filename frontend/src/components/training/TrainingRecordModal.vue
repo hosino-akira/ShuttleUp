@@ -106,21 +106,24 @@ const title = computed(() =>
     : t('トレーニング種目の編集'),
 );
 const categoryOptions = computed(() =>
-  categories.value.map((item) => ({
+  categories.value.filter(item => item.available || item.id === props.record?.categoryId).map((item) => ({
     value: item.id,
-    label: item.name,
+    label: item.available ? item.name : `${item.name} (${t('無効')})`,
+    disabled: !item.available,
   })),
 );
 const exerciseTypeOptions = computed(() =>
-  filteredTypes.value.map((item) => ({
+  filteredTypes.value.filter(item => item.available || item.id === props.record?.exerciseTypeId).map((item) => ({
     value: item.id,
-    label: item.name,
+    label: item.available ? item.name : `${item.name} (${t('無効')})`,
+    disabled: !item.available,
   })),
 );
 const exerciseOptions = computed(() =>
-  filteredExercises.value.map((exercise) => ({
+  filteredExercises.value.filter(item => item.available || item.id === props.record?.exerciseId).map((exercise) => ({
     value: exercise.id,
-    label: exercise.name,
+    label: exercise.available ? exercise.name : `${exercise.name} (${t('無効')})`,
+    disabled: !exercise.available,
   })),
 );
 
@@ -129,7 +132,7 @@ async function loadCategories(): Promise<void> {
   categoriesLoading.value = true;
   typesLoading.value = true;
   try {
-    const loaded = await getExerciseCategories();
+    const loaded = await getExerciseCategories(props.mode === "edit");
     if (requestId !== typeRequestId) return;
     categories.value = loaded;
   } catch (error) {
@@ -144,7 +147,7 @@ async function loadCategories(): Promise<void> {
   }
   try {
     // 全大分類の中分類を取得し、選択された条件でローカルに絞り込む。
-    const loaded = await Promise.all(categories.value.map(category => getExerciseTypes(category.id)));
+    const loaded = await Promise.all(categories.value.map(category => getExerciseTypes(category.id, props.mode === "edit")));
     if (requestId !== typeRequestId) return;
     exerciseTypes.value = loaded.flat();
   } catch (error) {
@@ -165,6 +168,7 @@ async function loadExercises(): Promise<void> {
     const loaded = await getExercises(
       undefined,
       props.userId,
+      props.mode === "edit",
     );
     if (requestId !== exerciseRequestId) return;
     exercises.value = loaded;

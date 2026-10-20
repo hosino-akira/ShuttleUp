@@ -8,4 +8,6 @@ import lombok.Getter;
 public class ExerciseCategoryResponse {
     private Long id;
     private String name;
+    private Boolean enabled;
+    private Boolean available;
 }

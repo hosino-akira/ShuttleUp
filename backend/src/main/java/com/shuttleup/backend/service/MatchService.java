@@ -61,6 +61,7 @@ public class MatchService {
         TrainingSession trainingSession = findTrainingSession(sessionId);
         Opponent opponent = findOpponent(request.getOpponentId());
         validateOpponentOwner(trainingSession, opponent);
+        requireEnabled(opponent);
 
         LocalDateTime now = LocalDateTime.now();
         Match match = new Match();
@@ -79,6 +80,7 @@ public class MatchService {
         Match match = findMatch(matchId);
         Opponent opponent = findOpponent(request.getOpponentId());
         validateOpponentOwner(match.getTrainingSession(), opponent);
+        if (!match.getOpponent().getId().equals(opponent.getId())) requireEnabled(opponent);
         match.setOpponent(opponent);
         applyValues(match, request);
         match.setUpdatedAt(LocalDateTime.now());
@@ -111,6 +113,11 @@ public class MatchService {
         return opponentRepository.findById(opponentId)
                 .orElseThrow(() -> new IllegalArgumentException(
                         "指定された対戦相手が見つかりません。"));
+    }
+
+    private void requireEnabled(Opponent opponent) {
+        if (!Boolean.TRUE.equals(opponent.getEnabled()))
+            throw new BadRequestException("無効な対戦相手は選択できません。");
     }
 
     private void validateOpponentOwner(
