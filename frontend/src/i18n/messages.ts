@@ -1,6 +1,22 @@
 // Japanese source text is the stable message key and the fallback language.
 // Named parameters are interpolated after lookup; chart placeholders stay intact.
 export const messages: Record<string, { en: string; zh: string }> = {
+  '身体データ': { en: 'Body data', zh: '身体数据' },
+  '未入力': { en: 'Not entered', zh: '未填写' },
+  '各項目は任意です。空欄で保存すると、その値を削除します。': { en: 'All fields are optional. Save an empty field to clear its value.', zh: '各项均为选填，留空保存即可清除该项数据。' },
+  '身長（cm）': { en: 'Height (cm)', zh: '身高（cm）' },
+  '体重（kg）': { en: 'Weight (kg)', zh: '体重（kg）' },
+  '体脂肪率（%）': { en: 'Body fat (%)', zh: '体脂率（%）' },
+  '身体データを保存': { en: 'Save body data', zh: '保存身体数据' },
+  '身体データを保存しました。': { en: 'Body data saved.', zh: '身体数据已保存。' },
+  '身体データを読み込めませんでした。もう一度お試しください。': { en: 'Could not load body data. Please try again.', zh: '身体数据加载失败，请重试。' },
+  '身体データを保存できませんでした。時間をおいて再度お試しください。': { en: 'Could not save body data. Please try again later.', zh: '身体数据保存失败，请稍后重试。' },
+  '身長は0.01〜999.99 cmで入力してください。': { en: 'Enter a height from 0.01 to 999.99 cm.', zh: '身高请输入0.01～999.99 cm。' },
+  '体重は0.01〜999.99 kgで入力してください。': { en: 'Enter a weight from 0.01 to 999.99 kg.', zh: '体重请输入0.01～999.99 kg。' },
+  '体脂肪率は0〜100 %で入力してください。': { en: 'Enter body fat from 0 to 100%.', zh: '体脂率请输入0～100%。' },
+  '身長は小数点以下2桁以内で入力してください。': { en: 'Enter height with at most two decimal places.', zh: '身高最多保留两位小数。' },
+  '体重は小数点以下2桁以内で入力してください。': { en: 'Enter weight with at most two decimal places.', zh: '体重最多保留两位小数。' },
+  '体脂肪率は小数点以下2桁以内で入力してください。': { en: 'Enter body fat with at most two decimal places.', zh: '体脂率最多保留两位小数。' },
   '自分だけに反映。クリックで選択、ダブルクリックで編集。': { en: 'Personal changes only. Click to select; double-click to edit.', zh: '仅影响本人。单击选中，双击编辑。' },
   '有効＝新規選択可／無効＝非表示（履歴保持）': { en: 'Enabled: selectable. Disabled: hidden; history kept.', zh: '启用＝新记录可选；停用＝隐藏，保留历史。' },
   '有効／無効': { en: 'Enabled / Disabled', zh: '启用／停用' },

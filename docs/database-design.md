@@ -8,7 +8,7 @@ Spring Data JPAのEntityを論理モデルの基準とする。MySQLの実DDL・
 
 | 表 | 列数 | 用途・主要関連 |
 |---|---|---|
-| users | 9 | email UK、password_hash nullable、token_version、status。 |
+| users | 12 | email UK、password_hash nullable、token_version、status、現在の身体データ3項目。 |
 | training_sessions | 9 | 本人user_id、日付・時間・feeling・メモ・plant_type。 |
 | exercise_categories | 8 | 大分類・display_order・enabled、所有user_id nullable、固定statistics_type。 |
 | exercise_types | 8 | 大分類category_id、中分類・display_order・enabled、所有user_id nullable。 |
@@ -35,6 +35,8 @@ users.token_versionはDB DEFAULT 0、statusはACTIVE指定。system_presetのfal
 業務記録の削除は物理削除。マスタは2026-10-20から停用／復元のみ。cascade／orphanRemoval指定なし。子明細・試合のあるセッション削除は実DBのFKによって409となり得る。対戦相手・種目のDELETEエンドポイントは提供しない。
 
 ## スキーマ変更と移行
+
+2026-10-20 身体データ：usersにheight_cm、body_weight_kg、body_fat_percentage（各DECIMAL(5,2)、NULL可）を追加。既存ユーザーはNULLのままとし、現在値だけを保持する。体重はトレーニング負荷のtraining_records.weight_kgとは別。BMIは画面で算出し、DBには保存しない。同日、旧バックエンドの再起動後にddl-auto=updateによる実MySQLへの3列追加と、JWT認証を通した保存・再取得・消去を確認した。
 
 現行dev・prodともddl-auto=updateで、Flyway／Liquibase・SQL migrationは未導入。本番では外部設定でvalidate等の運用へ切替える案を採用環境で検証する。
 

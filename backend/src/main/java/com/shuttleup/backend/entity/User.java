@@ -17,6 +17,7 @@ import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.DynamicUpdate;
 
 import java.time.LocalDateTime;
+import java.math.BigDecimal;
 
 /**
  * ユーザー基本情報を管理するエンティティ
@@ -63,6 +64,16 @@ public class User {
     /** アバター画像のURL */
     @Column(name = "avatar_url")
     private String avatarUrl;
+
+    /** 本人の現在の身体データ。未入力は null。 */
+    @Column(name = "height_cm", precision = 5, scale = 2)
+    private BigDecimal heightCm;
+
+    @Column(name = "body_weight_kg", precision = 5, scale = 2)
+    private BigDecimal bodyWeightKg;
+
+    @Column(name = "body_fat_percentage", precision = 5, scale = 2)
+    private BigDecimal bodyFatPercentage;
 
     /** 作成日時 */
     @Column(name = "created_at", nullable = false)

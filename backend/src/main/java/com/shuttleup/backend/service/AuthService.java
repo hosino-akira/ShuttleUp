@@ -4,6 +4,8 @@ import com.shuttleup.backend.dto.request.RegisterRequest;
 import com.shuttleup.backend.dto.request.LoginRequest;
 import com.shuttleup.backend.dto.request.ProfileUpdateRequest;
 import com.shuttleup.backend.dto.request.PasswordChangeRequest;
+import com.shuttleup.backend.dto.request.BodyDataUpdateRequest;
+import com.shuttleup.backend.dto.response.BodyDataResponse;
 import com.shuttleup.backend.dto.response.UserResponse;
 import com.shuttleup.backend.entity.User;
 import com.shuttleup.backend.entity.UserStatus;
@@ -94,6 +96,21 @@ public class AuthService {
             }
             throw exception;
         }
+    }
+
+    @Transactional(readOnly = true)
+    public BodyDataResponse getBodyData(Long userId) {
+        return BodyDataResponse.from(findActiveUser(userId));
+    }
+
+    @Transactional
+    public BodyDataResponse updateBodyData(Long userId, BodyDataUpdateRequest request) {
+        User user = findActiveUser(userId);
+        user.setHeightCm(request.getHeightCm());
+        user.setBodyWeightKg(request.getBodyWeightKg());
+        user.setBodyFatPercentage(request.getBodyFatPercentage());
+        user.setUpdatedAt(LocalDateTime.now());
+        return BodyDataResponse.from(userRepository.saveAndFlush(user));
     }
 
     private User findActiveUser(Long userId) {

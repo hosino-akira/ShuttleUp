@@ -33,6 +33,8 @@
 | AU-003 | Auth | 本人プロフィール取得 | GET | /api/auth/me | 200 OK |
 | AU-004 | Auth | 本人プロフィール更新 | PUT | /api/auth/me | 200 OK |
 | AU-005 | Auth | 本人パスワード変更 | PUT | /api/auth/me/password | 204 No Content |
+| AU-006 | Auth | 本人の現在の身体データ取得 | GET | /api/auth/me/body-data | 200 OK |
+| AU-007 | Auth | 本人の現在の身体データ保存 | PUT | /api/auth/me/body-data | 200 OK |
 | MS-001 | ExerciseMaster | 大分類一覧取得 | GET | /api/exercise-categories | 200 OK |
 | MS-002 | ExerciseMaster | 中分類一覧取得 | GET | /api/exercise-types | 200 OK |
 | MT-001 | Match | セッション別試合一覧取得 | GET | /api/training-sessions/{sessionId}/matches | 200 OK |
@@ -59,6 +61,8 @@ Invoke-RestMethod -Uri 'http://localhost:8000/api/analysis/users/<本人ID>/trai
 例のIDとJWTは専用テストユーザーの実値に置換する。パスワード・Bearer値を文書やログへ保存しない。項目・Request/Response例は[API仕様書](仕様書/ID書/API仕様書.xlsx)を参照。
 
 ## エラー・更新・集計
+
+身体データのGET/PUT応答はheightCm（cm）、bodyWeightKg（kg）、bodyFatPercentage（%）。全て任意の数値またはnullで、PUTのnull／省略はその項目の消去。小数点以下2桁まで、身長・体重は0.01〜999.99、体脂肪率は0〜100を許可し、範囲・桁数違反は400。認証本人をサーバーで確定し、他人のIDを受け付けない。ログイン応答や通常のプロフィール応答、分析データには含めない。BMIはクライアントの読取専用計算値でAPI保存対象外。
 
 Spring業務例外の本文はmessage。400入力、401認証、403権限、404不存在、409重複／使用中／DB制約。型不正・必須Queryなどは標準形式になる場合がある。FastAPIはdetail形式、日付検証422、上流不正応答502、接続／上流5xx503、timeout504。
 

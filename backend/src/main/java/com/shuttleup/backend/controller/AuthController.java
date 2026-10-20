@@ -6,6 +6,8 @@ import com.shuttleup.backend.dto.request.ProfileUpdateRequest;
 import com.shuttleup.backend.dto.request.PasswordChangeRequest;
 import com.shuttleup.backend.dto.response.LoginResponse;
 import com.shuttleup.backend.dto.response.UserResponse;
+import com.shuttleup.backend.dto.request.BodyDataUpdateRequest;
+import com.shuttleup.backend.dto.response.BodyDataResponse;
 import com.shuttleup.backend.service.AuthService;
 import com.shuttleup.backend.service.JwtTokenService;
 import com.shuttleup.backend.security.CurrentUser;
@@ -23,7 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/auth")
-@CrossOrigin(origins = "http://localhost:5173")
+@CrossOrigin(origins = {"http://localhost:5173", "http://127.0.0.1:5173"})
 @RequiredArgsConstructor
 public class AuthController {
 
@@ -45,6 +47,16 @@ public class AuthController {
     @GetMapping("/me")
     public UserResponse getProfile() {
         return authService.getProfile(CurrentUser.id());
+    }
+
+    @GetMapping("/me/body-data")
+    public BodyDataResponse getBodyData() {
+        return authService.getBodyData(CurrentUser.id());
+    }
+
+    @PutMapping("/me/body-data")
+    public BodyDataResponse updateBodyData(@Valid @RequestBody BodyDataUpdateRequest request) {
+        return authService.updateBodyData(CurrentUser.id(), request);
     }
 
     /** 更新対象とアカウント状態は、クライアントから指定させない。 */

@@ -28,6 +28,7 @@ export const NAVIGATION_MENU: readonly NavigationMenuItem[] = [
     to: { name: 'statistics' },
   },
   { key: 'master-data', label: 'マスタ管理', to: { name: 'master-data' } },
+  { key: 'body-data', label: '身体データ', to: { name: 'body-data' } },
   {
     key: 'profile',
     label: 'プロフィール',
